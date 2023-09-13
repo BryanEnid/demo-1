@@ -13,34 +13,20 @@ export const Landpage = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
       videoRef.current.srcObject = stream;
+      videoRef.current.play();
     } catch (error) {
+      // alert(error);
       console.error("Error accessing camera:", error);
-      alert(error);
     }
   };
 
   return (
     <>
-      {/* <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p> */}
-      asd
-      <video ref={videoRef} autoPlay playsInline muted />
       <button onClick={startCamera}>Start Camera</button>
-      <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" />
+
+      <video style={{ width: "100%" }} ref={videoRef} playsInline muted />
+
+      {/* <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" /> */}
     </>
   );
 };
