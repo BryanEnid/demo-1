@@ -6,11 +6,10 @@
   "categories": ["books", "education", "medical"],
   "background_color": "#ffffff",
   "theme_color": "#000000",
-
   "icons": [
     {
-      "src": "src/assets/observe_logo_128.png",
-      "sizes": "128x128",
+      "src": "src/assets/observe_logo_144.png",
+      "sizes": "144x144",
       "type": "image/png"
     }
   ],

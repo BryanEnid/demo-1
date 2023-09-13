@@ -6,10 +6,10 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), VitePWA()],
-  server: {
-    https: {
-      key: path.resolve(__dirname, "key.pem"),
-      cert: path.resolve(__dirname, "cert.pem"),
-    },
-  },
+  // server: {
+  //   https: {
+  //     key: path.resolve(__dirname, "key.pem"),
+  //     cert: path.resolve(__dirname, "cert.pem"),
+  //   },
+  // },
 });
