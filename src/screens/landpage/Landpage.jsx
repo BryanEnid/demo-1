@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import Webcam from "react-webcam";
-import reactLogo from "../../assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./Landpage.css";
 
 export const Landpage = () => {

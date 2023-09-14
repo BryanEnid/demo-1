@@ -1,6 +1,7 @@
 {
   "name": "Observe",
   "short_name": "Observe",
+  "description": "My Awesome App description",
   "start_url": "/",
   "display": "fullscreen",
   "categories": ["books", "education", "medical"],
