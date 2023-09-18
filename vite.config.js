@@ -30,10 +30,11 @@ export default defineConfig({
     }),
     qrcode(),
   ],
-  // server: {
-  //   https: {
-  //     key: path.resolve(__dirname, "key.pem"),
-  //     cert: path.resolve(__dirname, "cert.pem"),
-  //   },
-  // },
+  server: {
+    // https: true,
+    https: {
+      key: path.resolve(__dirname, "localhost.key"),
+      cert: path.resolve(__dirname, "localhost.crt"),
+    },
+  },
 });
