@@ -30,11 +30,18 @@ export default defineConfig({
     }),
     qrcode(),
   ],
+
   server: {
     // https: true,
     https: {
       key: path.resolve(__dirname, "localhost.key"),
       cert: path.resolve(__dirname, "localhost.crt"),
+    },
+  },
+
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"), // Create an alias named '@' pointing to the 'src' folder
     },
   },
 });

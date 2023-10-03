@@ -1,107 +1,80 @@
-// CameraScreen.js
-import React from "react";
-import { Box, Button, Grid, IconButton } from "@mui/material";
-
-import {
-  AccessAlarm,
-  Cameraswitch,
-  PhotoLibrary,
-  PictureInPicture,
-} from "@mui/icons-material";
-
+import React, { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
-import { ObserveIcon } from "../../components/ObserveIcon";
+
+import { Button } from "@/chadcn/Button";
+import { NavBar } from "@/components/NavBar";
+import { SideBar } from "@/components/SideBar";
+
+const CameraSize = 180;
 
 export const CameraScreen = () => {
-  const videoRef = React.useRef();
-  const fileInputRef = React.useRef();
-  const isFrontCamera = React.useState(true);
-  const cameraPosition = React.useMemo(
-    () => (isFrontCamera ? "user" : "environment"),
-    [isFrontCamera]
-  );
+  const [stream, setStream] = useState(null);
+  const [isScreenRecording, setScreenRecording] = useState(false);
 
-  const handleSelectedPictures = () => {};
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    async function getMediaStream() {
+      const config = { video: true, audio: false };
+      const stream = await navigator.mediaDevices.getDisplayMedia(config);
+      setStream(stream);
+      videoRef.current.srcObject = stream;
+    }
+
+    if (!stream && isScreenRecording) getMediaStream();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        setStream(null); // Reset the stream state
+      }
+    };
+  }, [stream, isScreenRecording]);
+
+  const toggleRecording = () => setScreenRecording(!isScreenRecording);
 
   return (
-    <Box sx={{ overflow: "hidden" }}>
-      <Webcam
-        mirrored
-        videoConstraints={{
-          height: window.innerHeight,
-          width: window.innerWidth,
-          facingMode: cameraPosition.current,
-        }}
-        height={window.innerHeight}
-        width={window.innerWidth}
+    <div className="h-screen w-screen">
+      <NavBar />
+
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-screen h-screen bg-slate-300"
       />
 
-      {/* Input API */}
-      <>
-        <input
-          ref={fileInputRef}
-          hidden
-          type="file"
-          accept=".png, .jpg, .jpeg"
-          onChange={handleSelectedPictures}
-        />
-      </>
-
-      {/* Overlay */}
-      <>
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            flex: 1,
-            height: window.innerHeight,
-            width: window.innerWidth,
-          }}
+      {/* WebCam */}
+      {isScreenRecording && stream && (
+        <div
+          style={{ height: CameraSize, width: CameraSize }}
+          className="flex absolute bottom-10 right-20 rounded-full items-center justify-center bg-black border-2 border-red-400"
         >
-          <Grid
-            container
-            sx={{
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              height: "100%",
+          <Webcam
+            mirrored
+            videoConstraints={{
+              height: CameraSize,
+              width: CameraSize,
+              // facingMode: cameraPosition.current,
             }}
-          >
-            <Box>
-              <IconButton
-                style={{ border: "none", backgroundColor: "transparent" }}
-              >
-                <ObserveIcon rounded size={80} />
-              </IconButton>
-            </Box>
+            onUserMedia={console.log}
+            className="rounded-full"
+          />
+        </div>
+      )}
 
-            <Grid container flexDirection="row" justifyContent={"space-evenly"}>
-              <Grid item>
-                <IconButton size="large" sx={{ color: "white" }}>
-                  <AccessAlarm sx={{ width: 40, height: 40 }} />
-                </IconButton>
-              </Grid>
+      {/* Overlay Actions */}
+      <SideBar />
 
-              <Grid item>
-                <IconButton
-                  size="large"
-                  sx={{ color: "white" }}
-                  onClick={() => fileInputRef.current.click()}
-                >
-                  <PhotoLibrary sx={{ width: 40, height: 40 }} />
-                </IconButton>
-              </Grid>
-
-              <Grid item>
-                <IconButton size="large" sx={{ color: "white" }}>
-                  <Cameraswitch sx={{ width: 40, height: 40 }} />
-                </IconButton>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Box>
-      </>
-    </Box>
+      <div className="fixed bottom-0">
+        <Button
+          variant={!isScreenRecording || !stream ? "outline" : "destructive"}
+          onClick={toggleRecording}
+        >
+          {isScreenRecording && stream ? "Stop Recording" : "Start Recording"}
+        </Button>
+      </div>
+    </div>
   );
 };
