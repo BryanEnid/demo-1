@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"] // Adjust this to match your alias configuration in vite.config.js
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}
