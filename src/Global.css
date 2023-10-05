@@ -101,6 +101,11 @@ body {
   padding: 0;
 }
 
+/* Apply a circular clip-path to the PiP window */
+video::-webkit-media-controls-enclosure {
+  clip-path: circle(50% at 50% 50%);
+}
+
 /* :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

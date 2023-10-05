@@ -7,11 +7,13 @@ import { DebugOverlay } from "@/components/DebugOverlay";
 
 import { VR_3D, Video360 } from "@/components/MediaPlayer";
 import { useOrientation } from "@/hooks/useOrientation";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 const CameraSize = 180;
 
 export const CameraScreen = () => {
-  const { isPortrait } = useOrientation();
+  // const { isPortrait } = useOrientation();
+  const { isMobile } = useDeviceType();
 
   const [videoType, setVideoType] = React.useState("Screen recorder");
   const [stream, setStream] = React.useState(null);
@@ -21,6 +23,18 @@ export const CameraScreen = () => {
 
   const video360Ref = React.useRef(null);
   const videoRef = React.useRef(null);
+  const cameraRef = React.useRef(null);
+
+  // Function to toggle PiP mode
+  const togglePiP = () => {
+    const videoElement = cameraRef.current.video;
+
+    if (document.pictureInPictureElement === videoElement) {
+      document.exitPictureInPicture();
+    } else {
+      videoElement.requestPictureInPicture();
+    }
+  };
 
   const handleDevices = React.useCallback(
     (mediaDevices) => {
@@ -98,7 +112,9 @@ export const CameraScreen = () => {
       <div className="h-screen w-screen bg-slate-300">
         {/* Interface */}
         <>
-          <RenderMediaPlayer videoType={videoType} />
+          <div className="z-10">
+            <RenderMediaPlayer videoType={videoType} />
+          </div>
 
           {/* WebCam */}
           {isScreenRecording && stream && (
@@ -107,6 +123,7 @@ export const CameraScreen = () => {
               className="flex absolute bottom-10 right-20 rounded-full items-center justify-center bg-black"
             >
               <Webcam
+                ref={cameraRef}
                 mirrored
                 videoConstraints={{
                   height: CameraSize,
@@ -114,7 +131,6 @@ export const CameraScreen = () => {
                   deviceId: deviceId,
                   // facingMode: cameraPosition.current,
                 }}
-                onUserMedia={() => console.log("loaded")}
                 className="rounded-full z-10"
               />
 
@@ -135,6 +151,7 @@ export const CameraScreen = () => {
                 icon: ["ci:radio-fill", "ci:stop-circle"],
                 title: "Screen recorder",
                 className: ["", "text-red-500"],
+                disabled: isMobile,
                 action: (ctx) => {
                   // Reset all icons
                   ctx.siblings.forEach((item) => item.setIcon(0));
@@ -151,15 +168,23 @@ export const CameraScreen = () => {
               },
 
               {
+                icon: ["material-symbols:pip-rounded"],
+                title: "Picture in Picture",
+                action: (ctx) => {
+                  togglePiP();
+                },
+              },
+
+              {
                 icon: ["ci:devices"],
                 title: "Camera devices",
                 type: "dropdown",
-                options: devices.map(({ label, deviceId }) => ({
+                options: devices?.map(({ label, deviceId }) => ({
                   label: label,
                   value: deviceId,
                 })),
                 action: (ctx) => {
-                  setDeviceId(ctx.selected);
+                  if (ctx.selected) setDeviceId(ctx.selected);
                 },
                 selected: deviceId,
               },
