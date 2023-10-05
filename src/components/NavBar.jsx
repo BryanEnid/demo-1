@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 
 export const NavBar = () => {
   return (
-    <nav class="flex fixed flex-row w-full h-20 items-center justify-end p-8 gap-8 text-gray-600 bg-white">
+    <nav className="flex fixed top-0 flex-row w-full h-20 items-center justify-end p-8 gap-8 text-gray-600 bg-white">
       <button>Career portal</button>
       <button>Explore companies</button>
       <button>Observatory</button>
