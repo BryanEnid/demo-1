@@ -65,7 +65,7 @@ export const VR_3D = () => {
       <Entity
         primitive="a-camera"
         camera="fov: 80"
-        looks-controls-enabled={false}
+        look-controls-enabled={false}
         wasd-controls-enabled={false}
         rotation-reader
       >
@@ -81,15 +81,6 @@ export const VR_3D = () => {
           }}
         />
       </Entity>
-
-      {/* <a-camera
-        camera="fov: 100"
-        // id="camera"
-        rotation-reader
-        // position="0 1.6 16"
-        look-controls-enabled={false}
-        wasd-controls-enabled={false}
-      /> */}
     </Scene>
   );
 };

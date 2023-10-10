@@ -59,7 +59,7 @@ export const CameraScreen = () => {
     setStream(stream);
     videoRef.current.srcObject = stream;
 
-    if (!stream) getMediaStream();
+    // togglePiP();
   };
 
   const stopRecording = async () => {
@@ -117,26 +117,22 @@ export const CameraScreen = () => {
           </div>
 
           {/* WebCam */}
-          {isScreenRecording && stream && (
-            <div
-              style={{ height: CameraSize, width: CameraSize }}
-              className="flex absolute bottom-10 right-20 rounded-full items-center justify-center bg-black"
-            >
-              <Webcam
-                ref={cameraRef}
-                mirrored
-                videoConstraints={{
-                  height: CameraSize,
-                  width: CameraSize,
-                  deviceId: deviceId,
-                  // facingMode: cameraPosition.current,
-                }}
-                className="rounded-full z-10"
-              />
-
-              <span class="animate-ping absolute inline-flex h-4/6 w-4/6 rounded-full bg-red-600" />
-            </div>
-          )}
+          <div
+            style={{ height: CameraSize, width: CameraSize }}
+            className="flex absolute bottom-10 right-20 rounded-full items-center justify-center transparent"
+          >
+            <Webcam
+              ref={cameraRef}
+              mirrored
+              videoConstraints={{
+                height: CameraSize,
+                width: CameraSize,
+                deviceId: deviceId,
+                // facingMode: cameraPosition.current,
+              }}
+              className="rounded-full z-10 opacity-0"
+            />
+          </div>
         </>
 
         {/* Overlay Actions */}
@@ -161,9 +157,18 @@ export const CameraScreen = () => {
                   ctx.setIcon(boundaries === index ? 0 : index);
 
                   setVideoType(ctx.this.title);
-                  if (ctx.iconIndex === 0)
-                    startRecording().catch(() => ctx.setIcon(0));
-                  if (ctx.iconIndex === 1) stopRecording();
+                  if (ctx.iconIndex === 0) {
+                    startRecording().catch(() => {
+                      ctx.setIcon(0);
+                      togglePiP();
+                    });
+                    togglePiP();
+                  }
+
+                  if (ctx.iconIndex === 1) {
+                    stopRecording();
+                    togglePiP();
+                  }
                 },
               },
 
@@ -197,6 +202,7 @@ export const CameraScreen = () => {
                   ctx.siblings.forEach(
                     (item) => item.title !== videoType && item.setIcon(0)
                   );
+                  document.exitPictureInPicture();
                   stopRecording();
 
                   setVideoType(ctx.this.title);
@@ -218,6 +224,7 @@ export const CameraScreen = () => {
                 action: (ctx) => {
                   // Clear state
                   ctx.siblings.forEach((item) => item.setIcon(0));
+                  document.exitPictureInPicture();
                   stopRecording();
 
                   setVideoType(ctx.this.title);

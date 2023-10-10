@@ -6,13 +6,32 @@ import { Landpage } from "./screens/landpage/Landpage";
 import { Profile } from "./screens/profile";
 import { CameraScreen } from "./screens/camera/Camera.jsx";
 
+// const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <Landpage />,
+//   },
+//   {
+//     path: "/profile/*",
+//     element: <Profile />,
+//   },
+//   {
+//     path: "/camera",
+//     element: <CameraScreen />,
+//   },
+// ]);
+
+// export const Routes = () => {
+//   return <RouterProvider router={router} />;
+// };
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Landpage />,
   },
   {
-    path: "/profile",
+    path: "/profile/*",
     element: <Profile />,
   },
   {
