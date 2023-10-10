@@ -7,11 +7,13 @@ import { DebugOverlay } from "@/components/DebugOverlay";
 
 import { VR_3D, Video360 } from "@/components/MediaPlayer";
 import { useOrientation } from "@/hooks/useOrientation";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 const CameraSize = 180;
 
 export const CameraScreen = () => {
-  const { isPortrait } = useOrientation();
+  // const { isPortrait } = useOrientation();
+  const { isMobile } = useDeviceType();
 
   const [videoType, setVideoType] = React.useState("Screen recorder");
   const [stream, setStream] = React.useState(null);
@@ -21,6 +23,18 @@ export const CameraScreen = () => {
 
   const video360Ref = React.useRef(null);
   const videoRef = React.useRef(null);
+  const cameraRef = React.useRef(null);
+
+  // Function to toggle PiP mode
+  const togglePiP = () => {
+    const videoElement = cameraRef.current.video;
+
+    if (document.pictureInPictureElement === videoElement) {
+      document.exitPictureInPicture();
+    } else {
+      videoElement.requestPictureInPicture();
+    }
+  };
 
   const handleDevices = React.useCallback(
     (mediaDevices) => {
@@ -45,7 +59,7 @@ export const CameraScreen = () => {
     setStream(stream);
     videoRef.current.srcObject = stream;
 
-    if (!stream) getMediaStream();
+    // togglePiP();
   };
 
   const stopRecording = async () => {
@@ -98,29 +112,27 @@ export const CameraScreen = () => {
       <div className="h-screen w-screen bg-slate-300">
         {/* Interface */}
         <>
-          <RenderMediaPlayer videoType={videoType} />
+          <div className="z-10">
+            <RenderMediaPlayer videoType={videoType} />
+          </div>
 
           {/* WebCam */}
-          {isScreenRecording && stream && (
-            <div
-              style={{ height: CameraSize, width: CameraSize }}
-              className="flex absolute bottom-10 right-20 rounded-full items-center justify-center bg-black"
-            >
-              <Webcam
-                mirrored
-                videoConstraints={{
-                  height: CameraSize,
-                  width: CameraSize,
-                  deviceId: deviceId,
-                  // facingMode: cameraPosition.current,
-                }}
-                onUserMedia={() => console.log("loaded")}
-                className="rounded-full z-10"
-              />
-
-              <span class="animate-ping absolute inline-flex h-4/6 w-4/6 rounded-full bg-red-600" />
-            </div>
-          )}
+          <div
+            style={{ height: CameraSize, width: CameraSize }}
+            className="flex absolute bottom-10 right-20 rounded-full items-center justify-center transparent"
+          >
+            <Webcam
+              ref={cameraRef}
+              mirrored
+              videoConstraints={{
+                height: CameraSize,
+                width: CameraSize,
+                deviceId: deviceId,
+                // facingMode: cameraPosition.current,
+              }}
+              className="rounded-full z-10 opacity-0"
+            />
+          </div>
         </>
 
         {/* Overlay Actions */}
@@ -135,6 +147,7 @@ export const CameraScreen = () => {
                 icon: ["ci:radio-fill", "ci:stop-circle"],
                 title: "Screen recorder",
                 className: ["", "text-red-500"],
+                disabled: isMobile,
                 action: (ctx) => {
                   // Reset all icons
                   ctx.siblings.forEach((item) => item.setIcon(0));
@@ -144,9 +157,26 @@ export const CameraScreen = () => {
                   ctx.setIcon(boundaries === index ? 0 : index);
 
                   setVideoType(ctx.this.title);
-                  if (ctx.iconIndex === 0)
-                    startRecording().catch(() => ctx.setIcon(0));
-                  if (ctx.iconIndex === 1) stopRecording();
+                  if (ctx.iconIndex === 0) {
+                    startRecording().catch(() => {
+                      ctx.setIcon(0);
+                      togglePiP();
+                    });
+                    togglePiP();
+                  }
+
+                  if (ctx.iconIndex === 1) {
+                    stopRecording();
+                    togglePiP();
+                  }
+                },
+              },
+
+              {
+                icon: ["material-symbols:pip-rounded"],
+                title: "Picture in Picture",
+                action: (ctx) => {
+                  togglePiP();
                 },
               },
 
@@ -154,12 +184,12 @@ export const CameraScreen = () => {
                 icon: ["ci:devices"],
                 title: "Camera devices",
                 type: "dropdown",
-                options: devices.map(({ label, deviceId }) => ({
+                options: devices?.map(({ label, deviceId }) => ({
                   label: label,
                   value: deviceId,
                 })),
                 action: (ctx) => {
-                  setDeviceId(ctx.selected);
+                  if (ctx.selected) setDeviceId(ctx.selected);
                 },
                 selected: deviceId,
               },
@@ -172,6 +202,7 @@ export const CameraScreen = () => {
                   ctx.siblings.forEach(
                     (item) => item.title !== videoType && item.setIcon(0)
                   );
+                  document.exitPictureInPicture();
                   stopRecording();
 
                   setVideoType(ctx.this.title);
@@ -193,6 +224,7 @@ export const CameraScreen = () => {
                 action: (ctx) => {
                   // Clear state
                   ctx.siblings.forEach((item) => item.setIcon(0));
+                  document.exitPictureInPicture();
                   stopRecording();
 
                   setVideoType(ctx.this.title);

@@ -18,14 +18,12 @@ import {
   TooltipTrigger,
 } from "@/chadcn/Tooltip";
 import { useOrientation } from "@/hooks/useOrientation";
+import { useDeviceType } from "@/hooks/useDeviceType";
 
 export const DebugOverlay = ({ data = [] }) => {
   const { isPortrait } = useOrientation();
+  const { isMobile, deviceType } = useDeviceType();
   const context = React.useRef(new Map());
-
-  React.useEffect(() => {
-    console.log("portrait:", isPortrait);
-  }, [isPortrait]);
 
   if (!data.length) return <></>;
 
@@ -33,31 +31,42 @@ export const DebugOverlay = ({ data = [] }) => {
     <TooltipProvider>
       <DropdownMenu>
         <div
-          className={
-            "flex absolute w-full bg-transparent bottom-20 " +
-            (isPortrait ? "justify-center " : "justify-end right-5")
-          }
+          className={`
+        // Defaults
+        flex absolute w-full bg-transparent justify-center pointer-events-none
+
+        // Mobile Landscape
+        md:max-lg:landscape:justify-end md:max-lg:landscape:right-8 md:max-lg:landscape:items-center md:max-lg:landscape:h-full
+
+        // Weird ...
+        max-lg:portrait:bottom-8  xl:bottom-8
+        `}
         >
           <div
-            className={
-              "flex rounded-full z-10 gap-6 backdrop-blur-md bg-gray-800/5 text-white border border-gray-300/20 " +
-              (isPortrait
-                ? "px-6 pt-1 justify-center items-center"
-                : "flex-col-reverse px-2 py-3 items-center left-0")
-            }
+            className={`
+          // Defaults
+          flex rounded-full z-20 gap-6 backdrop-blur-md bg-gray-800/5 text-white border border-gray-300/20 pt-2 pb-1 px-6 pointer-events-auto
+
+          // Mobile Landscape
+          md:max-lg:landscape:flex-col-reverse md:max-lg:landscape:px-2 md:max-lg:landscape:py-3 md:max-lg:landscape:items-center md:max-lg:landscape:left-0
+          `}
           >
             {data.map((item, index) => {
               const [iconIndex, setIcon] = React.useState(0);
               const [title, setTitle] = React.useState(item.title);
-              const [selected, setSelected] = React.useState();
+              const [selected, setSelected] = React.useState(item?.selected);
 
               React.useEffect(() => {
                 context.current.set(index, { ...item, setIcon, setTitle });
               }, []);
 
               React.useEffect(() => {
-                setSelected(item?.selected);
-              }, [item.selected]);
+                if (item?.selected) setSelected(item?.selected);
+              }, [item]);
+
+              // React.useEffect(() => {
+              //   console.log(item.options);
+              // }, [item.options]);
 
               const handleOnClick = (item, value) => {
                 item.action({
@@ -115,6 +124,12 @@ export const DebugOverlay = ({ data = [] }) => {
                         }}
                       >
                         {item?.options?.map((option) => (
+                          <DropdownMenuRadioItem
+                            key={option.label}
+                            value={option.value}
+                          >
+                            {option.label}
+                          </DropdownMenuRadioItem>
                           // TODO: MAke menu item work as well
                           // <DropdownMenuItem
                           //   key={option.label}
@@ -122,12 +137,6 @@ export const DebugOverlay = ({ data = [] }) => {
                           // >
                           //   {option.label}
                           // </DropdownMenuItem>
-                          <DropdownMenuRadioItem
-                            key={option.label}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </DropdownMenuRadioItem>
                         ))}
                       </DropdownMenuRadioGroup>
                     </DropdownMenuContent>

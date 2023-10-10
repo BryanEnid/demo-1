@@ -9,8 +9,7 @@ module.exports = {
       center: true,
       padding: "2rem",
       screens: {
-        lg: "1024px",
-        "2xl": "1400px",
+        "2xl": "1200px",
       },
     },
     extend: {

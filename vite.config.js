@@ -32,7 +32,7 @@ export default defineConfig({
   ],
 
   server: {
-    // https: true,
+    // ! Enable this for local https
     https: {
       key: path.resolve(__dirname, "localhost.key"),
       cert: path.resolve(__dirname, "localhost.crt"),

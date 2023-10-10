@@ -11,16 +11,22 @@ export const Landpage = () => {
   const paymentSystemRoute = "/pay"; // Replace with your actual payment system route
 
   return (
-    <div style={{ flex: 1 }}>
-      <center>
-        <button
-          variant="outlined"
-          size="large"
-          onClick={() => navigate(cameraRoute)} // Navigate to the camera route
-        >
-          Camera
-        </button>
-      </center>
+    <div className="flex flex-col gap-2 items-center justify-center">
+      <button
+        variant="outlined"
+        size="large"
+        onClick={() => navigate(cameraRoute)} // Navigate to the camera route
+      >
+        Camera
+      </button>
+
+      <button
+        variant="outlined"
+        size="large"
+        onClick={() => navigate("/profile")} // Navigate to the camera route
+      >
+        Profile
+      </button>
     </div>
   );
 };
