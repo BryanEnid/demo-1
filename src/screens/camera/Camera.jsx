@@ -99,8 +99,8 @@ export const CameraScreen = () => {
       case "3D (VR)":
         return <VR_3D className="w-screen h-screen" />;
 
-      case "3D (VR)":
-        return <VR_3D className="w-screen h-screen" />;
+      // case "3D (VR)":
+      //   return <VR_3D className="w-screen h-screen" />;
 
       default:
         return <></>;
