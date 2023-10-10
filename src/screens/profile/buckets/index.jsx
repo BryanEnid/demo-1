@@ -1,5 +1,5 @@
 import React from "react";
-import { BucketItem } from "./bucketItem";
+import { BucketItem } from "./BucketItem";
 import { useBuckets } from "@/hooks/useBuckets";
 import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
 
