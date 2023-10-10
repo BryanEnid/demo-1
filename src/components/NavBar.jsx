@@ -21,7 +21,7 @@ import {
 import { Typography } from "@/chadcn/Typography";
 import { Input } from "@/chadcn/Input";
 import { MediaSelector } from "./MediaSelector";
-import { Textarea } from "@/chadcn/TextArea";
+import { Textarea } from "@/chadcn/Textarea";
 
 export const NavBar = () => {
   const navigate = useNavigate();
