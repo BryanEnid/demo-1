@@ -89,6 +89,8 @@ export const DebugOverlay = ({ data = [] }) => {
                 />
               );
 
+              if (item.icon === "separator") return <></>;
+
               return (
                 <div key={item.title}>
                   <div className="transition hover:scale-125">

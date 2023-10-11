@@ -138,10 +138,17 @@ export const CameraScreen = () => {
 
           <SideBar />
 
-          {/* <DebugOverlay
+          <DebugOverlay
             data={[
               {
-                icon: ["ci:radio-fill", "ci:stop-circle"],
+                icon: ["ic:round-upload"],
+                title: "Screen recorder",
+                // className: ["", "text-red-500"],
+                action: (ctx) => {},
+              },
+              { icon: ["separator"] },
+              {
+                icon: ["fluent:screen-person-20-regular"],
                 title: "Screen recorder",
                 className: ["", "text-red-500"],
                 disabled: isMobile,
@@ -171,7 +178,7 @@ export const CameraScreen = () => {
 
               {
                 icon: ["material-symbols:pip-rounded"],
-                title: "Picture in Picture",
+                title: "Show camera",
                 action: (ctx) => {
                   togglePiP();
                 },
@@ -191,53 +198,53 @@ export const CameraScreen = () => {
                 selected: deviceId,
               },
 
-              {
-                icon: ["iconoir:360-view", "ci:play", "ci:check-big"],
-                title: "360 video (VR)",
-                action: (ctx) => {
-                  // Clear state
-                  ctx.siblings.forEach(
-                    (item) => item.title !== videoType && item.setIcon(0)
-                  );
-                  document.exitPictureInPicture();
-                  stopRecording();
+              // {
+              //   icon: ["iconoir:360-view", "ci:play", "ci:check-big"],
+              //   title: "360 video (VR)",
+              //   action: (ctx) => {
+              //     // Clear state
+              //     ctx.siblings.forEach(
+              //       (item) => item.title !== videoType && item.setIcon(0)
+              //     );
+              //     document.exitPictureInPicture();
+              //     stopRecording();
 
-                  setVideoType(ctx.this.title);
-                  const video = video360Ref.current?.video;
+              //     setVideoType(ctx.this.title);
+              //     const video = video360Ref.current?.video;
 
-                  // Change tab
-                  if (ctx.this.title !== videoType) ctx.setIcon(1);
+              //     // Change tab
+              //     if (ctx.this.title !== videoType) ctx.setIcon(1);
 
-                  if (ctx.this.title === videoType && video?.paused) {
-                    video.play();
-                    ctx.setIcon(2);
-                  }
-                },
-              },
+              //     if (ctx.this.title === videoType && video?.paused) {
+              //       video.play();
+              //       ctx.setIcon(2);
+              //     }
+              //   },
+              // },
 
-              {
-                icon: ["iconamoon:3d"],
-                title: "3D (VR)",
-                action: (ctx) => {
-                  // Clear state
-                  ctx.siblings.forEach((item) => item.setIcon(0));
-                  document.exitPictureInPicture();
-                  stopRecording();
+              // {
+              //   icon: ["iconamoon:3d"],
+              //   title: "3D (VR)",
+              //   action: (ctx) => {
+              //     // Clear state
+              //     ctx.siblings.forEach((item) => item.setIcon(0));
+              //     document.exitPictureInPicture();
+              //     stopRecording();
 
-                  setVideoType(ctx.this.title);
-                  const video = video360Ref.current?.video;
+              //     setVideoType(ctx.this.title);
+              //     const video = video360Ref.current?.video;
 
-                  // Change tab
-                  // if (ctx.this.title !== videoType) ctx.setIcon(1);
+              //     // Change tab
+              //     // if (ctx.this.title !== videoType) ctx.setIcon(1);
 
-                  // if (ctx.this.title === videoType && video.paused) {
-                  //   ctx.setIcon(2);
-                  //   video.play();
-                  // }
-                },
-              },
+              //     // if (ctx.this.title === videoType && video.paused) {
+              //     //   ctx.setIcon(2);
+              //     //   video.play();
+              //     // }
+              //   },
+              // },
             ]}
-          /> */}
+          />
         </>
       </div>
     </>

@@ -26,7 +26,8 @@ export const PreviewBucket = ({
   const [currentVideo, setCurrentVideo] = React.useState(0);
   const [files, setFiles] = React.useState(null);
   const [data, setData] = React.useState({
-    data: [],
+    videos: [],
+    name: "",
     title: "",
     description: "",
   });
@@ -60,7 +61,7 @@ export const PreviewBucket = ({
   };
 
   const handleNextVideo = () => {
-    if (!(currentVideo === data.data.length - 1))
+    if (!(currentVideo === data.videos.length - 1))
       return setCurrentVideo(currentVideo + 1);
 
     return setCurrentVideo(0);
@@ -73,22 +74,25 @@ export const PreviewBucket = ({
     if (editMode) {
       setTimeout(() => {
         setData({
-          data: [],
+          videos: [],
           name: "",
           title: "",
           description: "",
         });
         setEditMode(true);
       }, 1000);
+    } else {
+      setTimeout(() => {
+        setEditMode(false);
+      }, 500);
     }
   };
 
   const handleCreateBucket = () => {
-    if (files) uploadVideo().then();
-    console.log(documentId);
     addDocument(data, documentId).then(() => {
-      if (editMode) navigate("/camera");
+      if (editMode) navigate("/capture");
     });
+
     setEditMode(false);
   };
 
@@ -105,13 +109,13 @@ export const PreviewBucket = ({
                 autoPlay
                 controls={false}
                 ref={videoRef}
-                src={data.data[currentVideo]?.low_quality_preview.link}
+                src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
                 onEnded={handleNextVideo}
                 className="w-full h-full object-center rounded-none z-10"
               />
             </div>
           </div>
-          <div className="text-white flex flex-row h-48 px-8 my-6">
+          <div className="text-white flex flex-row  px-8 my-6">
             <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
               <img
                 src={user.picture.md}
@@ -171,30 +175,30 @@ export const PreviewBucket = ({
                   onChange={({ target }) =>
                     setData((prev) => ({ ...prev, description: target.value }))
                   }
-                  className="bg-white/10"
+                  className="bg-white/10 min-h-[100px]"
                 />
               </div>
             </div>
           </div>
 
           {/* TODO: Fix overflow hidden */}
-          <div className="h-10" />
+          {/* <div className="h-10" /> */}
 
-          {/* <div className="text-center text-white/50 mt-8">
-          <Typography variant="small">
-            Drag and drop your videos below
-          </Typography>
-        </div>
-
-        <div className="flex justify-center items-center my-6 mt-6">
-          <div className="grid grid-cols-4 gap-5 border-dashed border border-white/30 rounded-lg p-4">
-            {new Array(12).fill().map((video, index) => (
-              <div className="rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20">
-                <Typography>{index + 1}</Typography>
-              </div>
-            ))}
+          <div className="text-center text-white/50 mt-8">
+            <Typography variant="small">
+              Drag and drop your videos below
+            </Typography>
           </div>
-        </div> */}
+
+          <div className="flex justify-center items-center my-6 mt-6">
+            <div className="grid grid-cols-4 gap-5 border-dashed border border-white/30 rounded-lg p-4">
+              {new Array(12).fill().map((video, index) => (
+                <div className="rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20">
+                  <Typography>{index + 1}</Typography>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </PageModal>
     );
@@ -208,7 +212,7 @@ export const PreviewBucket = ({
             autoPlay
             controls={false}
             ref={videoRef}
-            src={data.data[currentVideo]?.low_quality_preview.link}
+            src={data.videos[currentVideo].videoUrl}
             onEnded={handleNextVideo}
             className="w-full h-full object-center rounded-none z-10"
           />
@@ -255,11 +259,8 @@ export const PreviewBucket = ({
       </div>
       <div className="flex justify-center items-center my-6 mt-10">
         <div className="grid grid-cols-4 gap-5">
-          {data.data.map((video) => (
-            <img
-              src={video.video_pictures[0].picture}
-              className=" rounded-lg object-cover w-40 h-28"
-            />
+          {data.videos.map(({ image }) => (
+            <img src={image} className=" rounded-lg object-cover w-40 h-28" />
           ))}
         </div>
       </div>

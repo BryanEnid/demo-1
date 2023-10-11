@@ -61,15 +61,15 @@ export const useFirestoreCollection = (collectionName) => {
   };
 
   const uploadVideo = async (file) => {
-    // try {
-    //   const storageRef = storage.ref();
-    //   const videoRef = storageRef.child(`videos/${file.name}`);
-    //   await videoRef.put(file);
-    //   const downloadURL = await videoRef.getDownloadURL();
-    //   return downloadURL;
-    // } catch (err) {
-    //   console.error("Error uploading video: ", err);
-    // }
+    try {
+      const storageRef = storage.ref();
+      const videoRef = storageRef.child(`videos/${file.name}`);
+      await videoRef.put(file);
+      const downloadURL = await videoRef.getDownloadURL();
+      return downloadURL;
+    } catch (err) {
+      console.error("Error uploading video: ", err);
+    }
   };
 
   return { data, loading, error, addDocument, uploadVideo };

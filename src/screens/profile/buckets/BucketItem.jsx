@@ -2,12 +2,15 @@ import { Button } from "@/chadcn/Button";
 import { Typography } from "@/chadcn/Typography";
 import { PageModal } from "@/components/PageModal";
 import { PreviewBucket } from "@/components/PreviewBucket";
+import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
+import { usePexelsVideoSearch } from "@/hooks/usePexelsVideoSearch";
 import { useUserData } from "@/hooks/useUserData";
 import { Icon } from "@iconify/react";
 import React from "react";
 
 export const BucketItem = ({ name, preview, data, documentId }) => {
   const { user } = useUserData();
+
   const [open, setOpen] = React.useState(false);
 
   const handleExit = () => {

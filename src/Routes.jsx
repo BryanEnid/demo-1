@@ -16,7 +16,7 @@ const router = createBrowserRouter([
     element: <Profile />,
   },
   {
-    path: "/camera",
+    path: "/capture/*",
     element: <CameraScreen />,
   },
 ]);
