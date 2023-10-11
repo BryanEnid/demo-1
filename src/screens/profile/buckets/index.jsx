@@ -5,11 +5,6 @@ import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
 
 export const Buckets = () => {
   const { buckets } = useBuckets();
-  // const { addDocument } = useFirestoreCollection("buckets");
-
-  React.useEffect(() => {
-    // addDocument({ simple: "right?" });
-  }, []);
 
   if (!buckets) return <></>;
 

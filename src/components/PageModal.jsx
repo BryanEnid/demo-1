@@ -3,22 +3,15 @@ import { Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
 export const PageModal = ({ children, show, onClose }) => {
-  const [open, setOpen] = useState(false);
-
   const cancelButtonRef = useRef(null);
 
-  React.useEffect(() => {
-    setOpen(show);
-  }, [show]);
-
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <Transition.Root show={show} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
         initialFocus={cancelButtonRef}
         onClose={(...props) => {
-          setOpen(...props);
           onClose(...props);
         }}
       >
@@ -60,7 +53,12 @@ export const PageModal = ({ children, show, onClose }) => {
                   }}
                 >
                   <div className="sm:flex sm:items-start ">
-                    <div className="text-center sm:text-left ">{children}</div>
+                    <div
+                      className="text-center sm:text-left "
+                      style={{ width: "768px" }}
+                    >
+                      {children}
+                    </div>
                   </div>
                 </div>
               </Dialog.Panel>

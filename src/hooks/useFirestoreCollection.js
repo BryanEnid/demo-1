@@ -1,5 +1,5 @@
 import React from "react";
-import { db } from "@/config/firebase";
+import { db } from "@/config/firebase"; // Assuming you have Firebase Storage configured
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 
 export const useFirestoreCollection = (collectionName) => {
@@ -38,11 +38,24 @@ export const useFirestoreCollection = (collectionName) => {
   const addDocument = async (documentData) => {
     try {
       const collectionRef = collection(db, collectionName);
-      await addDoc(collectionRef, documentData);
+      const docRef = await addDoc(collectionRef, documentData);
+      return docRef.id; // Return the document ID for reference
     } catch (err) {
       console.error("Error adding document: ", err);
     }
   };
 
-  return { data, loading, error, addDocument };
+  const uploadVideo = async (file) => {
+    // try {
+    //   const storageRef = storage.ref();
+    //   const videoRef = storageRef.child(`videos/${file.name}`);
+    //   await videoRef.put(file);
+    //   const downloadURL = await videoRef.getDownloadURL();
+    //   return downloadURL;
+    // } catch (err) {
+    //   console.error("Error uploading video: ", err);
+    // }
+  };
+
+  return { data, loading, error, addDocument, uploadVideo };
 };
