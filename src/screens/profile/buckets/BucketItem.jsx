@@ -6,7 +6,7 @@ import { useUserData } from "@/hooks/useUserData";
 import { Icon } from "@iconify/react";
 import React from "react";
 
-export const BucketItem = ({ name, preview, data }) => {
+export const BucketItem = ({ name, preview, data, documentId }) => {
   const { user } = useUserData();
   const [open, setOpen] = React.useState(false);
 
@@ -32,7 +32,12 @@ export const BucketItem = ({ name, preview, data }) => {
         <Typography>{name}</Typography>
       </div>
 
-      <PreviewBucket show={open} onClose={handleExit} data={data} />
+      <PreviewBucket
+        show={open}
+        onClose={handleExit}
+        data={data}
+        documentId={documentId}
+      />
     </>
   );
 };

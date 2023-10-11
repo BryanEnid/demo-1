@@ -1,6 +1,12 @@
 import React from "react";
 import { db } from "@/config/firebase"; // Assuming you have Firebase Storage configured
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  doc, // Add this import
+  setDoc, // Add this import
+  onSnapshot,
+} from "firebase/firestore";
 
 export const useFirestoreCollection = (collectionName) => {
   const [data, setData] = React.useState([]);
@@ -35,13 +41,22 @@ export const useFirestoreCollection = (collectionName) => {
     return () => unsubscribe();
   }, [collectionName]);
 
-  const addDocument = async (documentData) => {
+  const addDocument = async (documentData, documentId = null) => {
     try {
       const collectionRef = collection(db, collectionName);
-      const docRef = await addDoc(collectionRef, documentData);
-      return docRef.id; // Return the document ID for reference
+
+      if (documentId) {
+        // If a documentId is provided, update the existing document
+        const docRef = doc(collectionRef, documentId); // Use the doc method
+        await setDoc(docRef, documentData, { merge: true }); // Use setDoc with merge option
+        return documentId; // Return the document ID for reference
+      } else {
+        // If no documentId is provided, create a new document
+        const newDocRef = await addDoc(collectionRef, documentData);
+        return newDocRef.id; // Return the new document's ID for reference
+      }
     } catch (err) {
-      console.error("Error adding document: ", err);
+      console.error("Error adding/updating document: ", err);
     }
   };
 

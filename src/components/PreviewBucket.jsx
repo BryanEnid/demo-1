@@ -9,7 +9,13 @@ import { Input } from "@/chadcn/Input";
 import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
 import { useNavigate } from "react-router-dom";
 
-export const PreviewBucket = ({ show, onClose, data: inData, editMode }) => {
+export const PreviewBucket = ({
+  show,
+  onClose,
+  data: inData,
+  editMode,
+  documentId,
+}) => {
   // Hooks
   const { user } = useUserData();
   const navigate = useNavigate();
@@ -79,8 +85,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode }) => {
 
   const handleCreateBucket = () => {
     if (files) uploadVideo().then();
-    addDocument(data).then(() => {
-      navigate("/camera");
+    console.log(documentId);
+    addDocument(data, documentId).then(() => {
+      if (editMode) navigate("/camera");
     });
     setEditMode(false);
   };
@@ -141,26 +148,29 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode }) => {
               <div className="flex flex-col gap-3">
                 {isEditMode && (
                   <Input
+                    value={data.name}
+                    placeholder="Bucket name"
                     onChange={({ target }) =>
                       setData((prev) => ({ ...prev, name: target.value }))
                     }
-                    placeholder="Bucket name"
                     className="bg-white/10"
                   />
                 )}
 
                 <Input
+                  value={data.title}
+                  placeholder="Title"
                   onChange={({ target }) =>
                     setData((prev) => ({ ...prev, title: target.value }))
                   }
-                  placeholder="Title"
                   className="bg-white/10"
                 />
                 <Textarea
+                  value={data.description}
+                  placeholder="Description"
                   onChange={({ target }) =>
                     setData((prev) => ({ ...prev, description: target.value }))
                   }
-                  placeholder="Description"
                   className="bg-white/10"
                 />
               </div>
@@ -229,7 +239,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode }) => {
               <Typography variant="small">{user.role}</Typography>
             </div>
             <div>
-              <Button variant="secondary">Edit Bucket</Button>
+              <Button onClick={() => setEditMode(true)} variant="secondary">
+                Edit Bucket
+              </Button>
             </div>
           </div>
 

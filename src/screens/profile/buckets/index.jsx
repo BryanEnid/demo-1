@@ -8,14 +8,19 @@ export const Buckets = () => {
 
   if (!buckets) return <></>;
 
+  React.useEffect(() => {
+    console.log(buckets);
+  }, [buckets]);
+
   return (
     <div className="grid grid-cols-5 gap-16">
       {buckets.map((bucket) => (
-        <div key={bucket?.name}>
+        <div key={bucket.id}>
           <BucketItem
             data={bucket}
             name={bucket.name}
             preview={bucket.preview}
+            documentId={bucket.id}
           />
         </div>
       ))}
