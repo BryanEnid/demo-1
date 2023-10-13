@@ -8,6 +8,7 @@ import { Textarea } from "@/chadcn/Textarea";
 import { Input } from "@/chadcn/Input";
 import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
 import { useNavigate } from "react-router-dom";
+import { ReactSortable } from "react-sortablejs";
 
 export const PreviewBucket = ({
   show,
@@ -25,6 +26,7 @@ export const PreviewBucket = ({
   const [isEditMode, setEditMode] = React.useState(editMode ?? false);
   const [currentVideo, setCurrentVideo] = React.useState(0);
   const [files, setFiles] = React.useState(null);
+  const [state, setState] = React.useState([]);
   const [data, setData] = React.useState({
     videos: [],
     name: "",
@@ -32,11 +34,18 @@ export const PreviewBucket = ({
     description: "",
   });
 
+  // const setVideos = (props) => {
+  //   setData((prev) => ({ ...prev, videos: [...props] }));
+  // };
+
   // Refs
   const videoRef = React.useRef();
 
   React.useEffect(() => {
-    if (inData) setData(inData);
+    if (inData) {
+      setData(inData);
+      setState(inData.videos);
+    }
   }, [inData]);
 
   // Function to toggle fullscreen
@@ -190,14 +199,46 @@ export const PreviewBucket = ({
             </Typography>
           </div>
 
-          <div className="flex justify-center items-center my-6 mt-6">
-            <div className="grid grid-cols-4 gap-5 border-dashed border border-white/30 rounded-lg p-4">
-              {new Array(12).fill().map((video, index) => (
-                <div className="rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20">
-                  <Typography>{index + 1}</Typography>
-                </div>
-              ))}
-            </div>
+          {/* <div className="flex justify-center items-center my-6 mt-6"> */}
+          <div className="border-dashed border border-white/30 rounded-lg p-4 m-6">
+            <ReactSortable
+              className="w-full grid grid-cols-4 gap-5"
+              list={data.videos}
+              setList={(state) =>
+                setData((prev) => ({ ...prev, videos: state }))
+              }
+              animation={500}
+              delayOnTouchStart={true}
+              delay={0}
+              draggable=".draggable"
+              filter=".undraggable"
+              ghostClass="opacity-0"
+              // selectedClass="scale-150"
+            >
+              {[
+                ...data.videos,
+                ...new Array(12 - data?.videos?.length).fill(""),
+              ].map((data, index) => {
+                if (data.image) {
+                  return (
+                    <div key={data.image} className="draggable">
+                      <img
+                        src={data.image}
+                        className=" animate-wiggle rounded-lg object-cover w-40 h-28 select-none "
+                        // style={{ userDrag: "none" }}
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="undraggable rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20">
+                    <Typography>{index + 1}</Typography>
+                  </div>
+                );
+              })}
+            </ReactSortable>
+            {/* </div> */}
           </div>
         </div>
       </PageModal>
@@ -212,7 +253,7 @@ export const PreviewBucket = ({
             autoPlay
             controls={false}
             ref={videoRef}
-            src={data.videos[currentVideo].videoUrl}
+            src={data.videos[currentVideo]?.videoUrl}
             onEnded={handleNextVideo}
             className="w-full h-full object-center rounded-none z-10"
           />
@@ -257,10 +298,13 @@ export const PreviewBucket = ({
           </div>
         </div>
       </div>
+
       <div className="flex justify-center items-center my-6 mt-10">
         <div className="grid grid-cols-4 gap-5">
-          {data.videos.map(({ image }) => (
-            <img src={image} className=" rounded-lg object-cover w-40 h-28" />
+          {data.videos.map(({ image }, index) => (
+            <div key={image}>
+              <img src={image} className="rounded-lg object-cover w-40 h-28" />
+            </div>
           ))}
         </div>
       </div>

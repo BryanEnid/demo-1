@@ -55,7 +55,11 @@ export const PageModal = ({ children, show, onClose }) => {
                   <div className="sm:flex sm:items-start ">
                     <div
                       className="text-center sm:text-left "
-                      style={{ width: "768px" }}
+                      style={{
+                        width: "768px",
+                        maxHeight: "80vh", // Set a max height for the modal content
+                        overflowY: "auto", // Allow content to scroll if it exceeds the max height
+                      }}
                     >
                       {children}
                     </div>

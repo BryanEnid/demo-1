@@ -45,7 +45,7 @@ export const Buckets = () => {
           <BucketItem
             data={bucket}
             name={bucket.name}
-            preview={bucket.videos[0].videoUrl}
+            preview={bucket.videos[0]?.videoUrl}
             documentId={bucket.id}
           />
         </div>
