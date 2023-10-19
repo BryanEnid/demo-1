@@ -1,48 +1,29 @@
 import React from "react";
-import Webcam from "react-webcam";
+import { AspectRatio } from "@/chadcn/AspectRatio";
+import { Button } from "@/chadcn/Button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chadcn/Select";
+import { Icon } from "@iconify/react";
+import { Typography } from "@/chadcn/Typography";
 
-import { NavBar } from "@/components/NavBar";
-import { SideBar } from "@/components/SideBar";
-import { DebugOverlay } from "@/components/DebugOverlay";
-
-import { VR_3D, Video360 } from "@/components/MediaPlayer";
-import { useOrientation } from "@/hooks/useOrientation";
-import { useDeviceType } from "@/hooks/useDeviceType";
-
-const CameraSize = 180;
-
-export const CameraScreen = () => {
-  // const { isPortrait } = useOrientation();
-  const { isMobile } = useDeviceType();
-
-  const [videoType, setVideoType] = React.useState("Screen recorder");
-  const [stream, setStream] = React.useState(null);
-  const [isScreenRecording, setScreenRecording] = React.useState(false);
-  const [deviceId, setDeviceId] = React.useState();
+export const CaptureScreen = () => {
+  const [cameraPosition, setCameraPosition] = React.useState({ bottom: 100, right: 100 });
+  const [videoScale, setVideoScale] = React.useState(0.2);
+  const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
+  const [screenDevice, setScreenDevice] = React.useState("");
+  const [selfieDevice, setSelfieDevice] = React.useState("");
 
-  const video360Ref = React.useRef(null);
+  const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
-  const cameraRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
+  const recorderRef = React.useRef(null);
+  // const videoChunks = React.useRef([]);
 
-  // Function to toggle PiP mode
-  const togglePiP = () => {
-    const videoElement = cameraRef.current.video;
-
-    if (document.pictureInPictureElement === videoElement) {
-      document.exitPictureInPicture();
-    } else {
-      videoElement.requestPictureInPicture();
-    }
-  };
-
+  // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
     (mediaDevices) => {
-      const devicesList = mediaDevices.filter(
-        ({ kind }) => kind === "videoinput"
-      );
+      const devicesList = mediaDevices.filter(({ kind }) => kind === "videoinput");
       setDevices(devicesList);
-      setDeviceId(devicesList[0].deviceId);
     },
     [setDevices]
   );
@@ -51,202 +32,284 @@ export const CameraScreen = () => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
 
+  React.useEffect(() => {
+    if (!!screenDevice.length) startScreen(screenDevice);
+    if (!!selfieDevice.length) startWebcam(selfieDevice);
+    if (!!screenDevice.length || !!selfieDevice.length) drawScreen();
+
+    return () => {
+      // clearInterval(intervalId.current);
+      if (webcamRef.current?.srcObject) webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+    };
+  }, [screenDevice, selfieDevice]);
+
+  const handleRecordedVideo = (e) => {
+    const recordedVideo = new Blob([e.data], { type: "video/mp4" });
+    console.log("recording stopped", recordedVideo);
+
+    // For testing
+    const fileObjectURL = URL.createObjectURL(recordedVideo);
+    window.open(fileObjectURL);
+  };
+
   const startRecording = async () => {
-    setScreenRecording(true);
+    if (!isScreenRecording && canvasRef.current && (!!screenDevice.length || !!selfieDevice.length)) {
+      // Define Inputs
+      const canvasStream = canvasRef.current.captureStream();
+      const audioStream1 = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: screenDevice },
+      });
+      const audioStream2 = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: selfieDevice },
+      });
 
-    const config = { video: true, audio: false };
-    const stream = await navigator.mediaDevices.getDisplayMedia(config);
-    setStream(stream);
+      // Generate combined stream
+      const combinedStream = new MediaStream([...canvasStream.getTracks(), ...audioStream1.getTracks(), ...audioStream2.getTracks()]);
+
+      const recorder = new MediaRecorder(combinedStream);
+      recorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
+      recorderRef.current = recorder;
+
+      recorder.start();
+      setIsScreenRecording(true);
+      console.log("recording started");
+    }
+
+    if (isScreenRecording) {
+      setIsScreenRecording(false);
+      recorderRef.current.stop();
+    }
+  };
+
+  // const stopRecording = () => {};
+
+  const startWebcam = async (deviceId) => {
+    const config = {
+      video: {
+        width: 1920,
+        height: 1920,
+        aspectRatio: 1 / 1,
+        deviceId,
+      },
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(config);
+
+    // webcamRef.current.onloadedmetadata = (e) => {
+    //   canvasRef.current.width = window.innerWidth;
+    //   canvasRef.current.height = window.innerHeight;
+    // };
+
+    webcamRef.current.srcObject = stream;
+  };
+
+  const startScreen = async (deviceId) => {
+    const config = { video: { width: 1920, height: 1080, aspectRatio: 16 / 9, deviceId } };
+    const stream = await navigator.mediaDevices[deviceId === "Screen Recording" ? "getDisplayMedia" : "getUserMedia"](config);
+
+    const canvas = canvasRef.current;
+
+    const dpr = window.devicePixelRatio;
+    videoRef.current.onloadedmetadata = ({ target }) => {
+      canvas.width = 1920 * dpr;
+      canvas.height = 1080 * dpr;
+      // canvas.context2d.translate(0.5, 0.5); // TODO/FIXME: translate is not valid
+    };
+
     videoRef.current.srcObject = stream;
-
-    // togglePiP();
   };
 
-  const stopRecording = async () => {
-    setScreenRecording(false);
+  const drawScreen = () => {
+    // Video
+    const video = videoRef.current;
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+    const videoAspectRatio = videoWidth / videoHeight;
 
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null); // Reset the stream state
+    // Canvas
+    const canvas = canvasRef.current;
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const off_canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
+    const ctx = off_canvas.getContext("2d", { alpha: false });
+    // const ctx = canvas.getContext("2d", { alpha: false });
+
+    const dpr = window.devicePixelRatio;
+    ctx.scale(dpr, dpr);
+
+    let destWidth = canvasWidth;
+    let destHeight = canvasHeight;
+    if (videoAspectRatio > 16 / 9) {
+      destHeight = canvasWidth / videoAspectRatio;
+    } else {
+      destWidth = canvasHeight * videoAspectRatio;
     }
+
+    const xOffset = (canvasWidth - destWidth) / 2;
+    const yOffset = (canvasHeight - destHeight) / 2;
+
+    // Draw the video to fit the canvas dimensions
+    canvasRef.current.style.width = destWidth;
+    canvasRef.current.style.height = destHeight;
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.drawImage(video, Math.floor(xOffset), Math.floor(yOffset), Math.floor(destWidth), Math.floor(destHeight));
+
+    // Now, call the drawCamera function to overlay the webcam feed
+    drawCamera();
+
+    const bitmapOne = off_canvas.transferToImageBitmap();
+    canvas.getContext("bitmaprenderer").transferFromImageBitmap(bitmapOne);
+
+    requestAnimationFrame(drawScreen);
   };
 
-  const handle360Video = (ref, video) => {
-    video360Ref.current = { ref, video };
+  const drawCamera = () => {
+    const dpr = window.devicePixelRatio;
+    const canvasWidth = canvasRef.current.width;
+    const canvasHeight = canvasRef.current.height;
+    const cameraWidth = webcamRef.current.videoWidth * videoScale * dpr;
+    const cameraHeight = webcamRef.current.videoHeight * videoScale * dpr;
+    const tempCameraPosition = {
+      x: -cameraPosition.bottom * dpr + (canvasWidth - cameraWidth),
+      y: -cameraPosition.right * dpr + (canvasHeight - cameraHeight - 15),
+    };
+    const ctx = canvasRef.current.getContext("2d", { alpha: false });
+    ctx.scale(dpr, dpr);
+
+    ctx.save();
+
+    // Border
+    ctx.beginPath();
+    ctx.arc(
+      Math.floor(tempCameraPosition.x + cameraWidth / 2),
+      Math.floor(tempCameraPosition.y + cameraHeight / 2),
+      Math.floor(Math.min(cameraWidth, cameraHeight) / 2),
+      0,
+      Math.PI * 2
+    );
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 15;
+    ctx.stroke();
+
+    // Clip circular shape
+    ctx.beginPath();
+    ctx.arc(
+      Math.floor(tempCameraPosition.x + cameraWidth / 2),
+      Math.floor(tempCameraPosition.y + cameraHeight / 2),
+      Math.floor(Math.min(cameraWidth, cameraHeight) / 2),
+      0,
+      Math.PI * 2
+    );
+    ctx.clip();
+
+    // Camera to be clipped
+    ctx.drawImage(webcamRef.current, tempCameraPosition.x, tempCameraPosition.y, cameraWidth, cameraHeight);
+
+    ctx.restore();
   };
 
-  const RenderMediaPlayer = React.useCallback(({ videoType }) => {
-    switch (videoType) {
-      case "Screen recorder":
-        return (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-screen h-screen"
-          />
-        );
-
-      case "360 video (VR)":
-        return (
-          <Video360
-            onVideoReady={handle360Video}
-            className="w-screen h-screen"
-          />
-        );
-
-      case "3D (VR)":
-        return <VR_3D className="w-screen h-screen" />;
-
-      default:
-        return <></>;
-    }
-  }, []);
+  const handleStartScreen = (value) => {
+    setScreenDevice(value !== "none" ? value : "");
+    startScreen();
+  };
 
   return (
-    <>
-      <div className="h-screen w-screen bg-slate-300">
-        {/* Interface */}
-        <>
-          <div className="z-10">
-            <RenderMediaPlayer videoType={videoType} />
-          </div>
+    <div className="flex-inline pt-2 h-screen bg-[#001027]">
+      {/* Resources */}
+      <video ref={webcamRef} autoPlay className="h-full hidden" />
+      <video ref={videoRef} autoPlay className="h-full hidden" />
 
-          {/* WebCam */}
-          <div
-            style={{ height: CameraSize, width: CameraSize }}
-            className="flex absolute bottom-10 right-20 rounded-full items-center justify-center transparent"
-          >
-            <Webcam
-              ref={cameraRef}
-              mirrored
-              videoConstraints={{
-                height: CameraSize,
-                width: CameraSize,
-                deviceId: deviceId,
-                // facingMode: cameraPosition.current,
-              }}
-              className="rounded-full z-10 opacity-0"
-            />
-          </div>
-        </>
-
-        {/* Overlay Actions */}
-        <>
-          {/* <NavBar /> */}
-
-          <SideBar />
-
-          <DebugOverlay
-            data={[
-              {
-                icon: ["ic:round-upload"],
-                title: "Screen recorder",
-                // className: ["", "text-red-500"],
-                action: (ctx) => {},
-              },
-              { icon: ["separator"] },
-              {
-                icon: ["fluent:screen-person-20-regular"],
-                title: "Screen recorder",
-                className: ["", "text-red-500"],
-                disabled: isMobile,
-                action: (ctx) => {
-                  // Reset all icons
-                  ctx.siblings.forEach((item) => item.setIcon(0));
-
-                  const index = ctx.iconIndex + 1;
-                  const boundaries = ctx.this.icon.length;
-                  ctx.setIcon(boundaries === index ? 0 : index);
-
-                  setVideoType(ctx.this.title);
-                  if (ctx.iconIndex === 0) {
-                    startRecording().catch(() => {
-                      ctx.setIcon(0);
-                      togglePiP();
-                    });
-                    togglePiP();
-                  }
-
-                  if (ctx.iconIndex === 1) {
-                    stopRecording();
-                    togglePiP();
-                  }
-                },
-              },
-
-              {
-                icon: ["material-symbols:pip-rounded"],
-                title: "Show camera",
-                action: (ctx) => {
-                  togglePiP();
-                },
-              },
-
-              {
-                icon: ["ci:devices"],
-                title: "Camera devices",
-                type: "dropdown",
-                options: devices?.map(({ label, deviceId }) => ({
-                  label: label,
-                  value: deviceId,
-                })),
-                action: (ctx) => {
-                  if (ctx.selected) setDeviceId(ctx.selected);
-                },
-                selected: deviceId,
-              },
-
-              // {
-              //   icon: ["iconoir:360-view", "ci:play", "ci:check-big"],
-              //   title: "360 video (VR)",
-              //   action: (ctx) => {
-              //     // Clear state
-              //     ctx.siblings.forEach(
-              //       (item) => item.title !== videoType && item.setIcon(0)
-              //     );
-              //     document.exitPictureInPicture();
-              //     stopRecording();
-
-              //     setVideoType(ctx.this.title);
-              //     const video = video360Ref.current?.video;
-
-              //     // Change tab
-              //     if (ctx.this.title !== videoType) ctx.setIcon(1);
-
-              //     if (ctx.this.title === videoType && video?.paused) {
-              //       video.play();
-              //       ctx.setIcon(2);
-              //     }
-              //   },
-              // },
-
-              // {
-              //   icon: ["iconamoon:3d"],
-              //   title: "3D (VR)",
-              //   action: (ctx) => {
-              //     // Clear state
-              //     ctx.siblings.forEach((item) => item.setIcon(0));
-              //     document.exitPictureInPicture();
-              //     stopRecording();
-
-              //     setVideoType(ctx.this.title);
-              //     const video = video360Ref.current?.video;
-
-              //     // Change tab
-              //     // if (ctx.this.title !== videoType) ctx.setIcon(1);
-
-              //     // if (ctx.this.title === videoType && video.paused) {
-              //     //   ctx.setIcon(2);
-              //     //   video.play();
-              //     // }
-              //   },
-              // },
-            ]}
-          />
-        </>
+      <div className="w-screen flex justify-center">
+        <div
+          className="flex justify-center items-center max-w-screen-2xl bg-white rounded-3xl overflow-hidden"
+          style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
+        >
+          <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" />
+        </div>
       </div>
-    </>
+
+      <div className="relative flex flex-col items-center justify-center mt-10 w-full">
+        <div className="flex flex-row justify-center w-full items-center">
+          <div style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }} className="flex flex-row justify-between items-center">
+            {/* Start */}
+            <div className="flex flex-row gap-4">
+              <Select value={screenDevice} onValueChange={handleStartScreen}>
+                <SelectTrigger className="w-[180px] bg-white">
+                  <div className="truncate">
+                    <SelectValue placeholder="Select Screen Device" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
+                  {devices.map(({ deviceId, label }) => (
+                    <SelectItem key={deviceId} value={deviceId}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selfieDevice} onValueChange={(value) => setSelfieDevice(value !== "none" ? value : "")}>
+                <SelectTrigger className="w-[180px] bg-white ">
+                  <div className="truncate">
+                    <SelectValue placeholder="Select Selfie Camera" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {devices.map(({ deviceId, label }) => (
+                    <SelectItem key={deviceId} value={deviceId}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* End */}
+            <div className="flex flex-col items-center gap-2 text-white">
+              {/* <div className="rounded-xl p-1 px-6 bg-blue-600  text-center">
+                <Typography variant="large">2 : 00</Typography>
+              </div>
+
+              <div className="text-yellow-300">
+                <Typography variant="small">Recording ...</Typography>
+              </div> */}
+            </div>
+          </div>
+        </div>
+
+        {/* Overlay */}
+        <div className="absolute flex flex-row justify-center">
+          <div className="flex flex-row gap-16 text-4xl text-white">
+            <button className="rounded-full p-3 bg-blue-600">
+              <Icon icon="ph:microphone-bold" />
+            </button>
+
+            <button className="rounded-full p-3 bg-blue-600">
+              <Icon icon="majesticons:video" />
+            </button>
+
+            <button className="rounded-full p-3 bg-white text-black">
+              <Icon icon="iconamoon:restart" />
+            </button>
+
+            {/* <button className="rounded-full p-3">Pause</button> */}
+
+            <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center">
+              {/* <Icon icon="fluent:record-stop-48-filled" /> */}
+              <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} />
+
+              {/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">
+                <button className="bg-slate-600 rounded-full p-2 px-3">3s</button>
+                <button className="bg-slate-600 rounded-full p-2 px-3">10s</button>
+              </div> */}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // Screens
 import { Landpage } from "./screens/landpage/Landpage";
 import { Profile } from "./screens/profile";
-import { CameraScreen } from "./screens/capture/Capture.jsx";
+import { CaptureScreen } from "./screens/capture/Capture.jsx";
 
 const router = createBrowserRouter([
   {
@@ -17,7 +17,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/capture/*",
-    element: <CameraScreen />,
+    element: <CaptureScreen />,
   },
 ]);
 

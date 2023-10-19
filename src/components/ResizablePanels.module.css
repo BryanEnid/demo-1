@@ -1,0 +1,16 @@
+.Panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.PanelContent {
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-panel-background);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
