@@ -1,12 +1,16 @@
 import React from "react";
-import { db } from "@/config/firebase"; // Assuming you have Firebase Storage configured
+import { db, storage } from "@/config/firebase"; // Assuming you have Firebase Storage configured
 import {
   collection,
   addDoc,
   doc, // Add this import
   setDoc, // Add this import
   onSnapshot,
+  updateDoc,
+  getDoc,
+  deleteDoc,
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export const useFirestoreCollection = (collectionName) => {
   const [data, setData] = React.useState([]);
@@ -60,17 +64,84 @@ export const useFirestoreCollection = (collectionName) => {
     }
   };
 
-  const uploadVideo = async (file) => {
+  const deleteDocument = async (documentId) => {
     try {
-      const storageRef = storage.ref();
-      const videoRef = storageRef.child(`videos/${file.name}`);
-      await videoRef.put(file);
-      const downloadURL = await videoRef.getDownloadURL();
-      return downloadURL;
+      const docRef = doc(collection(db, collectionName), documentId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        await deleteDoc(docRef);
+        return true; // Document deleted successfully
+      } else {
+        console.error("Document does not exist.");
+        return false; // Document does not exist, deletion failed
+      }
     } catch (err) {
-      console.error("Error uploading video: ", err);
+      console.error("Error deleting document: ", err);
+      return false; // Deletion failed
     }
   };
 
-  return { data, loading, error, addDocument, uploadVideo };
+  const appendVideo = async (videoData, documentId) => {
+    try {
+      const docRef = doc(collection(db, collectionName), documentId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const currentData = docSnap.data();
+        const currentVideos = (currentData && currentData.videos) || [];
+        await updateDoc(docRef, { videos: [...currentVideos, videoData] });
+        return documentId;
+      } else {
+        console.error("Document does not exist.");
+        return null;
+      }
+    } catch (err) {
+      console.error("Error appending video to document: ", err);
+    }
+  };
+
+  const uploadVideo = async (file) => {
+    try {
+      // Generate a unique identifier for the filename
+      const documentId = Date.now().toString(); // Use a timestamp or any other unique identifier
+
+      // Create a reference with the generated document ID as the filename
+      const videoRef = ref(storage, `videos/${documentId}`);
+
+      // Upload the file
+      await uploadBytes(videoRef, file);
+
+      // Get the download URL
+      const downloadURL = await getDownloadURL(videoRef);
+
+      return downloadURL;
+    } catch (err) {
+      console.error("Error uploading video: ", err);
+      throw err; // Re-throw the error so the caller can handle it if needed
+    }
+  };
+
+  const uploadPicture = async (file) => {
+    try {
+      // Generate a unique identifier for the filename
+      const documentId = Date.now().toString(); // Use a timestamp or any other unique identifier
+
+      // Create a reference with the generated document ID as the filename
+      const videoRef = ref(storage, `pictures/${documentId}`);
+
+      // Upload the file
+      await uploadBytes(videoRef, file);
+
+      // Get the download URL
+      const downloadURL = await getDownloadURL(videoRef);
+
+      return downloadURL;
+    } catch (err) {
+      console.error("Error uploading video: ", err);
+      throw err; // Re-throw the error so the caller can handle it if needed
+    }
+  };
+
+  return { data, loading, error, addDocument, uploadVideo, uploadPicture, appendVideo, deleteDocument };
 };

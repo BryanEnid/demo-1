@@ -1,3 +1,4 @@
+import { Button } from "@/chadcn/Button";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,22 +12,14 @@ export const Landpage = () => {
   const paymentSystemRoute = "/pay"; // Replace with your actual payment system route
 
   return (
-    <div className="flex flex-col gap-2 items-center justify-center">
-      <button
-        variant="outlined"
-        size="large"
-        onClick={() => navigate(cameraRoute)} // Navigate to the camera route
-      >
-        Camera
-      </button>
-
-      <button
-        variant="outlined"
-        size="large"
-        onClick={() => navigate("/profile")} // Navigate to the camera route
-      >
-        Profile
-      </button>
+    <div className="flex h-screen items-center justify-center">
+      <div className="flex flex-col gap-2 ">
+        <Button
+          onClick={() => navigate("/profile")} // Navigate to the camera route
+        >
+          GO TO PROFILE – DEMO
+        </Button>
+      </div>
     </div>
   );
 };

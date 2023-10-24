@@ -7,20 +7,14 @@ import { Icon } from "@iconify/react";
 import { Textarea } from "@/chadcn/Textarea";
 import { Input } from "@/chadcn/Input";
 import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
-import { useNavigate } from "react-router-dom";
+import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 
-export const PreviewBucket = ({
-  show,
-  onClose,
-  data: inData,
-  editMode,
-  documentId,
-}) => {
+export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
   const { user } = useUserData();
   const navigate = useNavigate();
-  const { addDocument, uploadVideo } = useFirestoreCollection("buckets");
+  const { addDocument, deleteDocument } = useFirestoreCollection("buckets");
 
   // State
   const [isEditMode, setEditMode] = React.useState(editMode ?? false);
@@ -70,8 +64,7 @@ export const PreviewBucket = ({
   };
 
   const handleNextVideo = () => {
-    if (!(currentVideo === data.videos.length - 1))
-      return setCurrentVideo(currentVideo + 1);
+    if (!(currentVideo === data.videos.length - 1)) return setCurrentVideo(currentVideo + 1);
 
     return setCurrentVideo(0);
   };
@@ -98,11 +91,16 @@ export const PreviewBucket = ({
   };
 
   const handleCreateBucket = () => {
-    addDocument(data, documentId).then(() => {
-      if (editMode) navigate("/capture");
+    addDocument(data, documentId).then((dbid) => {
+      console.log(createSearchParams({ documentId: dbid }).toString());
+      if (editMode) navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
     });
 
     setEditMode(false);
+  };
+
+  const handleDeleteBucket = () => {
+    deleteDocument(documentId);
   };
 
   if (!user) return <></>;
@@ -126,10 +124,7 @@ export const PreviewBucket = ({
           </div>
           <div className="text-white flex flex-row  px-8 my-6">
             <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-              <img
-                src={user.picture.md}
-                className="rounded-full object-cover w-20"
-              />
+              <img src={user.picture.md} className="rounded-full object-cover w-20" />
               <Typography variant="small">215k</Typography>
             </div>
 
@@ -140,20 +135,8 @@ export const PreviewBucket = ({
                   <Typography variant="small">{user.role}</Typography>
                 </div>
                 <div>
-                  <Button
-                    variant="secondary"
-                    onClick={handleCreateBucket}
-                    disabled={
-                      ![data.description.length, data.title.length].every(
-                        Boolean
-                      )
-                    }
-                  >
-                    {isEditMode
-                      ? editMode
-                        ? "Create bucket"
-                        : "Done editing"
-                      : "Edit Bucket"}
+                  <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
+                    {isEditMode ? (editMode ? "Create bucket" : "Done editing") : "Edit Bucket"}
                   </Button>
                 </div>
               </div>
@@ -163,9 +146,7 @@ export const PreviewBucket = ({
                   <Input
                     value={data.name}
                     placeholder="Bucket name"
-                    onChange={({ target }) =>
-                      setData((prev) => ({ ...prev, name: target.value }))
-                    }
+                    onChange={({ target }) => setData((prev) => ({ ...prev, name: target.value }))}
                     className="bg-white/10"
                   />
                 )}
@@ -173,17 +154,13 @@ export const PreviewBucket = ({
                 <Input
                   value={data.title}
                   placeholder="Title"
-                  onChange={({ target }) =>
-                    setData((prev) => ({ ...prev, title: target.value }))
-                  }
+                  onChange={({ target }) => setData((prev) => ({ ...prev, title: target.value }))}
                   className="bg-white/10"
                 />
                 <Textarea
                   value={data.description}
                   placeholder="Description"
-                  onChange={({ target }) =>
-                    setData((prev) => ({ ...prev, description: target.value }))
-                  }
+                  onChange={({ target }) => setData((prev) => ({ ...prev, description: target.value }))}
                   className="bg-white/10 min-h-[100px]"
                 />
               </div>
@@ -194,9 +171,7 @@ export const PreviewBucket = ({
           {/* <div className="h-10" /> */}
 
           <div className="text-center text-white/50 mt-8">
-            <Typography variant="small">
-              Drag and drop your videos below
-            </Typography>
+            <Typography variant="small">Drag and drop your videos below</Typography>
           </div>
 
           {/* <div className="flex justify-center items-center my-6 mt-6"> */}
@@ -204,9 +179,7 @@ export const PreviewBucket = ({
             <ReactSortable
               className="w-full grid grid-cols-4 gap-5"
               list={data.videos}
-              setList={(state) =>
-                setData((prev) => ({ ...prev, videos: state }))
-              }
+              setList={(state) => setData((prev) => ({ ...prev, videos: state }))}
               animation={500}
               delayOnTouchStart={true}
               delay={0}
@@ -215,10 +188,7 @@ export const PreviewBucket = ({
               ghostClass="opacity-0"
               // selectedClass="scale-150"
             >
-              {[
-                ...data.videos,
-                ...new Array(12 - data?.videos?.length).fill(""),
-              ].map((data, index) => {
+              {[...data.videos, ...new Array(12 - data?.videos?.length).fill("")].map((data, index) => {
                 if (data.image) {
                   return (
                     <div key={data.image} className="draggable">
@@ -240,6 +210,12 @@ export const PreviewBucket = ({
             </ReactSortable>
             {/* </div> */}
           </div>
+
+          <div className="text-center text-white/50 px-8 my-8">
+            <Button onClick={handleDeleteBucket} className="w-full" variant="destructive">
+              Delete Bucket
+            </Button>
+          </div>
         </div>
       </PageModal>
     );
@@ -259,20 +235,13 @@ export const PreviewBucket = ({
           />
 
           <div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
-            <Icon
-              onClick={toggleFullscreen}
-              className="text-3xl text-white"
-              icon="iconamoon:screen-full-duotone"
-            />
+            <Icon onClick={toggleFullscreen} className="text-3xl text-white" icon="iconamoon:screen-full-duotone" />
           </div>
         </div>
       </div>
       <div className="text-white flex flex-row h-48 px-8 my-6">
         <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-          <img
-            src={user.picture.md}
-            className="rounded-full object-cover w-20"
-          />
+          <img src={user.picture.md} className="rounded-full object-cover w-20" />
           <Typography variant="small">215k</Typography>
           <Button variant="secondary">Anchor</Button>
         </div>

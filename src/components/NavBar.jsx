@@ -60,19 +60,21 @@ export const NavBar = () => {
 
           <DropdownMenuContent className="w-56">
             <DropdownMenuItem onClick={handleCreateBucket}>
-              <Icon
-                icon="fluent:album-add-24-regular"
-                className="pr-1 text-3xl"
-              />
+              <Icon icon="fluent:album-add-24-regular" className="pr-1 text-3xl" />
               Create a bucket
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem>
+              <Icon icon="pepicons-pop:camera" className="pr-1 text-3xl" />
+              Start recording
+            </DropdownMenuItem>
+            <DropdownMenuItem>
               <Icon icon="fluent:live-24-filled" className="pr-1 text-3xl" />
               Go Live
             </DropdownMenuItem>
+
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Icon icon="ic:round-upload" className="pr-1 text-3xl" /> Upload
@@ -80,27 +82,18 @@ export const NavBar = () => {
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem>
-                    <Icon
-                      icon="material-symbols:video-file"
-                      className="pr-1 text-3xl"
-                    />
+                    <Icon icon="material-symbols:video-file" className="pr-1 text-3xl" />
                     Upload a .MP4
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Icon
-                      icon="fluent:video-360-20-filled"
-                      className="pr-1 text-3xl"
-                    />
+                    <Icon icon="fluent:video-360-20-filled" className="pr-1 text-3xl" />
                     Upload a 360 Video (.MP4)
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuItem>
-              <Icon
-                icon="fluent:share-screen-person-16-regular"
-                className="pr-1 text-3xl"
-              />
+              <Icon icon="fluent:share-screen-person-16-regular" className="pr-1 text-3xl" />
               Record your screen
             </DropdownMenuItem>
 

@@ -4,29 +4,52 @@ import { Button } from "@/chadcn/Button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chadcn/Select";
 import { Icon } from "@iconify/react";
 import { Typography } from "@/chadcn/Typography";
+import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
+import { createSearchParams, useLocation, useNavigate, useParams, useRoutes } from "react-router-dom";
+import { useQueryParams } from "@/hooks/useQueryParams";
+import { Modal } from "@/components/Modal";
+
+function dataURItoBlob(dataURI) {
+  const byteString = atob(dataURI.split(",")[1]);
+  const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
+}
 
 export const CaptureScreen = () => {
-  const [cameraPosition, setCameraPosition] = React.useState({ bottom: 100, right: 100 });
-  const [videoScale, setVideoScale] = React.useState(0.2);
+  const navigate = useNavigate();
+  const params = useQueryParams();
+
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
   const [screenDevice, setScreenDevice] = React.useState("");
-  const [selfieDevice, setSelfieDevice] = React.useState("");
+  const [isUploading, setUploading] = React.useState(false);
+  const [bucketId, setBucketId] = React.useState(null);
 
   const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
-  const canvasRef = React.useRef(null);
+  const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
-  // const videoChunks = React.useRef([]);
+
+  const { uploadVideo, uploadPicture, appendVideo, data } = useFirestoreCollection("buckets");
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
     (mediaDevices) => {
       const devicesList = mediaDevices.filter(({ kind }) => kind === "videoinput");
       setDevices(devicesList);
+      setScreenDevice(devicesList[0].deviceId);
     },
     [setDevices]
   );
+
+  React.useEffect(() => {
+    params?.bucketid && setBucketId(params.bucketid);
+  }, [params.bucketid]);
 
   React.useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
@@ -34,48 +57,92 @@ export const CaptureScreen = () => {
 
   React.useEffect(() => {
     if (!!screenDevice.length) startScreen(screenDevice);
-    if (!!selfieDevice.length) startWebcam(selfieDevice);
-    if (!!screenDevice.length || !!selfieDevice.length) drawScreen();
 
     return () => {
-      // clearInterval(intervalId.current);
+      // canvasRef.current = null;
       if (webcamRef.current?.srcObject) webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
       if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
     };
-  }, [screenDevice, selfieDevice]);
+  }, [screenDevice]);
 
-  const handleRecordedVideo = (e) => {
+  const handleRecordedVideo = async (e) => {
+    setUploading(true);
+
+    // TODO: Change to send this directly to the data base so it can save it even faster without losing any info after done.
     const recordedVideo = new Blob([e.data], { type: "video/mp4" });
-    console.log("recording stopped", recordedVideo);
+    const preview = await generatePreview(recordedVideo);
+    const previewUrl = await uploadPicture(preview);
+    const videoUrl = await uploadVideo(recordedVideo);
 
-    // For testing
-    const fileObjectURL = URL.createObjectURL(recordedVideo);
-    window.open(fileObjectURL);
+    // Select bucket to upload
+
+    // if bucket id -> save it to that bucket id
+    // otherwise set it to unlisted
+    // for now dont save it
+    if (params.bucketid) {
+      appendVideo({ image: previewUrl, videoUrl: videoUrl }, params.bucketid)
+        .then((documentId) => {
+          setUploading(false);
+          navigate({ pathname: "/profile", search: createSearchParams({ focus: documentId }).toString() });
+        })
+        .finally(() => {
+          if (isUploading) setUploading(false);
+        });
+    }
+  };
+
+  const generatePreview = async (recordedVideo) => {
+    try {
+      const videoUrl = URL.createObjectURL(recordedVideo);
+
+      const videoElement = document.createElement("video");
+      videoElement.src = videoUrl;
+      document.body.appendChild(videoElement);
+
+      await videoElement.play();
+
+      const canvas = document.createElement("canvas");
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const ctx = canvas.getContext("2d");
+
+      // Draw the video frame onto the canvas
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+      // Convert the canvas content to a data URL (screenshot)
+      const screenshot = canvas.toDataURL("image/png");
+
+      // Clean up elements
+      document.body.removeChild(videoElement);
+      URL.revokeObjectURL(videoUrl);
+
+      // Convert the screenshot to a Blob
+      const screenshotBlob = dataURItoBlob(screenshot);
+
+      return screenshotBlob;
+    } catch (err) {
+      console.error("Error generating preview:", err);
+      throw err;
+    }
   };
 
   const startRecording = async () => {
-    if (!isScreenRecording && canvasRef.current && (!!screenDevice.length || !!selfieDevice.length)) {
+    if (!isScreenRecording && !!screenDevice.length) {
       // Define Inputs
-      const canvasStream = canvasRef.current.captureStream();
-      const audioStream1 = await navigator.mediaDevices.getUserMedia({
-        audio: { deviceId: screenDevice },
-      });
-      const audioStream2 = await navigator.mediaDevices.getUserMedia({
-        audio: { deviceId: selfieDevice },
-      });
+      const video = mainRef.current.captureStream();
 
       // Generate combined stream
-      const combinedStream = new MediaStream([...canvasStream.getTracks(), ...audioStream1.getTracks(), ...audioStream2.getTracks()]);
-
-      const recorder = new MediaRecorder(combinedStream);
-      recorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
+      const recorder = new MediaRecorder(video);
       recorderRef.current = recorder;
 
+      // Start recording
+      console.log("recording started");
       recorder.start();
       setIsScreenRecording(true);
-      console.log("recording started");
-    }
 
+      // Video stopped
+      recorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
+    }
     if (isScreenRecording) {
       setIsScreenRecording(false);
       recorderRef.current.stop();
@@ -84,129 +151,20 @@ export const CaptureScreen = () => {
 
   // const stopRecording = () => {};
 
-  const startWebcam = async (deviceId) => {
-    const config = {
-      video: {
-        width: 1920,
-        height: 1920,
-        aspectRatio: 1 / 1,
-        deviceId,
-      },
-    };
-
-    const stream = await navigator.mediaDevices.getUserMedia(config);
-
-    // webcamRef.current.onloadedmetadata = (e) => {
-    //   canvasRef.current.width = window.innerWidth;
-    //   canvasRef.current.height = window.innerHeight;
-    // };
-
-    webcamRef.current.srcObject = stream;
-  };
-
   const startScreen = async (deviceId) => {
-    const config = { video: { width: 1920, height: 1080, aspectRatio: 16 / 9, deviceId } };
-    const stream = await navigator.mediaDevices[deviceId === "Screen Recording" ? "getDisplayMedia" : "getUserMedia"](config);
+    const config = { video: { width: 1920, height: 1080, aspectRatio: 16 / 9, deviceId }, audio: true };
+    const main = mainRef.current;
 
-    const canvas = canvasRef.current;
-
-    const dpr = window.devicePixelRatio;
-    videoRef.current.onloadedmetadata = ({ target }) => {
-      canvas.width = 1920 * dpr;
-      canvas.height = 1080 * dpr;
-      // canvas.context2d.translate(0.5, 0.5); // TODO/FIXME: translate is not valid
+    // Set default config depending on the media source
+    const isDisplayMedia = deviceId === "Screen Recording";
+    const mediaStore = {
+      getDisplayMedia: async (props) => navigator.mediaDevices.getDisplayMedia({ ...props }),
+      getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props }),
     };
-
-    videoRef.current.srcObject = stream;
-  };
-
-  const drawScreen = () => {
-    // Video
-    const video = videoRef.current;
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-    const videoAspectRatio = videoWidth / videoHeight;
-
-    // Canvas
-    const canvas = canvasRef.current;
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-    const off_canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
-    const ctx = off_canvas.getContext("2d", { alpha: false });
-    // const ctx = canvas.getContext("2d", { alpha: false });
-
-    const dpr = window.devicePixelRatio;
-    ctx.scale(dpr, dpr);
-
-    let destWidth = canvasWidth;
-    let destHeight = canvasHeight;
-    if (videoAspectRatio > 16 / 9) {
-      destHeight = canvasWidth / videoAspectRatio;
-    } else {
-      destWidth = canvasHeight * videoAspectRatio;
-    }
-
-    const xOffset = (canvasWidth - destWidth) / 2;
-    const yOffset = (canvasHeight - destHeight) / 2;
-
-    // Draw the video to fit the canvas dimensions
-    canvasRef.current.style.width = destWidth;
-    canvasRef.current.style.height = destHeight;
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.drawImage(video, Math.floor(xOffset), Math.floor(yOffset), Math.floor(destWidth), Math.floor(destHeight));
-
-    // Now, call the drawCamera function to overlay the webcam feed
-    drawCamera();
-
-    const bitmapOne = off_canvas.transferToImageBitmap();
-    canvas.getContext("bitmaprenderer").transferFromImageBitmap(bitmapOne);
-
-    requestAnimationFrame(drawScreen);
-  };
-
-  const drawCamera = () => {
-    const dpr = window.devicePixelRatio;
-    const canvasWidth = canvasRef.current.width;
-    const canvasHeight = canvasRef.current.height;
-    const cameraWidth = webcamRef.current.videoWidth * videoScale * dpr;
-    const cameraHeight = webcamRef.current.videoHeight * videoScale * dpr;
-    const tempCameraPosition = {
-      x: -cameraPosition.bottom * dpr + (canvasWidth - cameraWidth),
-      y: -cameraPosition.right * dpr + (canvasHeight - cameraHeight - 15),
-    };
-    const ctx = canvasRef.current.getContext("2d", { alpha: false });
-    ctx.scale(dpr, dpr);
-
-    ctx.save();
-
-    // Border
-    ctx.beginPath();
-    ctx.arc(
-      Math.floor(tempCameraPosition.x + cameraWidth / 2),
-      Math.floor(tempCameraPosition.y + cameraHeight / 2),
-      Math.floor(Math.min(cameraWidth, cameraHeight) / 2),
-      0,
-      Math.PI * 2
-    );
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 15;
-    ctx.stroke();
-
-    // Clip circular shape
-    ctx.beginPath();
-    ctx.arc(
-      Math.floor(tempCameraPosition.x + cameraWidth / 2),
-      Math.floor(tempCameraPosition.y + cameraHeight / 2),
-      Math.floor(Math.min(cameraWidth, cameraHeight) / 2),
-      0,
-      Math.PI * 2
-    );
-    ctx.clip();
-
-    // Camera to be clipped
-    ctx.drawImage(webcamRef.current, tempCameraPosition.x, tempCameraPosition.y, cameraWidth, cameraHeight);
-
-    ctx.restore();
+    const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
+    main.srcObject = stream;
+    // TODO : fix this for facing mode
+    // main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
   };
 
   const handleStartScreen = (value) => {
@@ -215,101 +173,124 @@ export const CaptureScreen = () => {
   };
 
   return (
-    <div className="flex-inline pt-2 h-screen bg-[#001027]">
-      {/* Resources */}
-      <video ref={webcamRef} autoPlay className="h-full hidden" />
-      <video ref={videoRef} autoPlay className="h-full hidden" />
+    <>
+      {/* TODO: Replace this with https://www.figma.com/file/SmttzZOlFETqjtOu9vUixc/Observe?type=design&node-id=3231-4389&mode=dev */}
+      <Modal show>
+        <div className="flex flex-col gap-4 max-w-2xl">
+          {data.map((item) => {
+            return (
+              <button className="grid grid-cols-4 text-start border rounded-md py-4 px-8 gap-6 w-full">
+                <div>
+                  {item.videos?.[0]?.image ? (
+                    <img className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full" src={item.videos?.[0]?.image} />
+                  ) : (
+                    <div className="bg-black object-cover aspect-square shadow drop-shadow-xl p-1 rounded-full w-32" />
+                  )}
+                </div>
 
-      <div className="w-screen flex justify-center">
-        <div
-          className="flex justify-center items-center max-w-screen-2xl bg-white rounded-3xl overflow-hidden"
-          style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
-        >
-          <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" />
+                <div className="col-span-3">
+                  <Typography variant="large">{item.title}</Typography>
+                  <Typography variant="small">{item.description}</Typography>
+                </div>
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </Modal>
 
-      <div className="relative flex flex-col items-center justify-center mt-10 w-full">
-        <div className="flex flex-row justify-center w-full items-center">
-          <div style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }} className="flex flex-row justify-between items-center">
-            {/* Start */}
-            <div className="flex flex-row gap-4">
-              <Select value={screenDevice} onValueChange={handleStartScreen}>
-                <SelectTrigger className="w-[180px] bg-white">
-                  <div className="truncate">
-                    <SelectValue placeholder="Select Screen Device" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
-                  {devices.map(({ deviceId, label }) => (
-                    <SelectItem key={deviceId} value={deviceId}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <div className="flex-inline pt-2 h-screen bg-[#001027]">
+        {/* Resources */}
+        <video ref={webcamRef} autoPlay className="h-full hidden" />
+        <video ref={videoRef} autoPlay className="h-full hidden" />
 
-              <Select value={selfieDevice} onValueChange={(value) => setSelfieDevice(value !== "none" ? value : "")}>
-                <SelectTrigger className="w-[180px] bg-white ">
-                  <div className="truncate">
-                    <SelectValue placeholder="Select Selfie Camera" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {devices.map(({ deviceId, label }) => (
-                    <SelectItem key={deviceId} value={deviceId}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="w-screen flex justify-center">
+          <div
+            className="flex justify-center items-center max-w-screen-2xl bg-white rounded-3xl overflow-hidden"
+            style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
+          >
+            {/* TODO ! –  */}
+            {/* <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" /> */}
+            <video muted ref={mainRef} autoPlay controls={false} width={1920} height={1080} className="w-full h-full" />
+          </div>
+        </div>
 
-            {/* End */}
-            <div className="flex flex-col items-center gap-2 text-white">
-              {/* <div className="rounded-xl p-1 px-6 bg-blue-600  text-center">
+        <div className="relative flex flex-col items-center justify-center mt-10 w-full">
+          <div className="flex flex-row justify-center w-full items-center">
+            <div style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }} className="flex flex-row justify-between items-center">
+              {/* Start */}
+              <div className="flex flex-row gap-4">
+                <Select value={screenDevice} onValueChange={handleStartScreen}>
+                  <SelectTrigger className="w-[180px] bg-white">
+                    <div className="truncate">
+                      <SelectValue placeholder="Select Screen Device" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
+                    {devices.map(({ deviceId, label }) => (
+                      <SelectItem key={deviceId} value={deviceId}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* End */}
+              <div className="flex flex-col items-center gap-2 text-white">
+                {/* <div className="rounded-xl p-1 px-6 bg-blue-600  text-center">
                 <Typography variant="large">2 : 00</Typography>
               </div>
 
               <div className="text-yellow-300">
                 <Typography variant="small">Recording ...</Typography>
               </div> */}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Overlay */}
-        <div className="absolute flex flex-row justify-center">
-          <div className="flex flex-row gap-16 text-4xl text-white">
-            <button className="rounded-full p-3 bg-blue-600">
-              <Icon icon="ph:microphone-bold" />
-            </button>
+          {/* Overlay */}
+          <div className="absolute flex flex-row justify-center">
+            <div className="flex flex-row gap-16 text-4xl text-white">
+              <button className="rounded-full p-3 bg-blue-600">
+                <Icon icon="ph:microphone-bold" />
+              </button>
 
-            <button className="rounded-full p-3 bg-blue-600">
-              <Icon icon="majesticons:video" />
-            </button>
+              <button className="rounded-full p-3 bg-blue-600">
+                <Icon icon="majesticons:video" />
+              </button>
 
-            <button className="rounded-full p-3 bg-white text-black">
-              <Icon icon="iconamoon:restart" />
-            </button>
+              <button className="rounded-full p-3 bg-white text-black">
+                <Icon icon="iconamoon:restart" />
+              </button>
 
-            {/* <button className="rounded-full p-3">Pause</button> */}
+              {/* <button className="rounded-full p-3">Pause</button> */}
 
-            <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center">
-              {/* <Icon icon="fluent:record-stop-48-filled" /> */}
-              <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} />
-
-              {/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">
+              {!isUploading ? (
+                <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center">
+                  {/* <Icon icon="fluent:record-stop-48-filled" /> */}
+                  <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} />
+                  {/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">
                 <button className="bg-slate-600 rounded-full p-2 px-3">3s</button>
                 <button className="bg-slate-600 rounded-full p-2 px-3">10s</button>
               </div> */}
-            </button>
+                </button>
+              ) : (
+                <div className="flex rounded-full p-2 bg-white relative justify-center items-center text-primary">
+                  <Icon width={45} icon="line-md:uploading-loop" />
+
+                  <div className="absolute bottom-[-50px] flex flex-row text-sm">
+                    <div className="font-medium flex flex-row truncate justify-center items-center gap-2 bg-white rounded-full p-2 px-3">
+                      <Icon width={20} icon="line-md:loading-twotone-loop" /> Uploading ...
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
