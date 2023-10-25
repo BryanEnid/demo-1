@@ -24,13 +24,19 @@ import { Textarea } from "@/chadcn/Textarea";
 import { PageModal } from "./PageModal";
 import { PreviewBucket } from "./PreviewBucket";
 import { MediaSelector } from "./MediaSelector";
+import { useUserData } from "@/hooks/useUserData";
 
 export const NavBar = () => {
+  // Hooks
   const navigate = useNavigate();
+  const { user } = useUserData();
+
+  // State
   const [show, setShow] = React.useState(false);
   const [bucketName, setBucketName] = React.useState("");
   const [bucketDescription, setBucketDescription] = React.useState("");
 
+  // Refs
   const inputRef = React.useRef();
 
   const handleCreateBucket = () => {
@@ -109,7 +115,7 @@ export const NavBar = () => {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant="link" className="p-0 m-0">
-              Nikola Tesla
+              {user.displayName}
               <Icon icon="iconamoon:arrow-down-2-duotone" height={22} />
             </Button>
           </DropdownMenuTrigger>

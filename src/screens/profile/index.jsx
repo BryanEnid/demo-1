@@ -36,14 +36,10 @@ export const Profile = () => {
       <div>
         {/* Header */}
         <div className="flex flex-col items-center">
-          <img
-            src={user?.picture?.md}
-            className="rounded-full object-cover aspect-square w-48"
-          />
-          <Typography variant="h2">{user?.name}</Typography>
+          <img src={user?.providerData?.[0]?.photoURL} className="rounded-full object-cover aspect-square w-48" />
+          <Typography variant="h2">{user?.displayName}</Typography>
           <Typography variant="blockquote">
-            “If you want to find the secrets of the universe, think in terms of
-            energy, frequency and vibration.”
+            “If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.”
           </Typography>
         </div>
 

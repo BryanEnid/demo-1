@@ -11,15 +11,144 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useUserData } from "./useUserData";
 
 export const useFirestoreCollection = (collectionName) => {
+  // Hooks
+  const { user } = useUserData();
+
+  // State
   const [data, setData] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
 
-  React.useEffect(() => {
-    const collectionRef = collection(db, collectionName);
+  // Get the Firestore collection reference
+  const collectionRef = collection(db, collectionName);
 
+  const addDocument = async (documentData, documentId = null) => {
+    try {
+      if (!user) {
+        // Handle the case where there's no authenticated user
+        console.error("User is not authenticated.");
+        return null;
+      }
+
+      // Include the user's UID in the document data
+      console.log(user);
+      documentData.creatorId = user.uid;
+
+      if (documentId) {
+        // If a documentId is provided, update the existing document
+        return updateDocument(documentId, documentData);
+      } else {
+        // If no documentId is provided, create a new document
+        return createDocument(documentData);
+      }
+    } catch (err) {
+      console.error("Error adding/updating document: ", err);
+    }
+  };
+
+  const createDocument = async (documentData) => {
+    console.log(collectionRef, documentData);
+    try {
+      const newDocRef = await addDoc(collectionRef, documentData);
+      return newDocRef.id;
+    } catch (err) {
+      console.error("Error creating document: ", err);
+    }
+  };
+
+  const updateDocument = async (documentId, documentData) => {
+    try {
+      const docRef = doc(collectionRef, documentId);
+      await setDoc(docRef, documentData, {
+        merge: true,
+      });
+      return documentId;
+    } catch (err) {
+      console.error("Error updating document: ", err);
+    }
+  };
+
+  const deleteDocument = async (documentId) => {
+    try {
+      if (!user) {
+        // Handle the case where there's no authenticated user
+        console.error("User is not authenticated.");
+        return false;
+      }
+
+      const docRef = doc(collection(db, collectionName), documentId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const creatorId = docSnap.data().creatorId;
+
+        if (creatorId === user.uid) {
+          await deleteDoc(docRef);
+          return true; // Document deleted successfully
+        } else {
+          console.error("User does not have permission to delete this document.");
+          return false; // User doesn't have permission to delete this document
+        }
+      } else {
+        console.error("Document does not exist.");
+        return false; // Document does not exist, deletion failed
+      }
+    } catch (err) {
+      console.error("Error deleting document: ", err);
+      return false; // Deletion failed
+    }
+  };
+
+  const appendVideo = async (videoData, documentId) => {
+    try {
+      if (!user) {
+        // Handle the case where there's no authenticated user
+        console.error("User is not authenticated.");
+        return null;
+      }
+
+      const docRef = doc(collection(db, collectionName), documentId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const creatorId = docSnap.data().creatorId;
+
+        if (creatorId === user.uid) {
+          const currentData = docSnap.data();
+          const currentVideos = (currentData && currentData.videos) || [];
+          await updateDoc(docRef, { videos: [...currentVideos, videoData] });
+          return documentId;
+        } else {
+          console.error("User does not have permission to append to this document.");
+          return null; // User doesn't have permission to append to this document
+        }
+      } else {
+        console.error("Document does not exist.");
+        return null;
+      }
+    } catch (err) {
+      console.error("Error appending video to document: ", err);
+    }
+  };
+
+  const uploadFile = async (file, fileType) => {
+    try {
+      const documentId = Date.now().toString();
+      const fileRef = ref(storage, `${fileType}/${documentId}`);
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+      return downloadURL;
+    } catch (err) {
+      console.error(`Error uploading ${fileType}: `, err);
+      throw err;
+    }
+  };
+
+  // Fetch the data and set up the snapshot listener
+  React.useEffect(() => {
     const unsubscribe = onSnapshot(
       collectionRef,
       (querySnapshot) => {
@@ -45,103 +174,13 @@ export const useFirestoreCollection = (collectionName) => {
     return () => unsubscribe();
   }, [collectionName]);
 
-  const addDocument = async (documentData, documentId = null) => {
-    try {
-      const collectionRef = collection(db, collectionName);
-
-      if (documentId) {
-        // If a documentId is provided, update the existing document
-        const docRef = doc(collectionRef, documentId); // Use the doc method
-        await setDoc(docRef, documentData, { merge: true }); // Use setDoc with merge option
-        return documentId; // Return the document ID for reference
-      } else {
-        // If no documentId is provided, create a new document
-        const newDocRef = await addDoc(collectionRef, documentData);
-        return newDocRef.id; // Return the new document's ID for reference
-      }
-    } catch (err) {
-      console.error("Error adding/updating document: ", err);
-    }
+  return {
+    data,
+    loading,
+    error,
+    addDocument,
+    uploadFile,
+    appendVideo,
+    deleteDocument,
   };
-
-  const deleteDocument = async (documentId) => {
-    try {
-      const docRef = doc(collection(db, collectionName), documentId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        await deleteDoc(docRef);
-        return true; // Document deleted successfully
-      } else {
-        console.error("Document does not exist.");
-        return false; // Document does not exist, deletion failed
-      }
-    } catch (err) {
-      console.error("Error deleting document: ", err);
-      return false; // Deletion failed
-    }
-  };
-
-  const appendVideo = async (videoData, documentId) => {
-    try {
-      const docRef = doc(collection(db, collectionName), documentId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const currentData = docSnap.data();
-        const currentVideos = (currentData && currentData.videos) || [];
-        await updateDoc(docRef, { videos: [...currentVideos, videoData] });
-        return documentId;
-      } else {
-        console.error("Document does not exist.");
-        return null;
-      }
-    } catch (err) {
-      console.error("Error appending video to document: ", err);
-    }
-  };
-
-  const uploadVideo = async (file) => {
-    try {
-      // Generate a unique identifier for the filename
-      const documentId = Date.now().toString(); // Use a timestamp or any other unique identifier
-
-      // Create a reference with the generated document ID as the filename
-      const videoRef = ref(storage, `videos/${documentId}`);
-
-      // Upload the file
-      await uploadBytes(videoRef, file);
-
-      // Get the download URL
-      const downloadURL = await getDownloadURL(videoRef);
-
-      return downloadURL;
-    } catch (err) {
-      console.error("Error uploading video: ", err);
-      throw err; // Re-throw the error so the caller can handle it if needed
-    }
-  };
-
-  const uploadPicture = async (file) => {
-    try {
-      // Generate a unique identifier for the filename
-      const documentId = Date.now().toString(); // Use a timestamp or any other unique identifier
-
-      // Create a reference with the generated document ID as the filename
-      const videoRef = ref(storage, `pictures/${documentId}`);
-
-      // Upload the file
-      await uploadBytes(videoRef, file);
-
-      // Get the download URL
-      const downloadURL = await getDownloadURL(videoRef);
-
-      return downloadURL;
-    } catch (err) {
-      console.error("Error uploading video: ", err);
-      throw err; // Re-throw the error so the caller can handle it if needed
-    }
-  };
-
-  return { data, loading, error, addDocument, uploadVideo, uploadPicture, appendVideo, deleteDocument };
 };

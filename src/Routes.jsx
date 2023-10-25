@@ -12,7 +12,7 @@ const router = createBrowserRouter([
     element: <Landpage />,
   },
   {
-    path: "/profile/*",
+    path: "/:id/*",
     element: <Profile />,
   },
   {

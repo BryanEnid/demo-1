@@ -35,7 +35,7 @@ export const CaptureScreen = () => {
   const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
 
-  const { uploadVideo, uploadPicture, appendVideo, data } = useFirestoreCollection("buckets");
+  const { uploadFile, appendVideo, data } = useFirestoreCollection("buckets");
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
@@ -71,8 +71,8 @@ export const CaptureScreen = () => {
     // TODO: Change to send this directly to the data base so it can save it even faster without losing any info after done.
     const recordedVideo = new Blob([e.data], { type: "video/mp4" });
     const preview = await generatePreview(recordedVideo);
-    const previewUrl = await uploadPicture(preview);
-    const videoUrl = await uploadVideo(recordedVideo);
+    const previewUrl = await uploadFile(preview, "image");
+    const videoUrl = await uploadFile(recordedVideo, "video");
 
     // Select bucket to upload
 
@@ -175,7 +175,7 @@ export const CaptureScreen = () => {
   return (
     <>
       {/* TODO: Replace this with https://www.figma.com/file/SmttzZOlFETqjtOu9vUixc/Observe?type=design&node-id=3231-4389&mode=dev */}
-      <Modal show>
+      {/* <Modal show>
         <div className="flex flex-col gap-4 max-w-2xl">
           {data.map((item) => {
             return (
@@ -196,7 +196,7 @@ export const CaptureScreen = () => {
             );
           })}
         </div>
-      </Modal>
+      </Modal> */}
 
       <div className="flex-inline pt-2 h-screen bg-[#001027]">
         {/* Resources */}

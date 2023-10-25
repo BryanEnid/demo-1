@@ -92,8 +92,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
 
   const handleCreateBucket = () => {
     addDocument(data, documentId).then((dbid) => {
-      console.log(createSearchParams({ documentId: dbid }).toString());
-      if (editMode) navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
+      if (editMode && dbid) return navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
+
+      console.log("something went wrong");
     });
 
     setEditMode(false);
