@@ -228,11 +228,14 @@ export const CaptureScreen = () => {
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
-                    {devices.map(({ deviceId, label }) => (
-                      <SelectItem key={deviceId} value={deviceId}>
-                        {label}
-                      </SelectItem>
-                    ))}
+                    {devices.map(({ deviceId, label }) => {
+                      console.log({ deviceId, label });
+                      return (
+                        <SelectItem key={deviceId} value={deviceId}>
+                          {label}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
