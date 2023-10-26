@@ -54,7 +54,7 @@ export const CaptureScreen = () => {
   React.useEffect(() => {
     navigator.mediaDevices
       // Ask for permission
-      .getUserMedia({ audio: true, video: true })
+      .getUserMedia({ video: { width: 1920, height: 1080, aspectRatio: 16 / 9 }, audio: true })
       .then(() => navigator.mediaDevices.enumerateDevices())
       .then(handleDevices);
   }, [handleDevices]);
