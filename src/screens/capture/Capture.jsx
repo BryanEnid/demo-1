@@ -52,7 +52,11 @@ export const CaptureScreen = () => {
   }, [params.bucketid]);
 
   React.useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+    navigator.mediaDevices
+      // Ask for permission
+      .getUserMedia({ audio: true, video: true })
+      .then(() => navigator.mediaDevices.enumerateDevices())
+      .then(handleDevices);
   }, [handleDevices]);
 
   React.useEffect(() => {
@@ -230,6 +234,7 @@ export const CaptureScreen = () => {
                     <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
                     {devices.map(({ deviceId, label }) => {
                       console.log({ deviceId, label });
+                      if (!label) return "";
                       return (
                         <SelectItem key={deviceId} value={deviceId}>
                           {label}
