@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAuthentication } from "@/hooks/useAuthentication";
 
 // Components
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/chadcn/Tabs";
 import { Buckets } from "./buckets";
 import { Typography } from "@/chadcn/Typography";
 import { Button } from "@/chadcn/Button";
+import { useCollection } from "@/hooks/useCollection";
 
 const Example1 = () => {
   return <div className="bg-red-500 w-full h-screen">example</div>;
@@ -23,8 +24,27 @@ const Example2 = () => {
 };
 
 export const Profile = () => {
-  const { user } = useAuthentication();
+  // Hooks
+  const { user: currentUser } = useAuthentication();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { getBy } = useCollection("users", true);
+
+  const [profileUsername, setProfileUsername] = React.useState("");
+  const [profile, setProfile] = React.useState({});
+
+  React.useEffect(() => {
+    const username = pathname.slice(1).split("/")[0].toLowerCase();
+
+    if (username !== profileUsername) {
+      setProfileUsername(username);
+      getBy("where", "username", "==", username).then(setProfile);
+    }
+  }, [pathname]);
+
+  React.useEffect(() => {
+    console.log(profile);
+  }, [profile]);
 
   return (
     <div className="container">
@@ -36,8 +56,8 @@ export const Profile = () => {
       <div>
         {/* Header */}
         <div className="flex flex-col items-center">
-          <img src={user?.providerData?.[0]?.photoURL} className="rounded-full object-cover aspect-square w-48" />
-          <Typography variant="h2">{user?.displayName}</Typography>
+          <img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48" />
+          <Typography variant="h2">{profile?.name}</Typography>
           <Typography variant="blockquote">
             “If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.”
           </Typography>

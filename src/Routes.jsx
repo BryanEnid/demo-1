@@ -22,5 +22,7 @@ const router = createBrowserRouter([
 ]);
 
 export const Routes = () => {
+  // TODO: Preload all icons
+
   return <RouterProvider router={router} />;
 };

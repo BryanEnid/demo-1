@@ -8,12 +8,15 @@ import {
   onSnapshot,
   updateDoc,
   getDoc,
+  getDocs,
   deleteDoc,
+  where,
+  query,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuthentication } from "./useAuthentication";
 
-export const useCollection = (collectionName) => {
+export const useCollection = (collectionName, isQuering = false) => {
   // Hooks
   const { user } = useAuthentication();
 
@@ -141,33 +144,52 @@ export const useCollection = (collectionName) => {
     }
   };
 
+  const getBy = async (queryType, property, operation, value) => {
+    const queries = { where }; // Define Firestore query functions (e.g., where)
+    const userQuery = query(collectionRef, queries[queryType](property, operation, value));
+
+    const querySnapshot = await getDocs(userQuery);
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      const userUid = userDoc.id;
+
+      // Step 2: Use the UID to fetch the user data
+      const userRef = doc(collectionRef, userUid);
+
+      const userDoc2 = await getDoc(userRef); // Change getDocs to getDoc
+
+      if (userDoc2.exists()) {
+        return userDoc2.data();
+      }
+    }
+  };
+
   // TODO: Replace realtime data with regular fetch
   // Fetch the data and set up the snapshot listener
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collectionRef,
-      (querySnapshot) => {
-        const documents = [];
-        querySnapshot.forEach((doc) => {
-          documents.push({
-            id: doc.id,
-            ...doc.data(),
+    if (!isQuering) {
+      const unsubscribe = onSnapshot(
+        collectionRef,
+        (querySnapshot) => {
+          const documents = [];
+          querySnapshot.forEach((doc) => {
+            documents.push({ id: doc.id, ...doc.data() });
           });
-        });
-        setData(documents);
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error("Error getting documents: ", err);
-        setData([]);
-        setLoading(false);
-        setError(err);
-      }
-    );
+          setData(documents);
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          console.error("Error getting documents: ", err);
+          setData([]);
+          setLoading(false);
+          setError(err);
+        }
+      );
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
   }, [collectionName]);
 
-  return { data, loading, error, addDocument, uploadFile, appendVideo, deleteDocument };
+  return { data, loading, error, addDocument, uploadFile, appendVideo, deleteDocument, getBy };
 };

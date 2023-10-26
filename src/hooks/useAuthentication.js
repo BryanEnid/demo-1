@@ -1,25 +1,29 @@
 import React from "react";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
-import { useCollection } from "./useCollection";
+import { db } from "@/config/firebase"; // Assuming you have Firebase Storage configured
+import { collection, doc, setDoc } from "firebase/firestore";
 
 export const useAuthentication = () => {
   // Initialize Firebase Auth
   const auth = getAuth();
   const [user, setUser] = React.useState(null);
-  // const { addDocument } = useCollection();
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
-
     return () => unsubscribe();
   }, []);
+
+  const createUser = async (documentData, documentId) => {
+    const collectionRef = collection(db, "users");
+    const docRef = doc(collectionRef, documentId);
+    return setDoc(docRef, documentData);
+  };
 
   // Function to sign in with Google
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     const { user } = await signInWithPopup(auth, provider);
     setUser(user);
-    await addDocument(user, user.uid);
     return user;
   };
 
@@ -39,5 +43,6 @@ export const useAuthentication = () => {
     user,
     signInWithGoogle,
     signOutUser,
+    createUser,
   };
 };
