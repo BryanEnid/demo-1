@@ -1,16 +1,16 @@
 import React from "react";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { useCollection } from "./useCollection";
 
 export const useAuthentication = () => {
   // Initialize Firebase Auth
   const auth = getAuth();
-
   const [user, setUser] = React.useState(null);
+  // const { addDocument } = useCollection();
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
 
-    // Cleanup the listener when the component unmounts
     return () => unsubscribe();
   }, []);
 
@@ -19,20 +19,20 @@ export const useAuthentication = () => {
     const provider = new GoogleAuthProvider();
     const { user } = await signInWithPopup(auth, provider);
     setUser(user);
+    await addDocument(user, user.uid);
+    return user;
+  };
 
-    // await addDocument(user);
-
+  const logInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    const { user } = await signInWithPopup(auth, provider);
+    setUser(user);
     return user;
   };
 
   // Function to sign out
   const signOutUser = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+    signOut(auth).then(() => setUser(null));
   };
 
   return {

@@ -1,17 +1,17 @@
 import { Button } from "@/chadcn/Button";
 import { useAuthentication } from "@/hooks/useAuthentication";
+import { useCollection } from "@/hooks/useCollection";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
 export const Landpage = () => {
   const navigate = useNavigate(); // Get the navigate function
   const { user, signInWithGoogle, signOutUser } = useAuthentication();
+  const { addDocument } = useCollection("user");
 
-  React.useEffect(() => {
-    console.log(user);
-  }, [user]);
-
-  const handleSignIn = () => {};
+  const handleSignIn = () => {
+    // signInWithGoogle().then();
+  };
 
   return (
     <div className="flex flex-col h-screen items-center justify-center">

@@ -2,19 +2,20 @@ import React from "react";
 import { Button } from "@/chadcn/Button";
 import { Typography } from "@/chadcn/Typography";
 import { PageModal } from "@/components/PageModal";
-import { useUserData } from "@/hooks/useUserData";
+
 import { Icon } from "@iconify/react";
 import { Textarea } from "@/chadcn/Textarea";
 import { Input } from "@/chadcn/Input";
-import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
+import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
+import { useAuthentication } from "@/hooks/useAuthentication";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
-  const { user } = useUserData();
+  const { user } = useAuthentication();
   const navigate = useNavigate();
-  const { addDocument, deleteDocument } = useFirestoreCollection("buckets");
+  const { addDocument, deleteDocument } = useCollection("buckets");
 
   // State
   const [isEditMode, setEditMode] = React.useState(editMode ?? false);
@@ -125,15 +126,16 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           </div>
           <div className="text-white flex flex-row  px-8 my-6">
             <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-              <img src={user.picture.md} className="rounded-full object-cover w-20" />
+              {/* TODO: picture */}
+              <img src={user?.picture?.md} className="rounded-full object-cover w-20" />
               <Typography variant="small">215k</Typography>
             </div>
 
             <div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
               <div className="flex flex-row justify-between items-center">
                 <div>
-                  <Typography variant="large">{user.name}</Typography>
-                  <Typography variant="small">{user.role}</Typography>
+                  <Typography variant="large">{user?.name}</Typography>
+                  <Typography variant="small">{user?.role}</Typography>
                 </div>
                 <div>
                   <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
@@ -242,7 +244,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
       </div>
       <div className="text-white flex flex-row h-48 px-8 my-6">
         <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-          <img src={user.picture.md} className="rounded-full object-cover w-20" />
+          <img src={user?.picture?.md} className="rounded-full object-cover w-20" />
           <Typography variant="small">215k</Typography>
           <Button variant="secondary">Anchor</Button>
         </div>

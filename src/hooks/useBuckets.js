@@ -1,10 +1,10 @@
 import React from "react";
 import { usePexelsVideoSearch } from "./usePexelsVideoSearch";
-import { useFirestoreCollection } from "./useFirestoreCollection";
+import { useCollection } from "./useCollection";
 
 export const useBuckets = () => {
   // const [buckets, setBuckets] = React.useState(null);
-  const { data: buckets } = useFirestoreCollection("buckets");
+  const { data: buckets } = useCollection("buckets");
   // const { fetchVideos } = usePexelsVideoSearch({});
 
   // Fetch buckets data and populate

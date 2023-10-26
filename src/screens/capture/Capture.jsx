@@ -4,7 +4,7 @@ import { Button } from "@/chadcn/Button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chadcn/Select";
 import { Icon } from "@iconify/react";
 import { Typography } from "@/chadcn/Typography";
-import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
+import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useLocation, useNavigate, useParams, useRoutes } from "react-router-dom";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { Modal } from "@/components/Modal";
@@ -35,7 +35,7 @@ export const CaptureScreen = () => {
   const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
 
-  const { uploadFile, appendVideo, data } = useFirestoreCollection("buckets");
+  const { uploadFile, appendVideo, data } = useCollection("buckets");
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(

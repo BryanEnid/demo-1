@@ -11,11 +11,11 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useUserData } from "./useUserData";
+import { useAuthentication } from "./useAuthentication";
 
-export const useFirestoreCollection = (collectionName) => {
+export const useCollection = (collectionName) => {
   // Hooks
-  const { user } = useUserData();
+  const { user } = useAuthentication();
 
   // State
   const [data, setData] = React.useState([]);
@@ -34,7 +34,6 @@ export const useFirestoreCollection = (collectionName) => {
       }
 
       // Include the user's UID in the document data
-      console.log(user);
       documentData.creatorId = user.uid;
 
       if (documentId) {
@@ -50,13 +49,8 @@ export const useFirestoreCollection = (collectionName) => {
   };
 
   const createDocument = async (documentData) => {
-    console.log(collectionRef, documentData);
-    try {
-      const newDocRef = await addDoc(collectionRef, documentData);
-      return newDocRef.id;
-    } catch (err) {
-      console.error("Error creating document: ", err);
-    }
+    const newDocRef = await addDoc(collectionRef, documentData);
+    return newDocRef.id;
   };
 
   const updateDocument = async (documentId, documentData) => {
@@ -147,6 +141,7 @@ export const useFirestoreCollection = (collectionName) => {
     }
   };
 
+  // TODO: Replace realtime data with regular fetch
   // Fetch the data and set up the snapshot listener
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -174,13 +169,5 @@ export const useFirestoreCollection = (collectionName) => {
     return () => unsubscribe();
   }, [collectionName]);
 
-  return {
-    data,
-    loading,
-    error,
-    addDocument,
-    uploadFile,
-    appendVideo,
-    deleteDocument,
-  };
+  return { data, loading, error, addDocument, uploadFile, appendVideo, deleteDocument };
 };

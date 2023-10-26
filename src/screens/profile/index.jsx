@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
+import { useAuthentication } from "@/hooks/useAuthentication";
 
 // Components
 import { SideBar } from "@/components/SideBar";
@@ -10,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/chadcn/Tabs";
 
 // Screens
 import { Buckets } from "./buckets";
-import { useUserData } from "@/hooks/useUserData";
 import { Typography } from "@/chadcn/Typography";
 import { Button } from "@/chadcn/Button";
 
@@ -23,7 +23,7 @@ const Example2 = () => {
 };
 
 export const Profile = () => {
-  const { user } = useUserData();
+  const { user } = useAuthentication();
   const navigate = useNavigate();
 
   return (

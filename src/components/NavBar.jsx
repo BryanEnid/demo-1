@@ -24,12 +24,12 @@ import { Textarea } from "@/chadcn/Textarea";
 import { PageModal } from "./PageModal";
 import { PreviewBucket } from "./PreviewBucket";
 import { MediaSelector } from "./MediaSelector";
-import { useUserData } from "@/hooks/useUserData";
+import { useAuthentication } from "@/hooks/useAuthentication";
 
 export const NavBar = () => {
   // Hooks
   const navigate = useNavigate();
-  const { user } = useUserData();
+  const { user } = useAuthentication();
 
   // State
   const [show, setShow] = React.useState(false);
@@ -115,7 +115,7 @@ export const NavBar = () => {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant="link" className="p-0 m-0">
-              {user.displayName}
+              {user?.displayName}
               <Icon icon="iconamoon:arrow-down-2-duotone" height={22} />
             </Button>
           </DropdownMenuTrigger>
