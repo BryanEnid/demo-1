@@ -52,6 +52,14 @@ export const CaptureScreen = () => {
   }, [params.bucketid]);
 
   React.useEffect(() => {
+    // TODO: Not supportedf on Safari
+    // (async () => {
+    //   const { state: microphonePermission } = await navigator.permissions.query({ name: "microphone" });
+    //   const { state: cameraPermission } = await navigator.permissions.query({ name: "camera" });
+    //   const devices = await navigator.mediaDevices.enumerateDevices();
+    //   handleDevices(devices);
+    // })();
+
     navigator.mediaDevices
       // Ask for permission
       .getUserMedia({ video: { width: 1920, height: 1080, aspectRatio: 16 / 9 }, audio: true })

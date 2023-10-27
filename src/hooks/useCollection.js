@@ -164,6 +164,13 @@ export const useCollection = (collectionName, isQuering = false) => {
     }
   };
 
+  const checkAvailableUsername = async (username) => {
+    if (!(username.length > 3)) return false;
+    const userQuery = query(collectionRef, where("username", "==", username));
+    const querySnapshot = await getDocs(userQuery);
+    return querySnapshot.empty; // If empty, the username is available; if not, it's taken.
+  };
+
   // TODO: Replace realtime data with regular fetch
   // Fetch the data and set up the snapshot listener
   React.useEffect(() => {
@@ -191,5 +198,5 @@ export const useCollection = (collectionName, isQuering = false) => {
     }
   }, [collectionName]);
 
-  return { data, loading, error, addDocument, uploadFile, appendVideo, deleteDocument, getBy };
+  return { data, loading, error, addDocument, uploadFile, appendVideo, deleteDocument, getBy, checkAvailableUsername };
 };

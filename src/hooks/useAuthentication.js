@@ -44,5 +44,6 @@ export const useAuthentication = () => {
     signInWithGoogle,
     signOutUser,
     createUser,
+    logInWithGoogle,
   };
 };
