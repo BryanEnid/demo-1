@@ -149,19 +149,13 @@ export const useCollection = (collectionName, isQuering = false) => {
     const userQuery = query(collectionRef, queries[queryType](property, operation, value));
 
     const querySnapshot = await getDocs(userQuery);
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0];
-      const userUid = userDoc.id;
 
-      // Step 2: Use the UID to fetch the user data
-      const userRef = doc(collectionRef, userUid);
+    if (querySnapshot.empty) return;
 
-      const userDoc2 = await getDoc(userRef); // Change getDocs to getDoc
+    const output = [];
+    querySnapshot.forEach((doc) => output.push(doc.data()));
 
-      if (userDoc2.exists()) {
-        return userDoc2.data();
-      }
-    }
+    return output;
   };
 
   const checkAvailableUsername = async (username) => {

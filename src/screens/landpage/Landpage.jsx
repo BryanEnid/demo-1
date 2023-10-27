@@ -26,7 +26,7 @@ export const Landpage = () => {
     // TODO: firebase functions or lambda functions when using aws to create a documents for the user
     signInWithGoogle().then((user) => {
       const data = {
-        username: username.toLowerCase(),
+        username: username || user.uid,
         photoURL: user.photoURL,
         name: user.displayName,
         email: user.email,
@@ -43,7 +43,7 @@ export const Landpage = () => {
     debounceRef.current?.cancel();
 
     // Declare
-    const newUsername = target.value.toLowerCase();
+    const newUsername = target.value;
     const handleDebounce = () => {
       checkAvailableUsername(newUsername).then((value) => {
         console.log(">>> inside isUsername av", value);
@@ -59,10 +59,6 @@ export const Landpage = () => {
     const debounceInstance = _.debounce(handleDebounce, 500);
     debounceRef.current = debounceInstance;
     debounceInstance();
-  };
-
-  const handleLogIn = () => {
-    logInWithGoogle();
   };
 
   return (
@@ -89,7 +85,7 @@ export const Landpage = () => {
               </div>
             )}
 
-            {isUsernameAvailable === false && username.length > 3 && (
+            {isUsernameAvailable === false && username.length > 3 && !isChecking && (
               <div className="flex flex-row justify-center items-center gap-2 text-primary">
                 <Typography variant="small">User already exists</Typography>
               </div>
@@ -105,7 +101,7 @@ export const Landpage = () => {
             <Button
               variant="outline"
               onClick={handleSignIn} // Navigate to the camera route
-              disabled={!(username.length > 3)}
+              disabled={!(username.length > 3 && isUsernameAvailable && !isChecking)}
             >
               Google – Sign In
             </Button>

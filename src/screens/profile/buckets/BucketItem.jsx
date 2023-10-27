@@ -9,15 +9,12 @@ import { Icon } from "@iconify/react";
 import React from "react";
 
 export const BucketItem = ({ name, preview, data, documentId }) => {
-  const { user } = useAuthentication();
-
+  // State
   const [open, setOpen] = React.useState(false);
 
   const handleExit = () => {
     setOpen(false);
   };
-
-  if (!user) return <></>;
 
   return (
     <>

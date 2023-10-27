@@ -1,19 +1,18 @@
 import React from "react";
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { useAuthentication } from "@/hooks/useAuthentication";
+import { Route, Routes, useNavigate } from "react-router-dom";
 
 // Components
 import { SideBar } from "@/components/SideBar";
 import { NavBar } from "@/components/NavBar";
 
 // ChadUI
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/chadcn/Tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/chadcn/Tabs";
 
 // Screens
 import { Buckets } from "./buckets";
 import { Typography } from "@/chadcn/Typography";
 import { Button } from "@/chadcn/Button";
-import { useCollection } from "@/hooks/useCollection";
+import { useProfile } from "@/hooks/useProfile";
 
 const Example1 = () => {
   return <div className="bg-red-500 w-full h-screen">example</div>;
@@ -25,26 +24,16 @@ const Example2 = () => {
 
 export const Profile = () => {
   // Hooks
-  const { user: currentUser } = useAuthentication();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const { getBy } = useCollection("users", true);
 
-  const [profileUsername, setProfileUsername] = React.useState("");
-  const [profile, setProfile] = React.useState({});
+  const { profile, isLoading } = useProfile();
 
   React.useEffect(() => {
-    const username = pathname.slice(1).split("/")[0].toLowerCase();
+    // console.log(profile, isLoading);
+    if (!isLoading && !profile?.uid) navigate("/");
+  }, [isLoading, profile]);
 
-    if (username !== profileUsername) {
-      setProfileUsername(username);
-      getBy("where", "username", "==", username).then(setProfile);
-    }
-  }, [pathname]);
-
-  React.useEffect(() => {
-    console.log(profile);
-  }, [profile]);
+  if (isLoading) return <></>;
 
   return (
     <div className="container">
