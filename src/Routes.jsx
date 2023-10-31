@@ -4,26 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // Screens
 import { Landpage } from "./screens/landpage/Landpage";
 import { Profile } from "./screens/profile";
-import { CameraScreen } from "./screens/camera/Camera.jsx";
-
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <Landpage />,
-//   },
-//   {
-//     path: "/profile/*",
-//     element: <Profile />,
-//   },
-//   {
-//     path: "/camera",
-//     element: <CameraScreen />,
-//   },
-// ]);
-
-// export const Routes = () => {
-//   return <RouterProvider router={router} />;
-// };
+import { CaptureScreen } from "./screens/capture/Capture.jsx";
 
 const router = createBrowserRouter([
   {
@@ -31,15 +12,17 @@ const router = createBrowserRouter([
     element: <Landpage />,
   },
   {
-    path: "/profile/*",
+    path: "/:id/*",
     element: <Profile />,
   },
   {
-    path: "/camera",
-    element: <CameraScreen />,
+    path: "/capture/*",
+    element: <CaptureScreen />,
   },
 ]);
 
-export const Routes = () => {
+export const Routes = (props) => {
+  // TODO: Preload all icons
+
   return <RouterProvider router={router} />;
 };

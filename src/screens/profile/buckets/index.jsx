@@ -1,29 +1,21 @@
 import React from "react";
-import { BucketItem } from "./bucketItem";
-import { useBuckets } from "@/hooks/useBuckets";
-import { useFirestoreCollection } from "@/hooks/useFirestoreCollection";
+// import { BucketItem } from "./BucketItem";
+// import { useBuckets } from "@/hooks/useBuckets";
 
 export const Buckets = () => {
-  const { buckets } = useBuckets();
-  // const { addDocument } = useFirestoreCollection("buckets");
+  // const { buckets } = useBuckets();
 
-  React.useEffect(() => {
-    // addDocument({ simple: "right?" });
-  }, []);
+  // if (!buckets?.length) return <></>;
 
-  if (!buckets) return <></>;
+  return <></>;
 
-  return (
-    <div className="grid grid-cols-5 gap-16">
-      {buckets.map((bucket) => (
-        <div key={bucket?.name}>
-          <BucketItem
-            data={bucket}
-            name={bucket.name}
-            preview={bucket.preview}
-          />
-        </div>
-      ))}
-    </div>
-  );
+  // return (
+  //   <div className="grid grid-cols-5 gap-16">
+  //     {buckets.map((bucket) => (
+  //       <div key={bucket.id}>
+  //         <BucketItem data={bucket} name={bucket.name} preview={bucket.videos[0]?.videoUrl} documentId={bucket.id} />
+  //       </div>
+  //     ))}
+  //   </div>
+  // );
 };

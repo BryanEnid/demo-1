@@ -4,14 +4,16 @@ import Webcam from "react-webcam";
 import { NavBar } from "@/components/NavBar";
 import { SideBar } from "@/components/SideBar";
 import { DebugOverlay } from "@/components/DebugOverlay";
-
 import { VR_3D, Video360 } from "@/components/MediaPlayer";
 import { useOrientation } from "@/hooks/useOrientation";
 import { useDeviceType } from "@/hooks/useDeviceType";
+import { PanelGroup, Panel, ResizeHandle } from "@/components/ResizablePanels";
+import { Icon } from "@iconify/react";
+import { Typography } from "@/chadcn/Typography";
 
 const CameraSize = 180;
 
-export const CameraScreen = () => {
+export const CaptureScreen = () => {
   // const { isPortrait } = useOrientation();
   const { isMobile } = useDeviceType();
 
@@ -20,6 +22,7 @@ export const CameraScreen = () => {
   const [isScreenRecording, setScreenRecording] = React.useState(false);
   const [deviceId, setDeviceId] = React.useState();
   const [devices, setDevices] = React.useState([]);
+  const [screens, setScreens] = React.useState(2);
 
   const video360Ref = React.useRef(null);
   const videoRef = React.useRef(null);
@@ -99,9 +102,6 @@ export const CameraScreen = () => {
       case "3D (VR)":
         return <VR_3D className="w-screen h-screen" />;
 
-      case "3D (VR)":
-        return <VR_3D className="w-screen h-screen" />;
-
       default:
         return <></>;
     }
@@ -109,31 +109,29 @@ export const CameraScreen = () => {
 
   return (
     <>
-      <div className="h-screen w-screen bg-slate-300">
+      <div className="h-screen w-screen bg-[#001027] ">
         {/* Interface */}
-        <>
-          <div className="z-10">
-            <RenderMediaPlayer videoType={videoType} />
-          </div>
 
-          {/* WebCam */}
-          <div
-            style={{ height: CameraSize, width: CameraSize }}
-            className="flex absolute bottom-10 right-20 rounded-full items-center justify-center transparent"
-          >
-            <Webcam
-              ref={cameraRef}
-              mirrored
-              videoConstraints={{
-                height: CameraSize,
-                width: CameraSize,
-                deviceId: deviceId,
-                // facingMode: cameraPosition.current,
-              }}
-              className="rounded-full z-10 opacity-0"
-            />
-          </div>
-        </>
+        <div className="w-full h-full">
+          <PanelGroup direction="horizontal">
+            {new Array(screens).fill().map((_, index) => (
+              <>
+                <Panel className="flex justify-center items-center">
+                  <button className="h-full w-full flex flex-col items-center justify-center text-white/20 text-center transition hover:text-white/90 hover:scale-105 ">
+                    <Icon
+                      icon="icon-park-outline:add"
+                      className="text-[200px]"
+                    />
+
+                    <Typography>Click here to add a capture device</Typography>
+                  </button>
+                </Panel>
+
+                {index < screens - 1 && <ResizeHandle />}
+              </>
+            ))}
+          </PanelGroup>
+        </div>
 
         {/* Overlay Actions */}
         <>
@@ -141,10 +139,17 @@ export const CameraScreen = () => {
 
           {/* <SideBar /> */}
 
-          <DebugOverlay
+          {/* <DebugOverlay
             data={[
               {
-                icon: ["ci:radio-fill", "ci:stop-circle"],
+                icon: ["ic:round-upload"],
+                title: "Screen recorder",
+                // className: ["", "text-red-500"],
+                action: (ctx) => {},
+              },
+              { icon: ["separator"] },
+              {
+                icon: ["fluent:screen-person-20-regular"],
                 title: "Screen recorder",
                 className: ["", "text-red-500"],
                 disabled: isMobile,
@@ -174,7 +179,7 @@ export const CameraScreen = () => {
 
               {
                 icon: ["material-symbols:pip-rounded"],
-                title: "Picture in Picture",
+                title: "Show camera",
                 action: (ctx) => {
                   togglePiP();
                 },
@@ -194,53 +199,53 @@ export const CameraScreen = () => {
                 selected: deviceId,
               },
 
-              {
-                icon: ["iconoir:360-view", "ci:play", "ci:check-big"],
-                title: "360 video (VR)",
-                action: (ctx) => {
-                  // Clear state
-                  ctx.siblings.forEach(
-                    (item) => item.title !== videoType && item.setIcon(0)
-                  );
-                  document.exitPictureInPicture();
-                  stopRecording();
+              // {
+              //   icon: ["iconoir:360-view", "ci:play", "ci:check-big"],
+              //   title: "360 video (VR)",
+              //   action: (ctx) => {
+              //     // Clear state
+              //     ctx.siblings.forEach(
+              //       (item) => item.title !== videoType && item.setIcon(0)
+              //     );
+              //     document.exitPictureInPicture();
+              //     stopRecording();
 
-                  setVideoType(ctx.this.title);
-                  const video = video360Ref.current?.video;
+              //     setVideoType(ctx.this.title);
+              //     const video = video360Ref.current?.video;
 
-                  // Change tab
-                  if (ctx.this.title !== videoType) ctx.setIcon(1);
+              //     // Change tab
+              //     if (ctx.this.title !== videoType) ctx.setIcon(1);
 
-                  if (ctx.this.title === videoType && video?.paused) {
-                    video.play();
-                    ctx.setIcon(2);
-                  }
-                },
-              },
+              //     if (ctx.this.title === videoType && video?.paused) {
+              //       video.play();
+              //       ctx.setIcon(2);
+              //     }
+              //   },
+              // },
 
-              {
-                icon: ["iconamoon:3d"],
-                title: "3D (VR)",
-                action: (ctx) => {
-                  // Clear state
-                  ctx.siblings.forEach((item) => item.setIcon(0));
-                  document.exitPictureInPicture();
-                  stopRecording();
+              // {
+              //   icon: ["iconamoon:3d"],
+              //   title: "3D (VR)",
+              //   action: (ctx) => {
+              //     // Clear state
+              //     ctx.siblings.forEach((item) => item.setIcon(0));
+              //     document.exitPictureInPicture();
+              //     stopRecording();
 
-                  setVideoType(ctx.this.title);
-                  const video = video360Ref.current?.video;
+              //     setVideoType(ctx.this.title);
+              //     const video = video360Ref.current?.video;
 
-                  // Change tab
-                  // if (ctx.this.title !== videoType) ctx.setIcon(1);
+              //     // Change tab
+              //     // if (ctx.this.title !== videoType) ctx.setIcon(1);
 
-                  // if (ctx.this.title === videoType && video.paused) {
-                  //   ctx.setIcon(2);
-                  //   video.play();
-                  // }
-                },
-              },
+              //     // if (ctx.this.title === videoType && video.paused) {
+              //     //   ctx.setIcon(2);
+              //     //   video.play();
+              //     // }
+              //   },
+              // },
             ]}
-          />
+          /> */}
         </>
       </div>
     </>
