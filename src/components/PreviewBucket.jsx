@@ -10,10 +10,11 @@ import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useAuthentication } from "@/hooks/useAuthentication";
+import { useProfile } from "@/hooks/useProfile";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
-  const { user } = useAuthentication();
+  const { profile, isLoading } = useProfile();
   const navigate = useNavigate();
   const { addDocument, deleteDocument } = useCollection("buckets");
 
@@ -28,6 +29,10 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
     title: "",
     description: "",
   });
+
+  React.useEffect(() => {
+    console.log(profile);
+  }, [profile]);
 
   // const setVideos = (props) => {
   //   setData((prev) => ({ ...prev, videos: [...props] }));
@@ -105,7 +110,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
     deleteDocument(documentId);
   };
 
-  if (!user) return <></>;
+  // return <></>;
+
+  if (isLoading) return <></>;
 
   if (isEditMode)
     return (
@@ -127,15 +134,15 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           <div className="text-white flex flex-row  px-8 my-6">
             <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
               {/* TODO: picture */}
-              <img src={user?.picture?.md} className="rounded-full object-cover w-20" />
+              <img src={profile?.photoURL} className="rounded-full object-cover w-20" />
               <Typography variant="small">215k</Typography>
             </div>
 
             <div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
               <div className="flex flex-row justify-between items-center">
                 <div>
-                  <Typography variant="large">{user?.name}</Typography>
-                  <Typography variant="small">{user?.role}</Typography>
+                  <Typography variant="large">{profile?.name}</Typography>
+                  {/* <Typography variant="small">{profile?.role}</Typography> */}
                 </div>
                 <div>
                   <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
@@ -244,7 +251,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
       </div>
       <div className="text-white flex flex-row h-48 px-8 my-6">
         <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-          <img src={user?.picture?.md} className="rounded-full object-cover w-20" />
+          <img src={profile.photoURL} className="rounded-full object-cover w-20" />
           <Typography variant="small">215k</Typography>
           <Button variant="secondary">Anchor</Button>
         </div>
@@ -252,8 +259,8 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
         <div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
           <div className="flex flex-row justify-between items-center">
             <div>
-              <Typography variant="large">{user.name}</Typography>
-              <Typography variant="small">{user.role}</Typography>
+              <Typography variant="large">{profile.name}</Typography>
+              {/* <Typography variant="small">{profile.role}</Typography> */}
             </div>
             <div>
               <Button onClick={() => setEditMode(true)} variant="secondary">

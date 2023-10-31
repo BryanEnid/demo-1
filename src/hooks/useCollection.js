@@ -1,196 +1,143 @@
 import React from "react";
-import { db, storage } from "@/config/firebase"; // Assuming you have Firebase Storage configured
-import {
-  collection,
-  addDoc,
-  doc, // Add this import
-  setDoc, // Add this import
-  onSnapshot,
-  updateDoc,
-  getDoc,
-  getDocs,
-  deleteDoc,
-  where,
-  query,
-} from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "@/config/firebase";
+import { collection, addDoc, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, where, query } from "firebase/firestore";
 import { useAuthentication } from "./useAuthentication";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
-export const useCollection = (collectionName, isQuering = false) => {
-  // Hooks
+const configDefaults = { keys: [], query: false };
+
+export const useCollection = (collectionName, config = configDefaults) => {
   const { user } = useAuthentication();
 
-  // State
-  const [data, setData] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  // Define query key for useQuery
+  const queryKey = ["collection", collectionName, ...config?.keys];
+  const queries = { where }; // Define Firestore query functions (e.g., where)
 
-  // Get the Firestore collection reference
-  const collectionRef = collection(db, collectionName);
+  // Use useQuery to fetch the data
+  const queryProps = useQuery({
+    queryKey,
+    queryFn: async () => {
+      // Setup necesary references
+      const collectionRef = collection(db, collectionName);
 
-  const addDocument = async (documentData, documentId = null) => {
-    try {
-      if (!user) {
-        // Handle the case where there's no authenticated user
-        console.error("User is not authenticated.");
-        return null;
+      const params = [collectionRef];
+      // Add optional parameters for specific/complex queries
+      if (config?.query) {
+        const { queryType, property, operation, value } = config.query;
+        params.push(queries[queryType](property, operation, value));
       }
 
-      // Include the user's UID in the document data
-      documentData.creatorId = user.uid;
+      const userQuery = query(...params);
+      const q = query(userQuery);
 
-      if (documentId) {
-        // If a documentId is provided, update the existing document
-        return updateDocument(documentId, documentData);
-      } else {
-        // If no documentId is provided, create a new document
-        return createDocument(documentData);
-      }
-    } catch (err) {
-      console.error("Error adding/updating document: ", err);
-    }
-  };
-
-  const createDocument = async (documentData) => {
-    const newDocRef = await addDoc(collectionRef, documentData);
-    return newDocRef.id;
-  };
-
-  const updateDocument = async (documentId, documentData) => {
-    try {
-      const docRef = doc(collectionRef, documentId);
-      await setDoc(docRef, documentData, {
-        merge: true,
+      const querySnapshot = await getDocs(q);
+      const documents = {};
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        documents[data.username] = { id: doc.id, ...data };
       });
-      return documentId;
-    } catch (err) {
-      console.error("Error updating document: ", err);
-    }
-  };
 
-  const deleteDocument = async (documentId) => {
-    try {
-      if (!user) {
-        // Handle the case where there's no authenticated user
-        console.error("User is not authenticated.");
-        return false;
-      }
+      return new Promise((res) => res(documents));
+    },
 
-      const docRef = doc(collection(db, collectionName), documentId);
-      const docSnap = await getDoc(docRef);
+    ...config,
+  });
 
-      if (docSnap.exists()) {
-        const creatorId = docSnap.data().creatorId;
+  // Use useMutation for creating, updating, and deleting documents
+  const createDocumentMutation = useMutation({
+    mutationFn: (documentData) => {
+      if (!user) throw new Error("User is not authenticated.");
 
-        if (creatorId === user.uid) {
-          await deleteDoc(docRef);
-          return true; // Document deleted successfully
-        } else {
-          console.error("User does not have permission to delete this document.");
-          return false; // User doesn't have permission to delete this document
-        }
-      } else {
-        console.error("Document does not exist.");
-        return false; // Document does not exist, deletion failed
-      }
-    } catch (err) {
-      console.error("Error deleting document: ", err);
-      return false; // Deletion failed
-    }
-  };
+      documentData.creatorId = user.uid;
+      return addDoc(collection(db, collectionName), documentData);
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
 
-  const appendVideo = async (videoData, documentId) => {
-    try {
-      if (!user) {
-        // Handle the case where there's no authenticated user
-        console.error("User is not authenticated.");
-        return null;
-      }
+  const updateDocumentMutation = useMutation({
+    mutationFn: ({ documentId, documentData }) => {
+      if (!user) throw new Error("User is not authenticated.");
 
       const docRef = doc(collection(db, collectionName), documentId);
-      const docSnap = await getDoc(docRef);
+      return setDoc(docRef, documentData, { merge: true });
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
 
-      if (docSnap.exists()) {
+  const deleteDocumentMutation = useMutation({
+    mutationFn: (documentId) => {
+      if (!user) throw new Error("User is not authenticated.");
+
+      const docRef = doc(collection(db, collectionName), documentId);
+
+      return getDoc(docRef).then((docSnap) => {
+        if (!docSnap.exists()) throw new Error("Document does not exist.");
+
+        return deleteDoc(docRef);
+      });
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
+
+  const appendVideoMutation = useMutation({
+    mutationFn: ({ documentId, videoData }) => {
+      if (!user) throw new Error("User is not authenticated.");
+      const docRef = doc(collection(db, collectionName), documentId);
+
+      return getDoc(docRef).then((docSnap) => {
+        if (!docSnap.exists()) throw new Error("Document does not exist.");
         const creatorId = docSnap.data().creatorId;
 
-        if (creatorId === user.uid) {
-          const currentData = docSnap.data();
-          const currentVideos = (currentData && currentData.videos) || [];
-          await updateDoc(docRef, { videos: [...currentVideos, videoData] });
-          return documentId;
-        } else {
-          console.error("User does not have permission to append to this document.");
-          return null; // User doesn't have permission to append to this document
-        }
-      } else {
-        console.error("Document does not exist.");
-        return null;
-      }
-    } catch (err) {
-      console.error("Error appending video to document: ", err);
-    }
-  };
+        if (creatorId !== user.uid) throw new Error("User does not have permission to append to this document.");
 
-  const uploadFile = async (file, fileType) => {
-    try {
-      const documentId = Date.now().toString();
-      const fileRef = ref(storage, `${fileType}/${documentId}`);
-      await uploadBytes(fileRef, file);
-      const downloadURL = await getDownloadURL(fileRef);
-      return downloadURL;
-    } catch (err) {
-      console.error(`Error uploading ${fileType}: `, err);
-      throw err;
-    }
-  };
+        const currentData = docSnap.data();
+        const currentVideos = (currentData && currentData.videos) || [];
+        return updateDoc(docRef, { videos: [...currentVideos, videoData] });
+      });
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
 
-  const getBy = async (queryType, property, operation, value) => {
-    const queries = { where }; // Define Firestore query functions (e.g., where)
-    const userQuery = query(collectionRef, queries[queryType](property, operation, value));
+  // const getBy = async (queryType, property, operation, value) => {
+  //   const queries = { where }; // Define Firestore query functions (e.g., where)
+  //   const userQuery = query(collectionRef, queries[queryType](property, operation, value));
 
-    const querySnapshot = await getDocs(userQuery);
+  //   const querySnapshot = await getDocs(userQuery);
 
-    if (querySnapshot.empty) return;
+  //   if (querySnapshot.empty) return;
 
-    const output = [];
-    querySnapshot.forEach((doc) => output.push(doc.data()));
+  //   const output = [];
+  //   querySnapshot.forEach((doc) => output.push({ id: doc.id, ...doc.data() }));
 
-    return output;
-  };
+  //   return output;
+  // };
 
+  // Define a function to check available username
   const checkAvailableUsername = async (username) => {
     if (!(username.length > 3)) return false;
-    const userQuery = query(collectionRef, where("username", "==", username));
+    const userQuery = query(collection(db, collectionName), where("username", "==", username));
     const querySnapshot = await getDocs(userQuery);
-    return querySnapshot.empty; // If empty, the username is available; if not, it's taken.
+    return querySnapshot.empty;
   };
 
-  // TODO: Replace realtime data with regular fetch
-  // Fetch the data and set up the snapshot listener
-  React.useEffect(() => {
-    if (!isQuering) {
-      const unsubscribe = onSnapshot(
-        collectionRef,
-        (querySnapshot) => {
-          const documents = [];
-          querySnapshot.forEach((doc) => {
-            documents.push({ id: doc.id, ...doc.data() });
-          });
-          setData(documents);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          console.error("Error getting documents: ", err);
-          setData([]);
-          setLoading(false);
-          setError(err);
-        }
-      );
-
-      return () => unsubscribe();
-    }
-  }, [collectionName]);
-
-  return { data, loading, error, addDocument, uploadFile, appendVideo, deleteDocument, getBy, checkAvailableUsername };
+  return {
+    ...queryProps,
+    createDocument: createDocumentMutation.mutate,
+    updateDocument: updateDocumentMutation.mutate,
+    deleteDocument: deleteDocumentMutation.mutate,
+    appendVideo: appendVideoMutation.mutate,
+    // getBy: checkAvailableUsername,
+  };
 };

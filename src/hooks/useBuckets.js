@@ -5,8 +5,8 @@ import { useProfile } from "./useProfile";
 
 export const useBuckets = () => {
   // Hooks
-  const { getBy } = useCollection("buckets", true);
   const { profile } = useProfile();
+  const { getBy } = useCollection("buckets", { keys: [profile.uid], query: {} });
 
   // State
   const [buckets, setBuckets] = React.useState(null);

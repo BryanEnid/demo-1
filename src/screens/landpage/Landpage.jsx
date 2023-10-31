@@ -46,7 +46,6 @@ export const Landpage = () => {
     const newUsername = target.value;
     const handleDebounce = () => {
       checkAvailableUsername(newUsername).then((value) => {
-        console.log(">>> inside isUsername av", value);
         setUsernameAvailable(value);
         setChecking(false);
       });
