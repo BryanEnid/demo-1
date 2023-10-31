@@ -29,7 +29,7 @@ export const Profile = () => {
   const { data: profile, isLoading } = useProfile();
 
   React.useEffect(() => {
-    if (!isLoading && !profile?.uid) navigate("/");
+    // if (!isLoading && !profile?.uid) navigate("/");
   }, [profile]);
 
   if (isLoading) return <></>;

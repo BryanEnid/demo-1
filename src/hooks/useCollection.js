@@ -17,24 +17,29 @@ export const useCollection = (collectionName, config = configDefaults) => {
   const queryProps = useQuery({
     queryKey,
     queryFn: async () => {
-      // Setup necesary references
+      // Setup necessary references
       const collectionRef = collection(db, collectionName);
 
       const params = [collectionRef];
       // Add optional parameters for specific/complex queries
       if (config?.query) {
+        console.log("fired");
+        // TODO: add a less opinionated API
         const { queryType, property, operation, value } = config.query;
         params.push(queries[queryType](property, operation, value));
       }
 
+      // Prepare query
       const userQuery = query(...params);
       const q = query(userQuery);
 
+      // Construct object and read data
       const querySnapshot = await getDocs(q);
       const documents = {};
       querySnapshot.forEach((doc) => {
+        console.log(">>>>", doc);
         const data = doc.data();
-        documents[data.username] = { id: doc.id, ...data };
+        documents[doc.id] = { id: doc.id, ...data };
       });
 
       return new Promise((res) => res(documents));
