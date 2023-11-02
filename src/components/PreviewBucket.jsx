@@ -15,8 +15,8 @@ import { useUser } from "@/hooks/useUser";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
-  const { data: profile } = useProfile();
-  const { data: user } = useUser();
+  const { data: profile, isUserProfile } = useProfile();
+  // const { data: user } = useUser();
   const navigate = useNavigate();
   const { createDocument, deleteDocument, updateDocument } = useCollection("buckets");
 
@@ -262,7 +262,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
               {/* <Typography variant="small">{profile.role}</Typography> */}
             </div>
             <div>
-              {profile?.uid === user?.uid && (
+              {isUserProfile && (
                 <Button onClick={() => setEditMode(true)} variant="secondary">
                   Edit Bucket
                 </Button>

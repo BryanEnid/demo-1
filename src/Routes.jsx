@@ -7,6 +7,7 @@ import { CaptureScreen } from "./screens/capture/Capture.jsx";
 
 import { Profile } from "./screens/profile";
 import { Buckets } from "./screens/profile/buckets";
+import { Experience } from "./screens/profile/experience/Experience";
 
 const router = createBrowserRouter([
   {
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
 
       { path: "audio", element: <>audio</> },
       { path: "buckets", element: <Buckets /> },
-      { path: "experience", element: <>experience</> },
+      { path: "experience", element: <Experience /> },
       { path: "recommends", element: <>recommends</> },
       { path: "quests", element: <>quests</> },
       { path: "website", element: <>website</> },
