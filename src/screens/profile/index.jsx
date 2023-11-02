@@ -22,11 +22,13 @@ export const Profile = () => {
   // Hooks
   const navigate = useNavigate();
 
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile } = useProfile();
 
   React.useEffect(() => {
-    if (!isLoading && !profile?.uid) navigate("/");
+    if (!profile?.uid) navigate("/");
   }, [profile]);
+
+  if (!profile?.uid) return <></>;
 
   return (
     <div className="container">
