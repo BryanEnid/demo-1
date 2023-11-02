@@ -11,10 +11,12 @@ import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useProfile } from "@/hooks/useProfile";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { useUser } from "@/hooks/useUser";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
   const { data: profile } = useProfile();
+  const { data: user } = useUser();
   const navigate = useNavigate();
   const { createDocument, deleteDocument, updateDocument } = useCollection("buckets");
 
@@ -260,9 +262,11 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
               {/* <Typography variant="small">{profile.role}</Typography> */}
             </div>
             <div>
-              <Button onClick={() => setEditMode(true)} variant="secondary">
-                Edit Bucket
-              </Button>
+              {profile?.uid === user?.uid && (
+                <Button onClick={() => setEditMode(true)} variant="secondary">
+                  Edit Bucket
+                </Button>
+              )}
             </div>
           </div>
 
