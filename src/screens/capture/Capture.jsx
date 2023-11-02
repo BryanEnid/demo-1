@@ -8,6 +8,8 @@ import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useLocation, useNavigate, useParams, useRoutes } from "react-router-dom";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { Modal } from "@/components/Modal";
+import { useUser } from "@/hooks/useUser";
+import { Progress } from "@/chadcn/Progress";
 
 function dataURItoBlob(dataURI) {
   const byteString = atob(dataURI.split(",")[1]);
@@ -23,11 +25,13 @@ function dataURItoBlob(dataURI) {
 export const CaptureScreen = () => {
   const navigate = useNavigate();
   const params = useQueryParams();
+  const { user } = useUser();
 
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
   const [screenDevice, setScreenDevice] = React.useState("");
   const [isUploading, setUploading] = React.useState(false);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
   const [bucketId, setBucketId] = React.useState(null);
 
   const webcamRef = React.useRef(null);
@@ -35,7 +39,7 @@ export const CaptureScreen = () => {
   const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
 
-  const { uploadFile, appendVideo, data } = useCollection("buckets");
+  const { uploadFile, appendVideo, uploadResumableFile } = useCollection("buckets");
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
@@ -52,7 +56,7 @@ export const CaptureScreen = () => {
   }, [params.bucketid]);
 
   React.useEffect(() => {
-    // TODO: Not supportedf on Safari
+    // TODO: Not supported on Safari
     // (async () => {
     //   const { state: microphonePermission } = await navigator.permissions.query({ name: "microphone" });
     //   const { state: cameraPermission } = await navigator.permissions.query({ name: "camera" });
@@ -83,24 +87,34 @@ export const CaptureScreen = () => {
     // TODO: Change to send this directly to the data base so it can save it even faster without losing any info after done.
     const recordedVideo = new Blob([e.data], { type: "video/mp4" });
     const preview = await generatePreview(recordedVideo);
-    const previewUrl = await uploadFile(preview, "image");
-    const videoUrl = await uploadFile(recordedVideo, "video");
 
-    // Select bucket to upload
+    const imageUrl = await uploadFile({ file: preview, fileType: "image" });
+    const { uploadTask, getDownloadURL } = await uploadResumableFile({ file: recordedVideo, fileType: "video" });
 
-    // if bucket id -> save it to that bucket id
-    // otherwise set it to unlisted
-    // for now dont save it
-    if (params.bucketid) {
-      appendVideo({ image: previewUrl, videoUrl: videoUrl }, params.bucketid)
-        .then((documentId) => {
-          setUploading(false);
-          navigate({ pathname: "/profile", search: createSearchParams({ focus: documentId }).toString() });
-        })
-        .finally(() => {
+    // Render progress
+    uploadTask.on("state_changed", (snapshot) => setUploadProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes)));
+
+    // When finish uploading
+    uploadTask.then(() => {
+      getDownloadURL().then((videoUrl) => {
+        // if bucket id -> save it to that bucket id
+        // otherwise set it to unlisted
+        // for now dont save it
+        if (params.bucketid) {
+          appendVideo(
+            { videoData: { image: imageUrl, videoUrl: videoUrl }, documentId: params.bucketid },
+            {
+              onSuccess: () => {
+                setUploading(false);
+                navigate({ pathname: `/${user.username}`, search: createSearchParams({ focus: params.bucketid }).toString() });
+              },
+              onError: (e) => console.log("appendVideo", e),
+            }
+          );
           if (isUploading) setUploading(false);
-        });
-    }
+        }
+      });
+    });
   };
 
   const generatePreview = async (recordedVideo) => {
@@ -241,7 +255,6 @@ export const CaptureScreen = () => {
                     <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
                     {devices.map(({ deviceId, label }) => {
-                      console.log({ deviceId, label });
                       if (!label) return "";
                       return (
                         <SelectItem key={deviceId} value={deviceId}>
@@ -296,9 +309,11 @@ export const CaptureScreen = () => {
                 <div className="flex rounded-full p-2 bg-white relative justify-center items-center text-primary">
                   <Icon width={45} icon="line-md:uploading-loop" />
 
-                  <div className="absolute bottom-[-50px] flex flex-row text-sm">
-                    <div className="font-medium flex flex-row truncate justify-center items-center gap-2 bg-white rounded-full p-2 px-3">
-                      <Icon width={20} icon="line-md:loading-twotone-loop" /> Uploading ...
+                  <div className="absolute bottom-[-60px] flex flex-row text-sm">
+                    <div className="flex flex-col gap-1 font-medium justify-center items-center bg-white rounded-full p-2 px-6">
+                      <div className="flex flex-row truncate gap-2">{uploadProgress}% Uploading ...</div>
+
+                      <Progress className="border" value={uploadProgress} />
                     </div>
                   </div>
                 </div>

@@ -3,8 +3,11 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 // Screens
 import { Landpage } from "./screens/landpage/Landpage";
-import { Profile } from "./screens/profile";
 import { CaptureScreen } from "./screens/capture/Capture.jsx";
+
+import { Profile } from "./screens/profile";
+import { Buckets } from "./screens/profile/buckets";
+import { Experience } from "./screens/profile/experience/Experience";
 
 const router = createBrowserRouter([
   {
@@ -12,8 +15,18 @@ const router = createBrowserRouter([
     element: <Landpage />,
   },
   {
-    path: "/:id/*",
+    path: "/:id",
     element: <Profile />,
+    children: [
+      { path: "", element: <Buckets /> },
+
+      { path: "audio", element: <>audio</> },
+      { path: "buckets", element: <Buckets /> },
+      { path: "experience", element: <Experience /> },
+      { path: "recommends", element: <>recommends</> },
+      { path: "quests", element: <>quests</> },
+      { path: "website", element: <>website</> },
+    ],
   },
   {
     path: "/capture/*",

@@ -14,13 +14,13 @@ import {
   query,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useAuthentication } from "./useAuthentication";
+import { useUser } from "./useUser";
 
 const queryOptions = { queryType: null, property: null, value: null };
 
 export const useCollection = (collectionName, queryOptions) => {
   // Hooks
-  const { user } = useAuthentication();
+  const { user } = useUser();
 
   // State
   const [data, setData] = React.useState([]);

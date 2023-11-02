@@ -1,15 +1,11 @@
 import React from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 
 // Components
 import { SideBar } from "@/components/SideBar";
 import { NavBar } from "@/components/NavBar";
 
-// ChadUI
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/chadcn/Tabs";
-
 // Screens
-import { Buckets } from "./buckets";
 import { Typography } from "@/chadcn/Typography";
 import { Button } from "@/chadcn/Button";
 import { useProfile } from "@/hooks/useProfile";
@@ -29,10 +25,8 @@ export const Profile = () => {
   const { data: profile, isLoading } = useProfile();
 
   React.useEffect(() => {
-    // if (!isLoading && !profile?.uid) navigate("/");
+    if (!isLoading && !profile?.uid) navigate("/");
   }, [profile]);
-
-  if (isLoading) return <></>;
 
   return (
     <div className="container">
@@ -74,15 +68,7 @@ export const Profile = () => {
       </div>
 
       {/* Screens */}
-
-      <Routes>
-        {/* Fallback */}
-        <Route path="/" element={<Buckets />} />
-
-        {/* Subscreens */}
-        <Route path="/buckets" element={<Buckets />} />
-        <Route path="/experience" element={<Example2 />} />
-      </Routes>
+      <Outlet />
     </div>
   );
 };

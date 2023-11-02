@@ -1,13 +1,16 @@
 import React from "react";
-import { db } from "@/config/firebase";
+import { db, storage } from "@/config/firebase";
 import { collection, addDoc, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, where, query } from "firebase/firestore";
-import { useAuthentication } from "./useAuthentication";
-import { useQuery, useMutation } from "@tanstack/react-query";
 
-const configDefaults = { keys: [], query: false };
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthentication } from "./useAuthentication";
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
+const configDefaults = { keys: [], query: [] };
 
 export const useCollection = (collectionName, config = configDefaults) => {
   const { user } = useAuthentication();
+  const queryClient = useQueryClient();
 
   // Define query key for useQuery
   const queryKey = ["collection", collectionName, ...config?.keys];
@@ -15,6 +18,7 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
   // Use useQuery to fetch the data
   const queryProps = useQuery({
+    gcTime: Infinity,
     queryKey,
     queryFn: async () => {
       // Setup necessary references
@@ -22,10 +26,9 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
       const params = [collectionRef];
       // Add optional parameters for specific/complex queries
-      if (config?.query) {
-        console.log("fired");
-        // TODO: add a less opinionated API
-        const { queryType, property, operation, value } = config.query;
+      if (config?.query.every(Boolean) && config?.query?.length === 4) {
+        // TODO: create a less opinionated API
+        const [queryType, property, operation, value] = config.query;
         params.push(queries[queryType](property, operation, value));
       }
 
@@ -35,26 +38,25 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
       // Construct object and read data
       const querySnapshot = await getDocs(q);
-      const documents = {};
+      const documents = [];
       querySnapshot.forEach((doc) => {
-        console.log(">>>>", doc);
         const data = doc.data();
-        documents[doc.id] = { id: doc.id, ...data };
+        documents.push({ id: doc.id, ...data });
       });
 
       return new Promise((res) => res(documents));
     },
-
     ...config,
   });
 
   // Use useMutation for creating, updating, and deleting documents
   const createDocumentMutation = useMutation({
-    mutationFn: (documentData) => {
+    mutationFn: async ({ data }) => {
       if (!user) throw new Error("User is not authenticated.");
 
-      documentData.creatorId = user.uid;
-      return addDoc(collection(db, collectionName), documentData);
+      data.creatorId = user.uid;
+      const document = await addDoc(collection(db, collectionName), data);
+      return document.id;
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -63,11 +65,11 @@ export const useCollection = (collectionName, config = configDefaults) => {
   });
 
   const updateDocumentMutation = useMutation({
-    mutationFn: ({ documentId, documentData }) => {
+    mutationFn: ({ data, documentId }) => {
       if (!user) throw new Error("User is not authenticated.");
 
       const docRef = doc(collection(db, collectionName), documentId);
-      return setDoc(docRef, documentData, { merge: true });
+      return setDoc(docRef, data, { merge: true });
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -94,20 +96,19 @@ export const useCollection = (collectionName, config = configDefaults) => {
   });
 
   const appendVideoMutation = useMutation({
-    mutationFn: ({ documentId, videoData }) => {
+    mutationFn: async ({ videoData, documentId }) => {
       if (!user) throw new Error("User is not authenticated.");
       const docRef = doc(collection(db, collectionName), documentId);
 
-      return getDoc(docRef).then((docSnap) => {
-        if (!docSnap.exists()) throw new Error("Document does not exist.");
-        const creatorId = docSnap.data().creatorId;
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) throw new Error("Document does not exist.");
 
-        if (creatorId !== user.uid) throw new Error("User does not have permission to append to this document.");
+      const creatorId = docSnap.data().creatorId;
+      if (creatorId !== user.uid) throw new Error("User does not have permission to append to this document.");
 
-        const currentData = docSnap.data();
-        const currentVideos = (currentData && currentData.videos) || [];
-        return updateDoc(docRef, { videos: [...currentVideos, videoData] });
-      });
+      const currentData = docSnap.data();
+      const currentVideos = (currentData && currentData.videos) || [];
+      return updateDoc(docRef, { videos: [...currentVideos, videoData] });
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -115,19 +116,35 @@ export const useCollection = (collectionName, config = configDefaults) => {
     },
   });
 
-  // const getBy = async (queryType, property, operation, value) => {
-  //   const queries = { where }; // Define Firestore query functions (e.g., where)
-  //   const userQuery = query(collectionRef, queries[queryType](property, operation, value));
+  const uploadResumableFileMutation = useMutation({
+    mutationFn: async ({ file, fileType }) => {
+      const documentId = Date.now().toString();
+      const fileRef = ref(storage, `${fileType}/${documentId}`);
+      const uploadTask = uploadBytesResumable(fileRef, file);
 
-  //   const querySnapshot = await getDocs(userQuery);
+      return { uploadTask, getDownloadURL: () => getDownloadURL(fileRef) };
+    },
 
-  //   if (querySnapshot.empty) return;
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
 
-  //   const output = [];
-  //   querySnapshot.forEach((doc) => output.push({ id: doc.id, ...doc.data() }));
+  const uploadFileMutation = useMutation({
+    mutationFn: async ({ file, fileType }) => {
+      const documentId = Date.now().toString();
+      const fileRef = ref(storage, `${fileType}/${documentId}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      return url;
+    },
 
-  //   return output;
-  // };
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
 
   // Define a function to check available username
   const checkAvailableUsername = async (username) => {
@@ -143,6 +160,8 @@ export const useCollection = (collectionName, config = configDefaults) => {
     updateDocument: updateDocumentMutation.mutate,
     deleteDocument: deleteDocumentMutation.mutate,
     appendVideo: appendVideoMutation.mutate,
+    uploadResumableFile: uploadResumableFileMutation.mutateAsync,
+    uploadFile: uploadFileMutation.mutateAsync,
     // getBy: checkAvailableUsername,
   };
 };

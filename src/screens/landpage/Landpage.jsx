@@ -7,11 +7,13 @@ import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 import { Icon } from "@iconify/react";
 import { Typography } from "@/chadcn/Typography";
+import { useUser } from "@/hooks/useUser";
 
 export const Landpage = () => {
   // Hooks
   const navigate = useNavigate(); // Get the navigate function
-  const { user, signInWithGoogle, signOutUser, createUser, logInWithGoogle } = useAuthentication();
+  const { signInWithGoogle, signOutUser, createUser } = useAuthentication();
+  const { user } = useUser();
   const { checkAvailableUsername } = useCollection("users");
 
   // State
@@ -22,11 +24,11 @@ export const Landpage = () => {
   // Refs
   const debounceRef = React.useRef(null);
 
-  const handleSignIn = () => {
+  const handleSignIn = (type) => {
     // TODO: firebase functions or lambda functions when using aws to create a documents for the user
     signInWithGoogle().then((user) => {
       const data = {
-        username: username || user.uid,
+        username: type === "SignIn" ? username : user.username,
         photoURL: user.photoURL,
         name: user.displayName,
         email: user.email,
@@ -64,7 +66,7 @@ export const Landpage = () => {
     <div className="flex flex-col h-screen items-center justify-center">
       <div className="flex flex-col gap-2 ">
         <Button
-          onClick={() => navigate(`/${username}`)} // Navigate to the camera route
+          onClick={() => navigate(`/${user.username}`)} // Navigate to the camera route
           disabled={!user}
         >
           GO TO PROFILE – DEMO
@@ -99,7 +101,7 @@ export const Landpage = () => {
 
             <Button
               variant="outline"
-              onClick={handleSignIn} // Navigate to the camera route
+              onClick={() => handleSignIn("SignIn")} // Navigate to the camera route
               disabled={!(username.length > 3 && isUsernameAvailable && !isChecking)}
             >
               Google – Sign In
@@ -112,7 +114,7 @@ export const Landpage = () => {
             or
             <Button
               variant="outline"
-              onClick={handleSignIn} // Navigate to the camera route
+              onClick={() => handleSignIn("LogIn")} // Navigate to the camera route
             >
               Google – Log In
             </Button>
