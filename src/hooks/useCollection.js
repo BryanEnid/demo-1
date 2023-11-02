@@ -1,9 +1,10 @@
 import React from "react";
-import { db } from "@/config/firebase";
+import { db, storage } from "@/config/firebase";
 import { collection, addDoc, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, where, query } from "firebase/firestore";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthentication } from "./useAuthentication";
+import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const configDefaults = { keys: [], query: [] };
 
@@ -50,7 +51,7 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
   // Use useMutation for creating, updating, and deleting documents
   const createDocumentMutation = useMutation({
-    mutationFn: async ({ data, documentId }) => {
+    mutationFn: async ({ data }) => {
       if (!user) throw new Error("User is not authenticated.");
 
       data.creatorId = user.uid;
@@ -64,11 +65,11 @@ export const useCollection = (collectionName, config = configDefaults) => {
   });
 
   const updateDocumentMutation = useMutation({
-    mutationFn: ({ documentId, documentData }) => {
+    mutationFn: ({ data, documentId }) => {
       if (!user) throw new Error("User is not authenticated.");
 
       const docRef = doc(collection(db, collectionName), documentId);
-      return setDoc(docRef, documentData, { merge: true });
+      return setDoc(docRef, data, { merge: true });
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -107,9 +108,23 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
       const currentData = docSnap.data();
       const currentVideos = (currentData && currentData.videos) || [];
-      const document = await updateDoc(docRef, { videos: [...currentVideos, videoData] });
-      return document.id;
+      return updateDoc(docRef, { videos: [...currentVideos, videoData] });
     },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+    },
+  });
+
+  const uploadResumableFileMutation = useMutation({
+    mutationFn: async ({ file, fileType }) => {
+      const documentId = Date.now().toString();
+      const fileRef = ref(storage, `${fileType}/${documentId}`);
+      const uploadTask = uploadBytesResumable(fileRef, file);
+
+      return { uploadTask, getDownloadURL: () => getDownloadURL(fileRef) };
+    },
+
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
@@ -121,8 +136,8 @@ export const useCollection = (collectionName, config = configDefaults) => {
       const documentId = Date.now().toString();
       const fileRef = ref(storage, `${fileType}/${documentId}`);
       await uploadBytes(fileRef, file);
-      const downloadURL = await getDownloadURL(fileRef);
-      return downloadURL;
+      const url = await getDownloadURL(fileRef);
+      return url;
     },
 
     onSuccess: () => {
@@ -145,7 +160,8 @@ export const useCollection = (collectionName, config = configDefaults) => {
     updateDocument: updateDocumentMutation.mutate,
     deleteDocument: deleteDocumentMutation.mutate,
     appendVideo: appendVideoMutation.mutate,
-    uploadFile: uploadFileMutation.mutate,
+    uploadResumableFile: uploadResumableFileMutation.mutateAsync,
+    uploadFile: uploadFileMutation.mutateAsync,
     // getBy: checkAvailableUsername,
   };
 };

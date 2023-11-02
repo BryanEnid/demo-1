@@ -10,5 +10,6 @@ export const useProfile = () => {
     keys: [pathname.slice(1).split("/")[0]],
     query: ["where", "username", "==", pathname.slice(1).split("/")[0]],
     select: (item) => item[0],
+    enabled: !!pathname.slice(1).split("/")[0],
   });
 };

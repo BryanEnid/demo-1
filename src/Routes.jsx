@@ -16,6 +16,7 @@ const router = createBrowserRouter([
   {
     path: "/:id",
     element: <Profile />,
+
     children: [
       { path: "", element: <>homepage</> },
       { path: "buckets", element: <Buckets /> },

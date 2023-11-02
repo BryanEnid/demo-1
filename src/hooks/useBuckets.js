@@ -13,6 +13,7 @@ export const useBuckets = () => {
   } = useCollection("buckets", {
     keys: [profile?.uid],
     query: ["where", "creatorId", "==", profile?.uid],
+    enabled: !!profile,
   });
 
   return { buckets, createDocument, deleteDocument };

@@ -10,12 +10,13 @@ import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useProfile } from "@/hooks/useProfile";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile } = useProfile();
   const navigate = useNavigate();
-  const { createDocument, deleteDocument } = useCollection("buckets");
+  const { createDocument, deleteDocument, updateDocument } = useCollection("buckets");
 
   // State
   const [isEditMode, setEditMode] = React.useState(editMode ?? false);
@@ -88,23 +89,21 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
   };
 
   const handleCreateBucket = () => {
-    createDocument(
+    const crudFunction = documentId ? updateDocument : createDocument;
+    return crudFunction(
       { data, documentId },
       {
         onSuccess: (dbid) => {
           if (editMode && dbid) return navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
         },
+        onSettled: () => setEditMode(false),
       }
     );
-
-    setEditMode(false);
   };
 
   const handleDeleteBucket = () => {
     deleteDocument(documentId);
   };
-
-  if (isLoading) return <></>;
 
   if (isEditMode)
     return (
@@ -181,7 +180,10 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
             <ReactSortable
               className="w-full grid grid-cols-4 gap-5"
               list={data.videos}
-              setList={(state) => setData((prev) => ({ ...prev, videos: state }))}
+              setList={(state) => {
+                console.log(state);
+                setData((prev) => ({ ...prev, videos: state }));
+              }}
               animation={500}
               delayOnTouchStart={true}
               delay={0}
@@ -275,11 +277,21 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
 
       <div className="flex justify-center items-center my-6 mt-10">
         <div className="grid grid-cols-4 gap-5">
-          {data.videos.map(({ image }, index) => (
-            <div key={image}>
-              <img src={image} className="rounded-lg object-cover w-40 h-28" />
-            </div>
-          ))}
+          {data.videos.map(({ image }, index) => {
+            if (image)
+              return (
+                <div key={image}>
+                  {/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
+                  <LazyLoadImage
+                    className="rounded-lg object-cover w-40 h-28"
+                    // alt={image.alt}
+                    // height={image.height}
+                    src={image} // use normal <img> attributes as props
+                    // width={image.width}
+                  />
+                </div>
+              );
+          })}
         </div>
       </div>
     </PageModal>

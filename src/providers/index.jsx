@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 export const GlobalProvider = ({ children }) => {
   return (
     <ReactQueryProvider>
-      <React.Suspense fallback={<>Loading</>}>{children}</React.Suspense>
+      {children}
       <ReactQueryDevtools />
     </ReactQueryProvider>
   );

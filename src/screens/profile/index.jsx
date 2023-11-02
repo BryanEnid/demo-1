@@ -28,8 +28,6 @@ export const Profile = () => {
     if (!isLoading && !profile?.uid) navigate("/");
   }, [profile]);
 
-  if (isLoading) return <></>;
-
   return (
     <div className="container">
       {/* Overlay */}
