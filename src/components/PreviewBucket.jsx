@@ -9,14 +9,13 @@ import { Input } from "@/chadcn/Input";
 import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
-import { useAuthentication } from "@/hooks/useAuthentication";
 import { useProfile } from "@/hooks/useProfile";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
-  const { profile, isLoading } = useProfile();
+  const { data: profile, isLoading } = useProfile();
   const navigate = useNavigate();
-  const { addDocument, deleteDocument } = useCollection("buckets");
+  const { createDocument, deleteDocument } = useCollection("buckets");
 
   // State
   const [isEditMode, setEditMode] = React.useState(editMode ?? false);
@@ -29,14 +28,6 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
     title: "",
     description: "",
   });
-
-  React.useEffect(() => {
-    console.log(profile);
-  }, [profile]);
-
-  // const setVideos = (props) => {
-  //   setData((prev) => ({ ...prev, videos: [...props] }));
-  // };
 
   // Refs
   const videoRef = React.useRef();
@@ -97,11 +88,14 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
   };
 
   const handleCreateBucket = () => {
-    addDocument(data, documentId).then((dbid) => {
-      if (editMode && dbid) return navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
-
-      console.log("something went wrong");
-    });
+    createDocument(
+      { data, documentId },
+      {
+        onSuccess: (dbid) => {
+          if (editMode && dbid) return navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
+        },
+      }
+    );
 
     setEditMode(false);
   };
@@ -109,8 +103,6 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
   const handleDeleteBucket = () => {
     deleteDocument(documentId);
   };
-
-  // return <></>;
 
   if (isLoading) return <></>;
 
@@ -212,7 +204,10 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                 }
 
                 return (
-                  <div className="undraggable rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20">
+                  <div
+                    key={index + 1}
+                    className="undraggable rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20"
+                  >
                     <Typography>{index + 1}</Typography>
                   </div>
                 );

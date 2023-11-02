@@ -24,12 +24,12 @@ import { Textarea } from "@/chadcn/Textarea";
 import { PageModal } from "./PageModal";
 import { PreviewBucket } from "./PreviewBucket";
 import { MediaSelector } from "./MediaSelector";
-import { useAuthentication } from "@/hooks/useAuthentication";
+import { useUser } from "@/hooks/useUser";
 
 export const NavBar = () => {
   // Hooks
   const navigate = useNavigate();
-  const { user } = useAuthentication();
+  const { user } = useUser();
 
   // State
   const [show, setShow] = React.useState(false);
@@ -40,7 +40,7 @@ export const NavBar = () => {
   const inputRef = React.useRef();
 
   const handleCreateBucket = () => {
-    navigate("/profile/buckets");
+    navigate(`/${user.username}/buckets`);
     setShow(true);
   };
 

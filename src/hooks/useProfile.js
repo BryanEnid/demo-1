@@ -8,7 +8,7 @@ export const useProfile = () => {
 
   return useCollection("users", {
     keys: [pathname.slice(1).split("/")[0]],
-    query: { queryType: "where", property: "username", operation: "==", value: pathname.slice(1).split("/")[0] },
-    select: console.log,
+    query: ["where", "username", "==", pathname.slice(1).split("/")[0]],
+    select: (item) => item[0],
   });
 };

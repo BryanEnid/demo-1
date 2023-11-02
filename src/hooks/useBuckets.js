@@ -5,19 +5,15 @@ import { useProfile } from "./useProfile";
 
 export const useBuckets = () => {
   // Hooks
-  const { profile } = useProfile();
-  const { data } = useCollection("buckets", {
-    keys: [profile.uid],
-    query: { queryType: "where", property: "username", operation: "==", value: profile.username },
+  const { data: profile } = useProfile();
+  const {
+    data: buckets,
+    createDocument,
+    deleteDocument,
+  } = useCollection("buckets", {
+    keys: [profile?.uid],
+    query: ["where", "creatorId", "==", profile?.uid],
   });
 
-  // State
-  const [buckets, setBuckets] = React.useState(null);
-
-  React.useEffect(() => {
-    console.log(data);
-    // if (profile.uid) getBy("where", "creatorId", "==", profile.uid).then(setBuckets);
-  }, [data]);
-
-  return { buckets };
+  return { buckets, createDocument, deleteDocument };
 };

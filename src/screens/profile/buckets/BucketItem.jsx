@@ -1,12 +1,6 @@
-import { Button } from "@/chadcn/Button";
-import { Typography } from "@/chadcn/Typography";
-import { PageModal } from "@/components/PageModal";
-import { PreviewBucket } from "@/components/PreviewBucket";
-import { useAuthentication } from "@/hooks/useAuthentication";
-
-import { usePexelsVideoSearch } from "@/hooks/usePexelsVideoSearch";
-import { Icon } from "@iconify/react";
 import React from "react";
+import { Typography } from "@/chadcn/Typography";
+import { PreviewBucket } from "@/components/PreviewBucket";
 
 export const BucketItem = ({ name, preview, data, documentId }) => {
   // State

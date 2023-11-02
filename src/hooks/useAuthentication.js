@@ -6,7 +6,7 @@ import { collection, doc, setDoc } from "firebase/firestore";
 export const useAuthentication = () => {
   // Initialize Firebase Auth
   const auth = getAuth();
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = React.useState(auth.currentUser);
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -21,13 +21,7 @@ export const useAuthentication = () => {
 
   // Function to sign in with Google
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    const { user } = await signInWithPopup(auth, provider);
-    setUser(user);
-    return user;
-  };
-
-  const logInWithGoogle = async () => {
+    // Get from provider
     const provider = new GoogleAuthProvider();
     const { user } = await signInWithPopup(auth, provider);
     setUser(user);
@@ -44,6 +38,5 @@ export const useAuthentication = () => {
     signInWithGoogle,
     signOutUser,
     createUser,
-    logInWithGoogle,
   };
 };

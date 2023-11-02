@@ -8,6 +8,7 @@ import { useCollection } from "@/hooks/useCollection";
 import { createSearchParams, useLocation, useNavigate, useParams, useRoutes } from "react-router-dom";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { Modal } from "@/components/Modal";
+import { useUser } from "@/hooks/useUser";
 
 function dataURItoBlob(dataURI) {
   const byteString = atob(dataURI.split(",")[1]);
@@ -23,6 +24,7 @@ function dataURItoBlob(dataURI) {
 export const CaptureScreen = () => {
   const navigate = useNavigate();
   const params = useQueryParams();
+  const { user } = useUser();
 
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
@@ -52,7 +54,7 @@ export const CaptureScreen = () => {
   }, [params.bucketid]);
 
   React.useEffect(() => {
-    // TODO: Not supportedf on Safari
+    // TODO: Not supported on Safari
     // (async () => {
     //   const { state: microphonePermission } = await navigator.permissions.query({ name: "microphone" });
     //   const { state: cameraPermission } = await navigator.permissions.query({ name: "camera" });
@@ -83,8 +85,10 @@ export const CaptureScreen = () => {
     // TODO: Change to send this directly to the data base so it can save it even faster without losing any info after done.
     const recordedVideo = new Blob([e.data], { type: "video/mp4" });
     const preview = await generatePreview(recordedVideo);
-    const previewUrl = await uploadFile(preview, "image");
-    const videoUrl = await uploadFile(recordedVideo, "video");
+
+    const videoFile = { previewUrl: "", videoUrl: "" };
+    uploadFile({ file: preview, fileType: "image" }, { onSuccess: (url) => (videoFile.previewUrl = url) });
+    uploadFile({ file: recordedVideo, fileType: "video" }, { onSuccess: (url) => (videoFile.videoUrl = url) });
 
     // Select bucket to upload
 
@@ -92,14 +96,17 @@ export const CaptureScreen = () => {
     // otherwise set it to unlisted
     // for now dont save it
     if (params.bucketid) {
-      appendVideo({ image: previewUrl, videoUrl: videoUrl }, params.bucketid)
-        .then((documentId) => {
-          setUploading(false);
-          navigate({ pathname: "/profile", search: createSearchParams({ focus: documentId }).toString() });
-        })
-        .finally(() => {
-          if (isUploading) setUploading(false);
-        });
+      appendVideo(
+        { videoData: { image: videoFile.previewUrl, videoUrl: videoFile.videoUrl }, documentId: params.bucketid },
+        {
+          onSuccess: (documentId) => {
+            console.log(documentId);
+            setUploading(false);
+            navigate({ pathname: `/${user.username}`, search: createSearchParams({ focus: documentId }).toString() });
+          },
+        }
+      );
+      if (isUploading) setUploading(false);
     }
   };
 
@@ -241,7 +248,6 @@ export const CaptureScreen = () => {
                     <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
                     {devices.map(({ deviceId, label }) => {
-                      console.log({ deviceId, label });
                       if (!label) return "";
                       return (
                         <SelectItem key={deviceId} value={deviceId}>
