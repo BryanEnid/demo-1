@@ -105,7 +105,6 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
       const creatorId = docSnap.data().creatorId;
       if (creatorId !== user.uid) throw new Error("User does not have permission to append to this document.");
-
       const currentData = docSnap.data();
       const currentVideos = (currentData && currentData.videos) || [];
       return updateDoc(docRef, { videos: [...currentVideos, videoData] });
