@@ -22,10 +22,10 @@ export const Profile = () => {
   // Hooks
   const navigate = useNavigate();
 
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading } = useProfile();
 
   React.useEffect(() => {
-    if (!profile?.uid) navigate("/");
+    if (!profile?.uid && !isLoading) navigate("/");
   }, [profile]);
 
   if (!profile?.uid) return <></>;
