@@ -112,7 +112,8 @@ export const useCollection = (collectionName, config = configDefaults) => {
     },
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.setQueryData(queryKey, () => {});
     },
   });
 
@@ -124,11 +125,6 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
       return { uploadTask, getDownloadURL: () => getDownloadURL(fileRef) };
     },
-
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
-    },
   });
 
   const uploadFileMutation = useMutation({
@@ -138,11 +134,6 @@ export const useCollection = (collectionName, config = configDefaults) => {
       await uploadBytes(fileRef, file);
       const url = await getDownloadURL(fileRef);
       return url;
-    },
-
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
     },
   });
 
