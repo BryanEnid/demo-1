@@ -113,7 +113,7 @@ export const useCollection = (collectionName, config = configDefaults) => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey });
-      queryClient.setQueryData(queryKey, () => {});
+      queryClient.setQueryData(queryKey, (oldData) => {});
     },
   });
 
