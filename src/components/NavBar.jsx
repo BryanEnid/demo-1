@@ -74,7 +74,7 @@ export const NavBar = () => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/capture")}>
                 <Icon icon="pepicons-pop:camera" className="pr-1 text-3xl" />
                 Start recording
               </DropdownMenuItem>

@@ -10,6 +10,8 @@
     "preview": "vite preview --host"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.7",
+    "@ffmpeg/util": "^0.12.1",
     "@headlessui/react": "^1.7.17",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -42,6 +44,7 @@
     "react-resizable-panels": "^0.0.55",
     "react-router-dom": "^6.15.0",
     "react-sortablejs": "^6.1.4",
+    "react-video-editor": "^1.0.2",
     "react-webcam": "^7.1.1",
     "recharts": "^2.8.0",
     "sortablejs": "^1.15.0",

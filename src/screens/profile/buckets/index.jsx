@@ -5,6 +5,8 @@ import { useBuckets } from "@/hooks/useBuckets";
 export const Buckets = () => {
   const { buckets } = useBuckets();
 
+  console.log("buckets", buckets);
+
   if (!buckets?.length) return <></>;
 
   return (

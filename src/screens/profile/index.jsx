@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 
 // Components
 import { SideBar } from "@/components/SideBar";
@@ -9,6 +9,8 @@ import { NavBar } from "@/components/NavBar";
 import { Typography } from "@/chadcn/Typography";
 import { Button } from "@/chadcn/Button";
 import { useProfile } from "@/hooks/useProfile";
+import { useQueryParams } from "@/hooks/useQueryParams";
+import { useUser } from "@/hooks/useUser";
 
 const Example1 = () => {
   return <div className="bg-red-500 w-full h-screen">example</div>;
@@ -21,12 +23,18 @@ const Example2 = () => {
 export const Profile = () => {
   // Hooks
   const navigate = useNavigate();
-
+  const { pathname } = useLocation();
   const { data: profile, isLoading } = useProfile();
+  const { user } = useUser();
+
+  const username = pathname.slice(1).split("/")[0];
 
   React.useEffect(() => {
-    if (!profile?.uid && !isLoading) navigate("/");
-  }, [profile]);
+    (() => {
+      if (username === "profile") return navigate(`/${user.uid}`);
+      if (!profile?.uid && !isLoading) return navigate("/");
+    })();
+  }, [profile, isLoading]);
 
   if (!profile?.uid) return <></>;
 

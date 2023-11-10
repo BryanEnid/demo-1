@@ -2,7 +2,7 @@ import React from "react";
 import { Typography } from "@/chadcn/Typography";
 import { PreviewBucket } from "@/components/PreviewBucket";
 
-export const BucketItem = ({ name, preview, data, documentId }) => {
+export const BucketItem = ({ name, preview, data, documentId, onClick }) => {
   // State
   const [open, setOpen] = React.useState(false);
 
@@ -13,14 +13,14 @@ export const BucketItem = ({ name, preview, data, documentId }) => {
   return (
     <>
       <div className="flex flex-col items-center">
-        <button onClick={() => setOpen(true)} className="">
+        <button onClick={onClick ? () => onClick(data) : () => setOpen(true)} className="w-[200px]">
           <video autoPlay muted loop src={preview} className=" object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full" />
         </button>
 
         <Typography>{name}</Typography>
       </div>
 
-      <PreviewBucket show={open} onClose={handleExit} data={data} documentId={documentId} />
+      {!onClick && <PreviewBucket show={open} onClose={handleExit} data={data} documentId={documentId} />}
     </>
   );
 };

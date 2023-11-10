@@ -8,11 +8,20 @@ import { CaptureScreen } from "./screens/capture/Capture.jsx";
 import { Profile } from "./screens/profile";
 import { Buckets } from "./screens/profile/buckets";
 import { Experience } from "./screens/profile/experience/Experience";
+import { Preview } from "./screens/video_preview/Preview";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Landpage />,
+  },
+  {
+    path: "/capture/*",
+    element: <CaptureScreen />,
+  },
+  {
+    path: "/capture/preview",
+    element: <Preview />,
   },
   {
     path: "/:id",
@@ -27,10 +36,6 @@ const router = createBrowserRouter([
       { path: "quests", element: <>quests</> },
       { path: "website", element: <>website</> },
     ],
-  },
-  {
-    path: "/capture/*",
-    element: <CaptureScreen />,
   },
 ]);
 

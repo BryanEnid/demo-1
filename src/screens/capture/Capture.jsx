@@ -10,36 +10,25 @@ import { useQueryParams } from "@/hooks/useQueryParams";
 import { Modal } from "@/components/Modal";
 import { useUser } from "@/hooks/useUser";
 import { Progress } from "@/chadcn/Progress";
-
-function dataURItoBlob(dataURI) {
-  const byteString = atob(dataURI.split(",")[1]);
-  const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  return new Blob([ab], { type: mimeString });
-}
+import { useIndexedDBVideos } from "@/hooks/useIndexedDBVideos";
 
 export const CaptureScreen = () => {
+  // Hooks
   const navigate = useNavigate();
   const params = useQueryParams();
   const { user } = useUser();
+  const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos();
 
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
   const [screenDevice, setScreenDevice] = React.useState("");
   const [isUploading, setUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState(0);
-  const [bucketId, setBucketId] = React.useState(null);
 
   const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
   const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
-
-  const { uploadFile, appendVideo, uploadResumableFile } = useCollection("buckets");
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
@@ -50,10 +39,6 @@ export const CaptureScreen = () => {
     },
     [setDevices]
   );
-
-  React.useEffect(() => {
-    params?.bucketid && setBucketId(params.bucketid);
-  }, [params.bucketid]);
 
   React.useEffect(() => {
     // TODO: Not supported on Safari
@@ -84,72 +69,14 @@ export const CaptureScreen = () => {
   const handleRecordedVideo = async (e) => {
     setUploading(true);
 
-    // TODO: Change to send this directly to the data base so it can save it even faster without losing any info after done.
+    // TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
     const recordedVideo = new Blob([e.data], { type: "video/mp4" });
-    const preview = await generatePreview(recordedVideo);
 
-    const imageUrl = await uploadFile({ file: preview, fileType: "image" });
-    const { uploadTask, getDownloadURL } = await uploadResumableFile({ file: recordedVideo, fileType: "video" });
+    const request = await saveVideoIDB(recordedVideo);
 
-    // Render progress
-    uploadTask.on("state_changed", (snapshot) => setUploadProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes)));
-
-    // When finish uploading
-    uploadTask.then(() => {
-      getDownloadURL().then((videoUrl) => {
-        // if bucket id -> save it to that bucket id
-        // otherwise set it to unlisted
-        // for now dont save it
-        if (params.bucketid) {
-          appendVideo(
-            { videoData: { image: imageUrl, videoUrl: videoUrl }, documentId: params.bucketid },
-            {
-              onSuccess: () => {
-                setUploading(false);
-                navigate({ pathname: `/${user.username}`, search: createSearchParams({ focus: params.bucketid }).toString() });
-              },
-              onError: (e) => console.log("appendVideo", e),
-            }
-          );
-          if (isUploading) setUploading(false);
-        }
-      });
-    });
-  };
-
-  const generatePreview = async (recordedVideo) => {
-    try {
-      const videoUrl = URL.createObjectURL(recordedVideo);
-
-      const videoElement = document.createElement("video");
-      videoElement.src = videoUrl;
-      document.body.appendChild(videoElement);
-
-      await videoElement.play();
-
-      const canvas = document.createElement("canvas");
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      const ctx = canvas.getContext("2d");
-
-      // Draw the video frame onto the canvas
-      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-      // Convert the canvas content to a data URL (screenshot)
-      const screenshot = canvas.toDataURL("image/png");
-
-      // Clean up elements
-      document.body.removeChild(videoElement);
-      URL.revokeObjectURL(videoUrl);
-
-      // Convert the screenshot to a Blob
-      const screenshotBlob = dataURItoBlob(screenshot);
-
-      return screenshotBlob;
-    } catch (err) {
-      console.error("Error generating preview:", err);
-      throw err;
-    }
+    request.onsuccess = ({ target }) => {
+      navigate({ pathname: `preview`, search: createSearchParams({ id: target.result }).toString() });
+    };
   };
 
   const startRecording = async () => {
