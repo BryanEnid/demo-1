@@ -213,20 +213,21 @@ export const CaptureScreen = () => {
                 <Icon icon="ph:microphone-bold" />
               </button>
 
-              <button className="rounded-full p-3 bg-blue-600">
+              {/* <button className="rounded-full p-3 bg-blue-600">
                 <Icon icon="majesticons:video" />
-              </button>
+              </button> */}
 
-              <button className="rounded-full p-3 bg-white text-black">
+              {/* <button className="rounded-full p-3 bg-white text-black">
                 <Icon icon="iconamoon:restart" />
-              </button>
+              </button> */}
 
               {/* <button className="rounded-full p-3">Pause</button> */}
 
               {!isUploading ? (
-                <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center">
+                <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center items-center">
                   {/* <Icon icon="fluent:record-stop-48-filled" /> */}
-                  <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} />
+                  <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} className="z-10" />
+                  {isScreenRecording && <div className="animate-ping absolute inline-flex h-5/6 w-5/6 rounded-full bg-red-400 opacity-75 z-0" />}
                   {/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">
                 <button className="bg-slate-600 rounded-full p-2 px-3">3s</button>
                 <button className="bg-slate-600 rounded-full p-2 px-3">10s</button>
