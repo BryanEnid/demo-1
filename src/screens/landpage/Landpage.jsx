@@ -28,7 +28,7 @@ export const Landpage = () => {
     // TODO: firebase functions or lambda functions when using aws to create a documents for the user
     signInWithGoogle().then((user) => {
       const data = {
-        username: type === "SignIn" ? username : user.username,
+        username: user.uid,
         photoURL: user.photoURL,
         name: user.displayName,
         email: user.email,
