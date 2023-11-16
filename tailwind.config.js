@@ -1,5 +1,7 @@
 const { fontFamily } = require("tailwindcss/defaultTheme");
 
+console.log(fontFamily);
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -55,7 +57,9 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        satoshi: ["Satoshi", ...fontFamily.sans],
       },
+
       keyframes: {
         "accordion-down": {
           from: { height: 0 },
