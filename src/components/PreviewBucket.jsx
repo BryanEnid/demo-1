@@ -141,6 +141,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                   <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
                     {isEditMode ? (editMode ? "Create bucket" : "Done editing") : "Edit Bucket"}
                   </Button>
+                  <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
+                    {isEditMode ? (editMode ? "Create bucket" : "Done editing") : "Edit Bucket"}
+                  </Button>
                 </div>
               </div>
 
@@ -261,10 +264,15 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
               <Typography variant="large">{profile.name}</Typography>
               {/* <Typography variant="small">{profile.role}</Typography> */}
             </div>
-            <div>
+            <div className="flex gap-3">
               {isUserProfile && (
-                <Button onClick={() => setEditMode(true)} variant="secondary">
-                  Edit Bucket
+                <Button variant="secondary" onClick={() => setEditMode(true)}>
+                  Edit
+                </Button>
+              )}
+              {isUserProfile && (
+                <Button variant="secondary" onClick={() => setEditMode(true)}>
+                  Add
                 </Button>
               )}
             </div>

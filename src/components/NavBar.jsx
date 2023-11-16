@@ -60,10 +60,7 @@ export const NavBar = () => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button>
-                <Icon icon="majesticons:video-line" className="pr-1 text-3xl" />
-                Create
-              </Button>
+              <Button iconBegin={<Icon icon="majesticons:video-line" className="pr-1 text-3xl" />}>Create</Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-56">
@@ -76,7 +73,7 @@ export const NavBar = () => {
 
               <DropdownMenuItem onClick={() => navigate("/capture")}>
                 <Icon icon="pepicons-pop:camera" className="pr-1 text-3xl" />
-                Start recording
+                Capture
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Icon icon="fluent:live-24-filled" className="pr-1 text-3xl" />
@@ -100,10 +97,6 @@ export const NavBar = () => {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuItem>
-                <Icon icon="fluent:share-screen-person-16-regular" className="pr-1 text-3xl" />
-                Record your screen
-              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
 

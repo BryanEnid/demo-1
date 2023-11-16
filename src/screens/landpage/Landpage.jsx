@@ -74,7 +74,7 @@ export const Landpage = () => {
 
         <div className="h-60" />
 
-        {!user && (
+        {/* {!user && (
           <div className=" flex flex-col gap-2 mt-6 rounded-sm bg-slate-300 p-4">
             <div>What's the username you want ot use?</div>
 
@@ -107,13 +107,14 @@ export const Landpage = () => {
               Google – Sign In
             </Button>
           </div>
-        )}
+        )} */}
 
         {!user && (
-          <div className="flex flex-col gap-2 mt-6 rounded-sm  p-4 text-center">
-            or
+          <div className="flex flex-col gap-2 mt-6 rounded-sm p-4 text-center">
+            {/* or */}
             <Button
               variant="outline"
+              className="text-primary"
               onClick={() => handleSignIn("LogIn")} // Navigate to the camera route
             >
               Google – Log In
@@ -124,6 +125,7 @@ export const Landpage = () => {
         {user && (
           <Button
             variant="outline"
+            className="text-primary"
             onClick={signOutUser} // Navigate to the camera route
           >
             Sign out

@@ -13,5 +13,5 @@ export const useUser = () => {
     enabled: !!user?.uid,
   });
 
-  return { user: user ? { ...user, ...data } : null };
+  return { user: user && data ? { ...user, ...data } : null };
 };
