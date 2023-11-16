@@ -14,7 +14,15 @@ export const BucketItem = ({ name, preview, data, documentId, onClick }) => {
     <>
       <div className="flex flex-col items-center">
         <button onClick={onClick ? () => onClick(data) : () => setOpen(true)} className="w-[200px]">
-          <video autoPlay muted loop src={preview} className=" object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full" />
+          <video
+            type="video/mp4"
+            autoPlay
+            muted
+            loop
+            src={preview}
+            // crossOrigin="use-credentials"
+            className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full"
+          />
         </button>
 
         <Typography>{name}</Typography>

@@ -11,6 +11,7 @@ import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useProfile } from "@/hooks/useProfile";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/chadcn/DropDown";
 import { useUser } from "@/hooks/useUser";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
@@ -268,9 +269,22 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                 </Button>
               )}
               {isUserProfile && (
-                <Button variant="secondary" onClick={() => setEditMode(true)}>
-                  Add
-                </Button>
+                // <Button iconBegin={} variant="secondary" onClick={() => setEditMode(true)}>
+                //   Quick Add
+                // </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Icon icon="tabler:dots" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Profile</DropdownMenuItem>
+                    <DropdownMenuItem>Billing</DropdownMenuItem>
+                    <DropdownMenuItem>Team</DropdownMenuItem>
+                    <DropdownMenuItem>Subscription</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>

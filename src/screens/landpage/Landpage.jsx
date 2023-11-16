@@ -109,18 +109,31 @@ export const Landpage = () => {
           </div>
         )} */}
 
-        {!user && (
-          <div className="flex flex-col gap-2 mt-6 rounded-sm p-4 text-center">
-            {/* or */}
-            <Button
-              variant="outline"
-              className="text-primary"
-              onClick={() => handleSignIn("LogIn")} // Navigate to the camera route
-            >
-              Google – Log In
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-col gap-1">
+          {!user && (
+            <div className="flex flex-col gap-2 rounded-sm text-center ">
+              {/* or */}
+              <Button
+                onClick={() => handleSignIn("LogIn")} // Navigate to the camera route
+                className="px-20"
+              >
+                Log In – Google
+              </Button>
+            </div>
+          )}
+          {!user && (
+            <div className="flex flex-col gap-2 rounded-sm text-center">
+              {/* or */}
+              <Button
+                variant="link"
+                className="text-primary"
+                onClick={() => handleSignIn("SignIn")} // Navigate to the camera route
+              >
+                or Sign In – Google
+              </Button>
+            </div>
+          )}
+        </div>
 
         {user && (
           <Button
