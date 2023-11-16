@@ -141,9 +141,6 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                   <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
                     {isEditMode ? (editMode ? "Create bucket" : "Done editing") : "Edit Bucket"}
                   </Button>
-                  <Button variant="secondary" onClick={handleCreateBucket} disabled={![data.description.length, data.title.length].every(Boolean)}>
-                    {isEditMode ? (editMode ? "Create bucket" : "Done editing") : "Edit Bucket"}
-                  </Button>
                 </div>
               </div>
 
@@ -224,8 +221,8 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           </div>
 
           <div className="text-center text-white/50 px-8 my-8">
-            <Button onClick={handleDeleteBucket} className="w-full" variant="destructive">
-              Delete Bucket
+            <Button onClick={handleCreateBucket} className="w-full">
+              Save
             </Button>
           </div>
         </div>
