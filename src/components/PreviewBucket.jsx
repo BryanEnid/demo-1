@@ -26,6 +26,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
   const [currentVideo, setCurrentVideo] = React.useState(0);
   const [files, setFiles] = React.useState(null);
   const [state, setState] = React.useState([]);
+  const [isDragOver, setIsDragOver] = React.useState(false);
   const [data, setData] = React.useState({
     videos: [],
     name: "",
@@ -34,6 +35,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
   });
 
   // Refs
+  const dropZoneRef = React.useRef();
   const videoRef = React.useRef();
 
   React.useEffect(() => {
@@ -91,13 +93,17 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
     }
   };
 
+  const handleToCaptureScreen = (dbid) => {
+    return navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
+  };
+
   const handleCreateBucket = () => {
     const crudFunction = documentId ? updateDocument : createDocument;
     return crudFunction(
       { data, documentId },
       {
         onSuccess: (dbid) => {
-          if (editMode && dbid) return navigate({ pathname: "/capture", search: createSearchParams({ bucketid: dbid }).toString() });
+          if (editMode && dbid) return handleToCaptureScreen(dbid);
         },
         onSettled: () => setEditMode(false),
       }
@@ -106,6 +112,29 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
 
   const handleDeleteBucket = () => {
     deleteDocument(documentId);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (!e.dataTransfer.files.length > 0) return;
+
+    const files = e.dataTransfer.files;
+    const videoFile = files[0];
+
+    console.log(files);
+
+    // Check if the dropped file is a video
+    if (!videoFile.type.startsWith("video/")) return alert("Please drop a valid video file.");
   };
 
   if (isEditMode)
@@ -125,7 +154,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
               />
             </div>
           </div>
-          <div className="text-white flex flex-row  px-8 my-6">
+          <div className="flex flex-row  px-8 my-6">
             <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
               {/* TODO: picture */}
               <img src={profile?.photoURL} className="rounded-full object-cover w-20" />
@@ -174,12 +203,19 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           {/* TODO: Fix overflow hidden */}
           {/* <div className="h-10" /> */}
 
-          <div className="text-center text-white/50 mt-8">
+          <div className="text-center text-black/50 mt-8">
             <Typography variant="small">Drag and drop your videos below</Typography>
           </div>
 
           {/* <div className="flex justify-center items-center my-6 mt-6"> */}
-          <div className="border-dashed border border-white/30 rounded-lg p-4 m-6">
+          <div
+            ref={dropZoneRef}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            style={{ transition: "0.5s" }}
+            className={["border-dashed border border-black/30 rounded-lg p-4 m-6  transition", isDragOver && "bg-primary"].join(" ")}
+          >
             <ReactSortable
               className="w-full grid grid-cols-4 gap-5"
               list={data.videos}
@@ -211,7 +247,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                 return (
                   <div
                     key={index + 1}
-                    className="undraggable rounded-lg object-cover w-40 h-28 border-dashed border border-white/10 flex justify-center items-center text-3xl text-white/20"
+                    className="undraggable rounded-lg object-cover w-40 h-28 border-dashed border border-black/10 flex justify-center items-center text-3xl text-black/20"
                   >
                     <Typography>{index + 1}</Typography>
                   </div>
@@ -249,7 +285,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           </div>
         </div>
       </div>
-      <div className="text-white flex flex-row h-48 px-8 my-6">
+      <div className="flex flex-row h-48 px-8 my-6">
         <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
           <img src={profile.photoURL} className="rounded-full object-cover w-20" />
           <Typography variant="small">215k</Typography>
@@ -269,22 +305,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                 </Button>
               )}
               {isUserProfile && (
-                // <Button iconBegin={} variant="secondary" onClick={() => setEditMode(true)}>
-                //   Quick Add
-                // </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Icon icon="tabler:dots" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Billing</DropdownMenuItem>
-                    <DropdownMenuItem>Team</DropdownMenuItem>
-                    <DropdownMenuItem>Subscription</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button iconBegin={<Icon icon="humbleicons:camera-video" />} variant="secondary" onClick={() => handleToCaptureScreen(documentId)}>
+                  Quick Add
+                </Button>
               )}
             </div>
           </div>
