@@ -45,7 +45,6 @@ export const CaptureScreen = () => {
   //
   React.useEffect(() => {
     return () => {
-      console.log("fired", streamRef);
       streamRef.current?.getTracks().forEach((track) => {
         track.stop();
       });

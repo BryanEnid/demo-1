@@ -11,8 +11,9 @@ import { createSearchParams, useNavigate } from "react-router-dom";
 import { ReactSortable } from "react-sortablejs";
 import { useProfile } from "@/hooks/useProfile";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/chadcn/DropDown";
+
 import { useUser } from "@/hooks/useUser";
+import { Dialog } from "@/chadcn/Dialog";
 
 export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
   // Hooks
@@ -217,12 +218,10 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
             className={["border-dashed border border-black/30 rounded-lg p-4 m-6  transition", isDragOver && "bg-primary"].join(" ")}
           >
             <ReactSortable
-              className="w-full grid grid-cols-4 gap-5"
+              // className="w-full grid grid-cols-4 gap-5"
+              className="flex flex-wrap space-x-4 justify-between w-full gap-5"
               list={data.videos}
-              setList={(state) => {
-                console.log(state);
-                setData((prev) => ({ ...prev, videos: state }));
-              }}
+              setList={(state) => setData((prev) => ({ ...prev, videos: state }))}
               animation={500}
               delayOnTouchStart={true}
               delay={0}
@@ -237,7 +236,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                     <div key={data.image} className="draggable">
                       <img
                         src={data.image}
-                        className=" animate-wiggle rounded-lg object-cover w-40 h-28 select-none "
+                        className="animate-wiggle rounded-lg object-cover w-64 h-40 select-none "
                         // style={{ userDrag: "none" }}
                       />
                     </div>
@@ -247,7 +246,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                 return (
                   <div
                     key={index + 1}
-                    className="undraggable rounded-lg object-cover w-40 h-28 border-dashed border border-black/10 flex justify-center items-center text-3xl text-black/20"
+                    className="undraggable rounded-lg object-cover w-64 h-40 border-dashed border border-black/10 flex justify-center items-center text-3xl text-black/20"
                   >
                     <Typography>{index + 1}</Typography>
                   </div>
