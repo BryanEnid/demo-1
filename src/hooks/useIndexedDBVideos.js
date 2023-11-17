@@ -14,7 +14,6 @@ export const useIndexedDBVideos = () => {
 
       getAllRequest.onsuccess = function () {
         const savedVideos = getAllRequest.result;
-        console.log(savedVideos);
         setVideos(savedVideos);
       };
 

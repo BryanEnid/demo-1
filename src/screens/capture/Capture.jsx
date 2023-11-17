@@ -15,6 +15,7 @@ import { useIndexedDBVideos } from "@/hooks/useIndexedDBVideos";
 export const CaptureScreen = () => {
   // Hooks
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const params = useQueryParams();
   const { user } = useUser();
   const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos();
@@ -29,6 +30,7 @@ export const CaptureScreen = () => {
   const videoRef = React.useRef(null);
   const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
+  const streamRef = React.useRef();
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
@@ -39,6 +41,16 @@ export const CaptureScreen = () => {
     },
     [setDevices]
   );
+
+  //
+  React.useEffect(() => {
+    return () => {
+      console.log("fired", streamRef);
+      streamRef.current?.getTracks().forEach((track) => {
+        track.stop();
+      });
+    };
+  }, [pathname]);
 
   React.useEffect(() => {
     // TODO: Not supported on Safari
@@ -52,7 +64,7 @@ export const CaptureScreen = () => {
     navigator.mediaDevices
       // Ask for permission
       .getUserMedia({ video: { width: 1920, height: 1080, aspectRatio: 16 / 9 }, audio: true })
-      .then(() => navigator.mediaDevices.enumerateDevices())
+      .then((stream) => navigator.mediaDevices.enumerateDevices())
       .then(handleDevices);
   }, [handleDevices]);
 
@@ -116,6 +128,7 @@ export const CaptureScreen = () => {
     };
     const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
     main.srcObject = stream;
+    streamRef.current = stream;
     // TODO : fix this for facing mode
     // main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
   };
