@@ -39,8 +39,8 @@ export const Profile = () => {
 
   React.useEffect(() => {
     (() => {
-      if (username === "profile") return navigate(`/${user.uid}`);
-      if (!profile?.uid && !isLoading) return navigate("/");
+      if (username === "profile" && user) return navigate(`/${user.uid}`);
+      if (!profile?.uid && !isLoading) return navigate("/notfound");
     })();
   }, [profile, isLoading]);
 

@@ -18,7 +18,7 @@ export const CaptureScreen = () => {
   const { pathname } = useLocation();
   const params = useQueryParams();
   const { user } = useUser();
-  const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos();
+  const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos("local-unlisted-videos", 1);
 
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);

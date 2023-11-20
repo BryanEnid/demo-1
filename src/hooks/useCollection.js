@@ -3,13 +3,13 @@ import { db, storage } from "@/config/firebase";
 import { collection, addDoc, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, where, query } from "firebase/firestore";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthentication } from "./useAuthentication";
+import { useAuthenticationProviders } from "./useAuthenticationProviders";
 import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const configDefaults = { keys: [], query: [] };
 
 export const useCollection = (collectionName, config = configDefaults) => {
-  const { user } = useAuthentication();
+  const { user } = useAuthenticationProviders();
   const queryClient = useQueryClient();
 
   // Define query key for useQuery
@@ -51,6 +51,7 @@ export const useCollection = (collectionName, config = configDefaults) => {
         console.log(e);
       }
     },
+
     ...config,
   });
 

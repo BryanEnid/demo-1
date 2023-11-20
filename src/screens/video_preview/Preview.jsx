@@ -15,7 +15,7 @@ import { useUser } from "@/hooks/useUser";
 
 export const Preview = () => {
   // Hooks
-  const { getVideo, videos } = useIndexedDBVideos();
+  const { getVideo, videos } = useIndexedDBVideos("local-unlisted-videos", 1);
   const { id: videoIdIDB } = useQueryParams();
   const { uploadFile, uploadResumableFile, appendVideo } = useCollection("buckets");
   const { buckets } = useBuckets("user");

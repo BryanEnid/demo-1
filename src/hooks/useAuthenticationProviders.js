@@ -3,14 +3,22 @@ import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signO
 import { db } from "@/config/firebase"; // Assuming you have Firebase Storage configured
 import { collection, doc, setDoc } from "firebase/firestore";
 
-export const useAuthentication = () => {
+export const useAuthenticationProviders = () => {
   // Initialize Firebase Auth
   const auth = getAuth();
-  const [user, setUser] = React.useState(auth.currentUser);
+  const [user, setUser] = React.useState(null);
+  const [isLoading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      setUser(authUser);
+      setLoading(false);
+    });
+    return () => {
+      unsubscribe();
+      setLoading(true);
+      setUser(null);
+    };
   }, []);
 
   const createUser = async (documentData, documentId) => {
@@ -30,11 +38,12 @@ export const useAuthentication = () => {
 
   // Function to sign out
   const signOutUser = async () => {
-    signOut(auth).then(() => setUser(null));
+    return signOut(auth).then(() => setUser(null));
   };
 
   return {
     user,
+    isLoading,
     signInWithGoogle,
     signOutUser,
     createUser,

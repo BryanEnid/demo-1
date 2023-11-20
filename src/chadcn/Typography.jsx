@@ -12,10 +12,7 @@ export const Typography = ({ variant, children, className, ...rest }) => {
 
     case "h2": {
       return (
-        <h2
-          {...rest}
-          className={["mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0", className].join(" ")}
-        >
+        <h2 {...rest} className={["scroll-m-20 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0", className].join(" ")}>
           {children}
         </h2>
       );
@@ -23,7 +20,7 @@ export const Typography = ({ variant, children, className, ...rest }) => {
 
     case "h3": {
       return (
-        <h3 {...rest} className={["mt-8 scroll-m-20 text-2xl font-semibold tracking-tight", className].join(" ")}>
+        <h3 {...rest} className={["text-2xl font-semibold tracking-tight", className].join(" ")}>
           {children}
         </h3>
       );

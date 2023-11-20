@@ -1,6 +1,6 @@
 import React from "react";
 
-export const useIndexedDBVideos = () => {
+export const useIndexedDBVideos = (dbName, dbVersion = 1) => {
   const [videos, setVideos] = React.useState([]);
 
   React.useEffect(() => {
@@ -90,8 +90,8 @@ export const useIndexedDBVideos = () => {
   }, []);
 
   const openDB = async () => {
-    const dbVersion = 1;
-    const dbName = "local-unlisted-videos";
+    // const dbVersion = 1;
+    // const dbName = "local-unlisted-videos";
 
     const request = window.indexedDB.open(dbName, dbVersion);
 

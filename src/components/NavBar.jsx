@@ -25,11 +25,13 @@ import { PageModal } from "./PageModal";
 import { PreviewBucket } from "./PreviewBucket";
 import { MediaSelector } from "./MediaSelector";
 import { useUser } from "@/hooks/useUser";
+import { useAuth } from "@/providers/Authentication";
 
 export const NavBar = () => {
   // Hooks
   const navigate = useNavigate();
   const { user } = useUser();
+  const { logout } = useAuth();
 
   // State
   const [show, setShow] = React.useState(false);
@@ -46,6 +48,10 @@ export const NavBar = () => {
 
   const handleCancel = () => {
     setShow(false);
+  };
+
+  const handleLogOut = () => {
+    logout().then(() => navigate("/"));
   };
 
   return (
@@ -113,9 +119,8 @@ export const NavBar = () => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant="link" className="p-0 m-0">
+              <Button iconEnd={<Icon icon="iconamoon:arrow-down-2-duotone" height={22} />} variant="link" className="p-0 m-0">
                 {user?.displayName}
-                <Icon icon="iconamoon:arrow-down-2-duotone" height={22} />
               </Button>
             </DropdownMenuTrigger>
 
@@ -123,7 +128,7 @@ export const NavBar = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate(`/${user.uid}`)}>
                   Profile
                   <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                 </DropdownMenuItem>
@@ -164,7 +169,7 @@ export const NavBar = () => {
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuItem disabled>API</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogOut}>
                 Log out
                 <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
               </DropdownMenuItem>

@@ -50,3 +50,13 @@ export const generatePreview = async (recordedVideo) => {
     throw err;
   }
 };
+
+export const generateRandomNumber = (minimum, maximum) => {
+  // Generate a random decimal number between 0 (inclusive) and 1 (exclusive)
+  const randomDecimal = Math.random();
+
+  // Scale the random decimal to the desired range and round to the nearest integer
+  const randomInteger = Math.floor(randomDecimal * (maximum - minimum + 1)) + minimum;
+
+  return randomInteger;
+};
