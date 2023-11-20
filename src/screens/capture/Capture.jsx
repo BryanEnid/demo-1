@@ -25,6 +25,7 @@ export const CaptureScreen = () => {
   const [screenDevice, setScreenDevice] = React.useState("");
   const [isUploading, setUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState(0);
+  const [volumeDisplay, setVolumeDisplay] = React.useState(0);
 
   const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
@@ -42,7 +43,7 @@ export const CaptureScreen = () => {
     [setDevices]
   );
 
-  //
+  // Stop tracks when leaving to another screen
   React.useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach((track) => {
@@ -61,7 +62,7 @@ export const CaptureScreen = () => {
     // })();
 
     navigator.mediaDevices
-      // Ask for permission
+      // ! It only ask for permission
       .getUserMedia({ video: { width: 1920, height: 1080, aspectRatio: 16 / 9 }, audio: true })
       .then((stream) => navigator.mediaDevices.enumerateDevices())
       .then(handleDevices);
@@ -126,6 +127,23 @@ export const CaptureScreen = () => {
       getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props }),
     };
     const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
+
+    const audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule("./src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
+    const source = audioContext.createMediaStreamSource(stream);
+    const processor = new AudioWorkletNode(audioContext, "vumeter");
+
+    processor.port.onmessage = (event) => {
+      if (event.data.type === "audioData") {
+        const { average } = event.data.data;
+        const volume = 1 + average * 8;
+        const max_cap = 1.6;
+        setVolumeDisplay(volume > max_cap ? max_cap : volume);
+      }
+    };
+
+    source.connect(processor).connect(audioContext.destination);
+
     main.srcObject = stream;
     streamRef.current = stream;
     // TODO : fix this for facing mode
@@ -221,9 +239,18 @@ export const CaptureScreen = () => {
           {/* Overlay */}
           <div className="absolute flex flex-row justify-center">
             <div className="flex flex-row gap-16 text-4xl text-white">
-              <button className="rounded-full p-3 bg-blue-600">
-                <Icon icon="ph:microphone-bold" />
-              </button>
+              <div>
+                <div className="relative">
+                  <button className="rounded-full p-3 bg-blue-600 relative z-10 scale-95">
+                    <Icon icon="ph:microphone-bold" />
+                  </button>
+
+                  <div
+                    style={{ transform: `scale(${volumeDisplay})`, transition: "transform 0.1s linear" }}
+                    className="absolute top-0 left-0 w-full h-full bg-blue-400 rounded-full"
+                  />
+                </div>
+              </div>
 
               {/* <button className="rounded-full p-3 bg-blue-600">
                 <Icon icon="majesticons:video" />
@@ -253,7 +280,7 @@ export const CaptureScreen = () => {
                     <div className="flex flex-col gap-1 font-medium justify-center items-center bg-white rounded-full p-2 px-6">
                       <div className="flex flex-row truncate gap-2">{uploadProgress}% Uploading ...</div>
 
-                      <Progress className="border" value={uploadProgress} />
+                      {/* <Progress className="border" value={uploadProgress} /> */}
                     </div>
                   </div>
                 </div>

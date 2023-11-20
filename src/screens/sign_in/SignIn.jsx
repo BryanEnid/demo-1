@@ -57,7 +57,7 @@ export const SignIn = () => {
     debounceInstance();
   };
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <></>;
   if (user) return <Navigate to="/profile" />;
 
   return (
