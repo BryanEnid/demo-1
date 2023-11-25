@@ -261,6 +261,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
                 src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
                 onEnded={handleNextVideo}
                 type="video/mp4"
+                loop={data?.videos?.length === 1}
                 className="w-full h-full object-center rounded-none z-10"
               />
             </div>
@@ -456,6 +457,7 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
             ref={videoRef}
             src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
             onEnded={handleNextVideo}
+            loop={data?.videos?.length === 1}
             className="w-full h-full object-center rounded-none z-10"
           />
 

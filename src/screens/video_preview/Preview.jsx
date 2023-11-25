@@ -13,6 +13,16 @@ import { Progress } from "@/chadcn/Progress";
 import { createSearchParams, useNavigate } from "react-router-dom";
 import { useUser } from "@/hooks/useUser";
 
+const MiniaturePreview = ({ video, onClick, id }) => {
+  const src = React.useMemo(() => URL.createObjectURL(video.blob), []);
+
+  return (
+    <button key={id} onClick={() => onClick(src)}>
+      <video src={src} className="w-[250px] border-4 rounded-xl" autoPlay muted loop />
+    </button>
+  );
+};
+
 export const Preview = () => {
   // Hooks
   const { getVideo, videos } = useIndexedDBVideos("local-unlisted-videos", 1);
@@ -34,7 +44,8 @@ export const Preview = () => {
   React.useEffect(() => {
     getVideo(Number(videoIdIDB))
       .then((video) => {
-        setVideo(video);
+        const src = URL.createObjectURL(video.blob);
+        setVideo({ ...video, src });
       })
       .finally(() => {
         setLoading(false);
@@ -49,10 +60,6 @@ export const Preview = () => {
   const handleSelectedBucket = (data) => {
     setSelectedBucket(data);
     setSubmitable(true);
-  };
-
-  const handleUnlistedSelectedVideo = (video) => {
-    setUnlistedVideoSelected(video);
   };
 
   const handleSaveVideo = async () => {
@@ -96,25 +103,21 @@ export const Preview = () => {
       <div className="grid grid-cols-5 h-screen">
         <div className="flex flex-col col-span-4">
           <div className="flex flex-1 justify-center  bg-black">
-            <video controls autoPlay muted loop controlsList="nofullscreen">
-              <source src={URL.createObjectURL(video.blob)} type="video/mp4" />
-            </video>
+            <video src={video.src} controls autoPlay muted loop controlsList="nofullscreen" />
           </div>
 
           <div className="flex flex-col min-h-[200px] max-h-[400px] overflow-y-auto p-4">
             <Typography variant="large">Unlisted Videos</Typography>
             <div className="flex flex-row gap-4 w-full flex-wrap mt-4">
               {videos?.map((video) => (
-                <button key={video.id} onClick={() => handleUnlistedSelectedVideo(video)}>
-                  <video src={URL.createObjectURL(video.blob)} className="w-[250px] border-4 rounded-xl" />
-                </button>
+                <MiniaturePreview video={video} onClick={(src) => setVideo({ ...video, src })} id={video.id} />
               ))}
             </div>
           </div>
         </div>
 
         <div className="flex flex-col h-screen justify-between p-4 bg-[#001027]">
-          <div className="text-white">
+          <div className="text-white flex flex-col gap-4">
             {buckets?.map((bucket) => (
               <div key={bucket.id} className={selectedBucket?.id === bucket?.id ? "opacity-100" : "opacity-50"}>
                 <BucketItem data={bucket} name={bucket.name} preview={bucket.videos[0]?.videoUrl} documentId={bucket.id} onClick={handleSelectedBucket} />
