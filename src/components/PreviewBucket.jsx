@@ -16,7 +16,7 @@ import { useUser } from "@/hooks/useUser";
 import { Dialog } from "@/chadcn/Dialog";
 import { VideoUploadButton } from "./VideoUploadButton";
 import { Progress } from "@/chadcn/Progress";
-import { generatePreview, generateRandomNumber } from "@/lib/utils";
+import { cn, generatePreview, generateRandomNumber } from "@/lib/utils";
 import { CircularProgress } from "./CircularProgress";
 import { CachedVideo } from "./CachedVideo";
 
@@ -506,16 +506,21 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           {data.videos.map(({ image }, index) => {
             if (image)
               return (
-                <div key={image}>
-                  {/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
-                  <LazyLoadImage
-                    className="rounded-lg object-cover w-40 h-28"
-                    // alt={image.alt}
-                    // height={image.height}
-                    src={image} // use normal <img> attributes as props
-                    // width={image.width}
-                  />
-                </div>
+                <button onClick={() => setCurrentVideo(index)}>
+                  <div key={image}>
+                    {/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
+                    <LazyLoadImage
+                      className={cn(
+                        "rounded-lg object-cover w-40 h-28 transition-all border-transparent border-[4px]",
+                        currentVideo === index && "border-primary scale-110"
+                      )}
+                      // alt={image.alt}
+                      // height={image.height}
+                      src={image} // use normal <img> attributes as props
+                      // width={image.width}
+                    />
+                  </div>
+                </button>
               );
           })}
         </div>

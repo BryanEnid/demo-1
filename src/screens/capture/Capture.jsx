@@ -128,21 +128,22 @@ export const CaptureScreen = () => {
     };
     const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
 
-    const audioContext = new AudioContext();
-    await audioContext.audioWorklet.addModule("./src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
-    const source = audioContext.createMediaStreamSource(stream);
-    const processor = new AudioWorkletNode(audioContext, "vumeter");
+    // ! Vercel breaks with this code. I think it related how the app gets build
+    // const audioContext = new AudioContext();
+    // await audioContext.audioWorklet.addModule("/src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
+    // const source = audioContext.createMediaStreamSource(stream);
+    // const processor = new AudioWorkletNode(audioContext, "vumeter");
 
-    processor.port.onmessage = (event) => {
-      if (event.data.type === "audioData") {
-        const { average } = event.data.data;
-        const volume = 1 + average * 8;
-        const max_cap = 1.6;
-        setVolumeDisplay(volume > max_cap ? max_cap : volume);
-      }
-    };
+    // processor.port.onmessage = (event) => {
+    //   if (event.data.type === "audioData") {
+    //     const { average } = event.data.data;
+    //     const volume = 1 + average * 8;
+    //     const max_cap = 1.6;
+    //     setVolumeDisplay(volume > max_cap ? max_cap : volume);
+    //   }
+    // };
 
-    source.connect(processor).connect(audioContext.destination);
+    // source.connect(processor).connect(audioContext.destination);
 
     main.srcObject = stream;
     streamRef.current = stream;
