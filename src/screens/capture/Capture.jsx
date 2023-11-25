@@ -152,6 +152,7 @@ export const CaptureScreen = () => {
 
     // source.connect(processor).connect(audioContext.destination);
 
+    console.log(deviceId);
     main.srcObject = deviceId ? stream : null;
     streamRef.current = stream;
     // TODO : fix this for facing mode
@@ -194,14 +195,27 @@ export const CaptureScreen = () => {
         <video ref={webcamRef} autoPlay className="h-full hidden" />
         <video ref={videoRef} autoPlay className="h-full hidden" />
 
-        <div className="w-screen flex justify-center">
+        <div className="w-screen flex justify-center relative">
           <div
             className="flex justify-center items-center max-w-screen-2xl bg-black rounded-3xl overflow-hidden"
             style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
           >
             {/* TODO ! –  */}
             {/* <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" /> */}
-            <video muted ref={mainRef} autoPlay controls={false} width={1920} height={1080} className="h-[1080px] max-w-[1920px]" />
+            <video
+              muted
+              ref={mainRef}
+              autoPlay
+              controls={false}
+              width={1920}
+              height={1080}
+              className={`h-[1080px] max-w-[1920px] ${screenDevice === "Screen Recording" && "opacity-0"}`}
+            />
+            {screenDevice === "Screen Recording" && (
+              <div className="absolute text-white">
+                <Typography variant="large">You are screen recording ...</Typography>
+              </div>
+            )}
           </div>
         </div>
 
