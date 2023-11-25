@@ -4,7 +4,6 @@ export const useIndexedDBVideos = (dbName, dbVersion = 1) => {
   const [videos, setVideos] = React.useState([]);
 
   React.useEffect(() => {
-    console.log("triggered");
     const retrieveVideos = async () => {
       const db = await openDB();
 

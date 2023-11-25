@@ -117,7 +117,7 @@ export const CaptureScreen = () => {
   // const stopRecording = () => {};
 
   const startScreen = async (deviceId) => {
-    const config = { video: { width: 1920, height: 1080, aspectRatio: 16 / 9, deviceId }, audio: true };
+    const config = { video: { width: 1920, height: 1080, deviceId }, audio: true };
     const main = mainRef.current;
 
     // Set default config depending on the media source
@@ -127,6 +127,13 @@ export const CaptureScreen = () => {
       getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props }),
     };
     const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
+
+    stream.getTracks().forEach((track) => {
+      track.onended = (evt) => {
+        if (isScreenRecording) startRecording();
+        setScreenDevice("");
+      };
+    });
 
     // ! Vercel breaks with this code. I think it related how the app gets build
     // const audioContext = new AudioContext();
@@ -145,7 +152,7 @@ export const CaptureScreen = () => {
 
     // source.connect(processor).connect(audioContext.destination);
 
-    main.srcObject = stream;
+    main.srcObject = deviceId ? stream : null;
     streamRef.current = stream;
     // TODO : fix this for facing mode
     // main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
@@ -189,12 +196,12 @@ export const CaptureScreen = () => {
 
         <div className="w-screen flex justify-center">
           <div
-            className="flex justify-center items-center max-w-screen-2xl bg-white rounded-3xl overflow-hidden"
+            className="flex justify-center items-center max-w-screen-2xl bg-black rounded-3xl overflow-hidden"
             style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
           >
             {/* TODO ! –  */}
             {/* <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" /> */}
-            <video muted ref={mainRef} autoPlay controls={false} width={1920} height={1080} className="w-full h-full" />
+            <video muted ref={mainRef} autoPlay controls={false} width={1920} height={1080} className="h-[1080px] max-w-[1920px]" />
           </div>
         </div>
 
