@@ -466,7 +466,8 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           </div>
         </div>
       </div>
-      <div className="flex flex-row h-48 px-8 my-6">
+
+      <div className="flex flex-row px-8 my-6">
         <div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
           <img src={profile.photoURL} className="rounded-full object-cover w-20" />
           <Typography variant="small">215k</Typography>
@@ -497,7 +498,9 @@ export const PreviewBucket = ({ show, onClose, data: inData, editMode, documentI
           <div>
             <div>
               <Typography variant="large">{data.title}</Typography>
-              <Typography variant="small">{data.description}</Typography>
+              <Typography variant="p" className="whitespace-pre-line">
+                {data.description}
+              </Typography>
             </div>
           </div>
         </div>

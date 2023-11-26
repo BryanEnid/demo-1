@@ -132,6 +132,7 @@ export const CaptureScreen = () => {
       track.onended = (evt) => {
         if (isScreenRecording) startRecording();
         setScreenDevice("");
+        mainRef.current = null;
       };
     });
 
@@ -197,7 +198,7 @@ export const CaptureScreen = () => {
 
         <div className="w-screen flex justify-center relative">
           <div
-            className="flex justify-center items-center max-w-screen-2xl bg-black rounded-3xl overflow-hidden"
+            className="flex justify-center items-center max-w-screen-2xl bg-gray-700 rounded-3xl overflow-hidden"
             style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
           >
             {/* TODO ! –  */}
@@ -246,14 +247,18 @@ export const CaptureScreen = () => {
               </div>
 
               {/* End */}
-              <div className="flex flex-col items-center gap-2 text-white">
-                {/* <div className="rounded-xl p-1 px-6 bg-blue-600  text-center">
-                <Typography variant="large">2 : 00</Typography>
-              </div>
+              <div className="flex flex-col items-center gap-2 text-white relative">
+                {isScreenRecording && (
+                  <>
+                    <div className="rounded-xl p-1 px-6 bg-blue-600 text-center">
+                      <Typography variant="large">2 : 00</Typography>
+                    </div>
 
-              <div className="text-yellow-300">
-                <Typography variant="small">Recording ...</Typography>
-              </div> */}
+                    <div className="text-yellow-300 absolute -bottom-8">
+                      <Typography variant="small">Recording ...</Typography>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
