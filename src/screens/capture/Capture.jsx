@@ -11,6 +11,7 @@ import { Modal } from "@/components/Modal";
 import { useUser } from "@/hooks/useUser";
 import { Progress } from "@/chadcn/Progress";
 import { useIndexedDBVideos } from "@/hooks/useIndexedDBVideos";
+import { formatTimestamp } from "@/lib/utils";
 
 export const CaptureScreen = () => {
   // Hooks
@@ -20,13 +21,16 @@ export const CaptureScreen = () => {
   const { user } = useUser();
   const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos("local-unlisted-videos", 1);
 
+  // State
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
   const [screenDevice, setScreenDevice] = React.useState("");
   const [isUploading, setUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState(0);
   const [volumeDisplay, setVolumeDisplay] = React.useState(0);
+  const [timelapsed, setTimeLapsed] = React.useState(0);
 
+  // Refs
   const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
   const mainRef = React.useRef();
@@ -77,6 +81,21 @@ export const CaptureScreen = () => {
       if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
     };
   }, [screenDevice]);
+
+  React.useEffect(() => {
+    let instance;
+    if (isScreenRecording) {
+      instance = setInterval(() => {
+        setTimeLapsed((prev) => prev + 1000);
+      }, 1000);
+    }
+
+    if (timelapsed !== 0 && !isScreenRecording) setTimeLapsed(0);
+
+    return () => {
+      clearInterval(instance);
+    };
+  }, [isScreenRecording]);
 
   const handleRecordedVideo = async (e) => {
     setUploading(true);
@@ -153,7 +172,6 @@ export const CaptureScreen = () => {
 
     // source.connect(processor).connect(audioContext.destination);
 
-    console.log(deviceId);
     main.srcObject = deviceId ? stream : null;
     streamRef.current = stream;
     // TODO : fix this for facing mode
@@ -248,10 +266,10 @@ export const CaptureScreen = () => {
 
               {/* End */}
               <div className="flex flex-col items-center gap-2 text-white relative">
-                {isScreenRecording && (
+                {true && (
                   <>
                     <div className="rounded-xl p-1 px-6 bg-blue-600 text-center">
-                      <Typography variant="large">2 : 00</Typography>
+                      <Typography variant="large">{formatTimestamp(timelapsed)}</Typography>
                     </div>
 
                     <div className="text-yellow-300 absolute -bottom-8">
