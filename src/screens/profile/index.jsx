@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useLocation, useMatches } from "react-router-dom";
 
 // Components
 import { SideBar } from "@/components/SideBar";
@@ -9,24 +9,42 @@ import { NavBar } from "@/components/NavBar";
 import { Typography } from "@/chadcn/Typography";
 import { Button } from "@/chadcn/Button";
 import { useProfile } from "@/hooks/useProfile";
+import { useQueryParams } from "@/hooks/useQueryParams";
+import { useUser } from "@/hooks/useUser";
+import { Icon } from "@iconify/react";
 
-const Example1 = () => {
-  return <div className="bg-red-500 w-full h-screen">example</div>;
-};
+const NavOption = ({ title }) => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [, subscreen] = pathname.slice(1).split("/");
 
-const Example2 = () => {
-  return <div className="bg-blue-500">example</div>;
+  return (
+    <Button variant={subscreen === title.toLowerCase() ? "secondary" : "ghost"} onClick={() => navigate(title.toLowerCase())}>
+      <Typography variant="large" className="capitalize">
+        {title}
+      </Typography>
+    </Button>
+  );
 };
 
 export const Profile = () => {
   // Hooks
   const navigate = useNavigate();
-
+  const { pathname } = useLocation();
   const { data: profile, isLoading } = useProfile();
+  const { user } = useUser();
+
+  // State
+  const [username] = pathname.slice(1).split("/");
 
   React.useEffect(() => {
-    if (!isLoading && !profile?.uid) navigate("/");
-  }, [profile]);
+    (() => {
+      if (username === "profile" && user) return navigate(`/${user.uid}`);
+      if (!profile?.uid && !isLoading) return navigate("/notfound");
+    })();
+  }, [profile, isLoading]);
+
+  if (!profile?.uid) return <></>;
 
   return (
     <div className="container">
@@ -46,24 +64,12 @@ export const Profile = () => {
         </div>
 
         <div className="flex my-20 gap-4 justify-center">
-          <Button variant="ghost" onClick={() => navigate("audio")}>
-            <Typography variant="large">Audio</Typography>
-          </Button>
-          <Button variant="ghost" onClick={() => navigate("buckets")}>
-            <Typography variant="large">Buckets</Typography>
-          </Button>
-          <Button variant="ghost" onClick={() => navigate("experience")}>
-            <Typography variant="large">Experience</Typography>
-          </Button>
-          <Button variant="ghost" onClick={() => navigate("recommends")}>
-            <Typography variant="large">Recommends</Typography>
-          </Button>
-          <Button variant="ghost" onClick={() => navigate("quests")}>
-            <Typography variant="large">Quests</Typography>
-          </Button>
-          <Button variant="ghost" onClick={() => navigate("website")}>
-            <Typography variant="large">Website</Typography>
-          </Button>
+          <NavOption title="Audio" />
+          <NavOption title="Buckets" />
+          <NavOption title="Experience" />
+          <NavOption title="Recommends" />
+          <NavOption title="Quests" />
+          <NavOption title="Website" />
         </div>
       </div>
 

@@ -3,13 +3,13 @@ import { db, storage } from "@/config/firebase";
 import { collection, addDoc, doc, setDoc, updateDoc, getDoc, getDocs, deleteDoc, where, query } from "firebase/firestore";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthentication } from "./useAuthentication";
+import { useAuthenticationProviders } from "./useAuthenticationProviders";
 import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const configDefaults = { keys: [], query: [] };
 
 export const useCollection = (collectionName, config = configDefaults) => {
-  const { user } = useAuthentication();
+  const { user } = useAuthenticationProviders();
   const queryClient = useQueryClient();
 
   // Define query key for useQuery
@@ -21,31 +21,37 @@ export const useCollection = (collectionName, config = configDefaults) => {
     gcTime: Infinity,
     queryKey,
     queryFn: async () => {
-      // Setup necessary references
-      const collectionRef = collection(db, collectionName);
+      try {
+        // Setup necessary references
+        const collectionRef = collection(db, collectionName);
 
-      const params = [collectionRef];
-      // Add optional parameters for specific/complex queries
-      if (config?.query.every(Boolean) && config?.query?.length === 4) {
-        // TODO: create a less opinionated API
-        const [queryType, property, operation, value] = config.query;
-        params.push(queries[queryType](property, operation, value));
+        const params = [collectionRef];
+
+        // Add optional parameters for specific/complex queries
+        if (config?.query.every(Boolean) && config?.query?.length === 4) {
+          // TODO: create a less opinionated API
+          const [queryType, property, operation, value] = config.query;
+          params.push(queries[queryType](property, operation, value));
+        }
+
+        // Prepare query
+        const userQuery = query(...params);
+        const q = query(userQuery);
+
+        // Construct object and read data
+        const querySnapshot = await getDocs(q);
+        const documents = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          documents.push({ id: doc.id, ...data });
+        });
+
+        return new Promise((res) => res(documents));
+      } catch (e) {
+        console.log(e);
       }
-
-      // Prepare query
-      const userQuery = query(...params);
-      const q = query(userQuery);
-
-      // Construct object and read data
-      const querySnapshot = await getDocs(q);
-      const documents = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        documents.push({ id: doc.id, ...data });
-      });
-
-      return new Promise((res) => res(documents));
     },
+
     ...config,
   });
 
@@ -112,7 +118,8 @@ export const useCollection = (collectionName, config = configDefaults) => {
     },
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.setQueryData(queryKey, (oldData) => {});
     },
   });
 
@@ -124,11 +131,6 @@ export const useCollection = (collectionName, config = configDefaults) => {
 
       return { uploadTask, getDownloadURL: () => getDownloadURL(fileRef) };
     },
-
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
-    },
   });
 
   const uploadFileMutation = useMutation({
@@ -138,11 +140,6 @@ export const useCollection = (collectionName, config = configDefaults) => {
       await uploadBytes(fileRef, file);
       const url = await getDownloadURL(fileRef);
       return url;
-    },
-
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["collection", collectionName] });
     },
   });
 

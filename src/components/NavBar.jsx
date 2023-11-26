@@ -25,11 +25,13 @@ import { PageModal } from "./PageModal";
 import { PreviewBucket } from "./PreviewBucket";
 import { MediaSelector } from "./MediaSelector";
 import { useUser } from "@/hooks/useUser";
+import { useAuth } from "@/providers/Authentication";
 
 export const NavBar = () => {
   // Hooks
   const navigate = useNavigate();
   const { user } = useUser();
+  const { logout } = useAuth();
 
   // State
   const [show, setShow] = React.useState(false);
@@ -48,6 +50,10 @@ export const NavBar = () => {
     setShow(false);
   };
 
+  const handleLogOut = () => {
+    logout().then(() => navigate("/"));
+  };
+
   return (
     <>
       <div className="h-20 w-full" />
@@ -60,10 +66,7 @@ export const NavBar = () => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button>
-                <Icon icon="majesticons:video-line" className="pr-1 text-3xl" />
-                Create
-              </Button>
+              <Button iconBegin={<Icon icon="majesticons:video-line" className="pr-1 text-3xl" />}>Create</Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-56">
@@ -74,9 +77,9 @@ export const NavBar = () => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/capture")}>
                 <Icon icon="pepicons-pop:camera" className="pr-1 text-3xl" />
-                Start recording
+                Capture
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Icon icon="fluent:live-24-filled" className="pr-1 text-3xl" />
@@ -100,10 +103,6 @@ export const NavBar = () => {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuItem>
-                <Icon icon="fluent:share-screen-person-16-regular" className="pr-1 text-3xl" />
-                Record your screen
-              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
 
@@ -120,9 +119,8 @@ export const NavBar = () => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant="link" className="p-0 m-0">
+              <Button iconEnd={<Icon icon="iconamoon:arrow-down-2-duotone" height={22} />} variant="link" className="p-0 m-0">
                 {user?.displayName}
-                <Icon icon="iconamoon:arrow-down-2-duotone" height={22} />
               </Button>
             </DropdownMenuTrigger>
 
@@ -130,7 +128,7 @@ export const NavBar = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate(`/${user.uid}`)}>
                   Profile
                   <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                 </DropdownMenuItem>
@@ -171,7 +169,7 @@ export const NavBar = () => {
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuItem disabled>API</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogOut}>
                 Log out
                 <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
               </DropdownMenuItem>

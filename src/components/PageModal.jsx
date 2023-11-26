@@ -24,14 +24,11 @@ export const PageModal = ({ children, show, onClose }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-blue-900/90 brightness-50 backdrop-blur-sm" />
+          <div className="fixed inset-0 brightness-95 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 w-screen">
-          <div
-            className="flex min-h-full items-end justify-center text-center sm:items-center"
-            brightness-50brightness-50
-          >
+          <div className="flex min-h-full items-end justify-center text-center sm:items-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -43,12 +40,12 @@ export const PageModal = ({ children, show, onClose }) => {
             >
               <Dialog.Panel
                 className={
-                  "drop-shadow-[0_05px_10px_rgba(255,255,255,200)] overflow-hidden border-2 backdrop-blur-xl backdrop-brightness-50 border-white relative transform rounded-lg text-left transition-all max-w-3xl"
+                  "drop-shadow-[0_5px_5px_rgba(255,255,255,200)] overflow-hidden border backdrop-blur-sm border-gray-200 relative transform rounded-lg text-left transition-all max-w-7xl"
                 }
               >
                 <div
                   style={{
-                    background: "#00173A",
+                    background: "white",
                     backdropFilter: "blur(10px)",
                   }}
                 >
@@ -56,8 +53,8 @@ export const PageModal = ({ children, show, onClose }) => {
                     <div
                       className="text-center sm:text-left "
                       style={{
-                        width: "768px",
-                        maxHeight: "80vh", // Set a max height for the modal content
+                        width: "80vw",
+                        maxHeight: "95vh", // Set a max height for the modal content
                         overflowY: "auto", // Allow content to scroll if it exceeds the max height
                       }}
                     >

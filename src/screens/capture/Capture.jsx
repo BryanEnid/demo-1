@@ -10,36 +10,28 @@ import { useQueryParams } from "@/hooks/useQueryParams";
 import { Modal } from "@/components/Modal";
 import { useUser } from "@/hooks/useUser";
 import { Progress } from "@/chadcn/Progress";
-
-function dataURItoBlob(dataURI) {
-  const byteString = atob(dataURI.split(",")[1]);
-  const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  return new Blob([ab], { type: mimeString });
-}
+import { useIndexedDBVideos } from "@/hooks/useIndexedDBVideos";
 
 export const CaptureScreen = () => {
+  // Hooks
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const params = useQueryParams();
   const { user } = useUser();
+  const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos("local-unlisted-videos", 1);
 
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
   const [devices, setDevices] = React.useState([]);
   const [screenDevice, setScreenDevice] = React.useState("");
   const [isUploading, setUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState(0);
-  const [bucketId, setBucketId] = React.useState(null);
+  const [volumeDisplay, setVolumeDisplay] = React.useState(0);
 
   const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
   const mainRef = React.useRef();
   const recorderRef = React.useRef(null);
-
-  const { uploadFile, appendVideo, uploadResumableFile } = useCollection("buckets");
+  const streamRef = React.useRef();
 
   // TODO: handle new devices without refreshes
   const handleDevices = React.useCallback(
@@ -51,9 +43,14 @@ export const CaptureScreen = () => {
     [setDevices]
   );
 
+  // Stop tracks when leaving to another screen
   React.useEffect(() => {
-    params?.bucketid && setBucketId(params.bucketid);
-  }, [params.bucketid]);
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => {
+        track.stop();
+      });
+    };
+  }, [pathname]);
 
   React.useEffect(() => {
     // TODO: Not supported on Safari
@@ -65,9 +62,9 @@ export const CaptureScreen = () => {
     // })();
 
     navigator.mediaDevices
-      // Ask for permission
+      // ! It only ask for permission
       .getUserMedia({ video: { width: 1920, height: 1080, aspectRatio: 16 / 9 }, audio: true })
-      .then(() => navigator.mediaDevices.enumerateDevices())
+      .then((stream) => navigator.mediaDevices.enumerateDevices())
       .then(handleDevices);
   }, [handleDevices]);
 
@@ -84,72 +81,14 @@ export const CaptureScreen = () => {
   const handleRecordedVideo = async (e) => {
     setUploading(true);
 
-    // TODO: Change to send this directly to the data base so it can save it even faster without losing any info after done.
+    // TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
     const recordedVideo = new Blob([e.data], { type: "video/mp4" });
-    const preview = await generatePreview(recordedVideo);
 
-    const imageUrl = await uploadFile({ file: preview, fileType: "image" });
-    const { uploadTask, getDownloadURL } = await uploadResumableFile({ file: recordedVideo, fileType: "video" });
+    const request = await saveVideoIDB(recordedVideo);
 
-    // Render progress
-    uploadTask.on("state_changed", (snapshot) => setUploadProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes)));
-
-    // When finish uploading
-    uploadTask.then(() => {
-      getDownloadURL().then((videoUrl) => {
-        // if bucket id -> save it to that bucket id
-        // otherwise set it to unlisted
-        // for now dont save it
-        if (params.bucketid) {
-          appendVideo(
-            { videoData: { image: imageUrl, videoUrl: videoUrl }, documentId: params.bucketid },
-            {
-              onSuccess: () => {
-                setUploading(false);
-                navigate({ pathname: `/${user.username}`, search: createSearchParams({ focus: params.bucketid }).toString() });
-              },
-              onError: (e) => console.log("appendVideo", e),
-            }
-          );
-          if (isUploading) setUploading(false);
-        }
-      });
-    });
-  };
-
-  const generatePreview = async (recordedVideo) => {
-    try {
-      const videoUrl = URL.createObjectURL(recordedVideo);
-
-      const videoElement = document.createElement("video");
-      videoElement.src = videoUrl;
-      document.body.appendChild(videoElement);
-
-      await videoElement.play();
-
-      const canvas = document.createElement("canvas");
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      const ctx = canvas.getContext("2d");
-
-      // Draw the video frame onto the canvas
-      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-      // Convert the canvas content to a data URL (screenshot)
-      const screenshot = canvas.toDataURL("image/png");
-
-      // Clean up elements
-      document.body.removeChild(videoElement);
-      URL.revokeObjectURL(videoUrl);
-
-      // Convert the screenshot to a Blob
-      const screenshotBlob = dataURItoBlob(screenshot);
-
-      return screenshotBlob;
-    } catch (err) {
-      console.error("Error generating preview:", err);
-      throw err;
-    }
+    request.onsuccess = ({ target }) => {
+      navigate({ pathname: `preview`, search: createSearchParams({ id: target.result }).toString() });
+    };
   };
 
   const startRecording = async () => {
@@ -178,7 +117,7 @@ export const CaptureScreen = () => {
   // const stopRecording = () => {};
 
   const startScreen = async (deviceId) => {
-    const config = { video: { width: 1920, height: 1080, aspectRatio: 16 / 9, deviceId }, audio: true };
+    const config = { video: { width: 1920, height: 1080, deviceId }, audio: true };
     const main = mainRef.current;
 
     // Set default config depending on the media source
@@ -188,7 +127,34 @@ export const CaptureScreen = () => {
       getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props }),
     };
     const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
-    main.srcObject = stream;
+
+    stream.getTracks().forEach((track) => {
+      track.onended = (evt) => {
+        if (isScreenRecording) startRecording();
+        setScreenDevice("");
+      };
+    });
+
+    // ! Vercel breaks with this code. I think it related how the app gets build
+    // const audioContext = new AudioContext();
+    // await audioContext.audioWorklet.addModule("/src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
+    // const source = audioContext.createMediaStreamSource(stream);
+    // const processor = new AudioWorkletNode(audioContext, "vumeter");
+
+    // processor.port.onmessage = (event) => {
+    //   if (event.data.type === "audioData") {
+    //     const { average } = event.data.data;
+    //     const volume = 1 + average * 8;
+    //     const max_cap = 1.6;
+    //     setVolumeDisplay(volume > max_cap ? max_cap : volume);
+    //   }
+    // };
+
+    // source.connect(processor).connect(audioContext.destination);
+
+    console.log(deviceId);
+    main.srcObject = deviceId ? stream : null;
+    streamRef.current = stream;
     // TODO : fix this for facing mode
     // main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
   };
@@ -229,14 +195,27 @@ export const CaptureScreen = () => {
         <video ref={webcamRef} autoPlay className="h-full hidden" />
         <video ref={videoRef} autoPlay className="h-full hidden" />
 
-        <div className="w-screen flex justify-center">
+        <div className="w-screen flex justify-center relative">
           <div
-            className="flex justify-center items-center max-w-screen-2xl bg-white rounded-3xl overflow-hidden"
+            className="flex justify-center items-center max-w-screen-2xl bg-black rounded-3xl overflow-hidden"
             style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }}
           >
             {/* TODO ! –  */}
             {/* <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" /> */}
-            <video muted ref={mainRef} autoPlay controls={false} width={1920} height={1080} className="w-full h-full" />
+            <video
+              muted
+              ref={mainRef}
+              autoPlay
+              controls={false}
+              width={1920}
+              height={1080}
+              className={`h-[1080px] max-w-[1920px] ${screenDevice === "Screen Recording" && "opacity-0"}`}
+            />
+            {screenDevice === "Screen Recording" && (
+              <div className="absolute text-white">
+                <Typography variant="large">You are screen recording ...</Typography>
+              </div>
+            )}
           </div>
         </div>
 
@@ -282,24 +261,34 @@ export const CaptureScreen = () => {
           {/* Overlay */}
           <div className="absolute flex flex-row justify-center">
             <div className="flex flex-row gap-16 text-4xl text-white">
-              <button className="rounded-full p-3 bg-blue-600">
-                <Icon icon="ph:microphone-bold" />
-              </button>
+              <div>
+                <div className="relative">
+                  <button className="rounded-full p-3 bg-blue-600 relative z-10 scale-95">
+                    <Icon icon="ph:microphone-bold" />
+                  </button>
 
-              <button className="rounded-full p-3 bg-blue-600">
+                  <div
+                    style={{ transform: `scale(${volumeDisplay})`, transition: "transform 0.1s linear" }}
+                    className="absolute top-0 left-0 w-full h-full bg-blue-400 rounded-full"
+                  />
+                </div>
+              </div>
+
+              {/* <button className="rounded-full p-3 bg-blue-600">
                 <Icon icon="majesticons:video" />
-              </button>
+              </button> */}
 
-              <button className="rounded-full p-3 bg-white text-black">
+              {/* <button className="rounded-full p-3 bg-white text-black">
                 <Icon icon="iconamoon:restart" />
-              </button>
+              </button> */}
 
               {/* <button className="rounded-full p-3">Pause</button> */}
 
               {!isUploading ? (
-                <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center">
+                <button onClick={startRecording} className="flex rounded-full p-3 bg-[#E87259] relative justify-center items-center">
                   {/* <Icon icon="fluent:record-stop-48-filled" /> */}
-                  <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} />
+                  <Icon icon={!isScreenRecording ? "fluent:record-48-filled" : "fluent:record-stop-48-filled"} className="z-10" />
+                  {isScreenRecording && <div className="animate-ping absolute inline-flex h-5/6 w-5/6 rounded-full bg-red-400 opacity-75 z-0" />}
                   {/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">
                 <button className="bg-slate-600 rounded-full p-2 px-3">3s</button>
                 <button className="bg-slate-600 rounded-full p-2 px-3">10s</button>
@@ -313,7 +302,7 @@ export const CaptureScreen = () => {
                     <div className="flex flex-col gap-1 font-medium justify-center items-center bg-white rounded-full p-2 px-6">
                       <div className="flex flex-row truncate gap-2">{uploadProgress}% Uploading ...</div>
 
-                      <Progress className="border" value={uploadProgress} />
+                      {/* <Progress className="border" value={uploadProgress} /> */}
                     </div>
                   </div>
                 </div>

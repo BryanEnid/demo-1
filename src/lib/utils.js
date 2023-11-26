@@ -4,3 +4,59 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
+
+function dataURItoBlob(dataURI) {
+  const byteString = atob(dataURI.split(",")[1]);
+  const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
+}
+
+export const generatePreview = async (recordedVideo) => {
+  try {
+    const videoUrl = URL.createObjectURL(recordedVideo);
+
+    const videoElement = document.createElement("video");
+    videoElement.src = videoUrl;
+    document.body.appendChild(videoElement);
+
+    await videoElement.play();
+
+    const canvas = document.createElement("canvas");
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    const ctx = canvas.getContext("2d");
+
+    // Draw the video frame onto the canvas
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+    // Convert the canvas content to a data URL (screenshot)
+    const screenshot = canvas.toDataURL("image/png");
+
+    // Clean up elements
+    document.body.removeChild(videoElement);
+    URL.revokeObjectURL(videoUrl);
+
+    // Convert the screenshot to a Blob
+    const screenshotBlob = dataURItoBlob(screenshot);
+
+    return screenshotBlob;
+  } catch (err) {
+    console.error("Error generating preview:", err);
+    throw err;
+  }
+};
+
+export const generateRandomNumber = (minimum, maximum) => {
+  // Generate a random decimal number between 0 (inclusive) and 1 (exclusive)
+  const randomDecimal = Math.random();
+
+  // Scale the random decimal to the desired range and round to the nearest integer
+  const randomInteger = Math.floor(randomDecimal * (maximum - minimum + 1)) + minimum;
+
+  return randomInteger;
+};
