@@ -12,6 +12,7 @@ import { useUser } from "@/hooks/useUser";
 import { Progress } from "@/chadcn/Progress";
 import { useIndexedDBVideos } from "@/hooks/useIndexedDBVideos";
 import { formatTimestamp } from "@/lib/utils";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 
 export const CaptureScreen = () => {
   // Hooks
@@ -23,26 +24,37 @@ export const CaptureScreen = () => {
 
   // State
   const [isScreenRecording, setIsScreenRecording] = React.useState(false);
-  const [devices, setDevices] = React.useState([]);
+  const [devices, setDevices] = React.useState({ audio: [], video: [] });
   const [screenDevice, setScreenDevice] = React.useState("");
+  const [audioDevice, setAudioDevice] = React.useState("");
   const [isUploading, setUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState(0);
   const [volumeDisplay, setVolumeDisplay] = React.useState(0);
   const [timelapsed, setTimeLapsed] = React.useState(0);
+  const [recordedAudio, setRecordedAudio] = React.useState();
+  const [recordedVideo, setRecordedVideo] = React.useState();
 
   // Refs
   const webcamRef = React.useRef(null);
   const videoRef = React.useRef(null);
   const mainRef = React.useRef();
-  const recorderRef = React.useRef(null);
   const streamRef = React.useRef();
+  const audioRecorderRef = React.useRef();
+  const videoRecorderRef = React.useRef();
+  const ffmpegRef = useRef(new FFmpeg());
 
   // TODO: handle new devices without refreshes
+  // Detects all audio and video devices and populates
   const handleDevices = React.useCallback(
     (mediaDevices) => {
-      const devicesList = mediaDevices.filter(({ kind }) => kind === "videoinput");
+      const devicesList = { audio: [], video: [] };
+      mediaDevices.forEach((device) => {
+        if (device.kind === "videoinput") devicesList.video.push(device);
+        if (device.kind === "audioinput") devicesList.audio.push(device);
+      });
       setDevices(devicesList);
-      setScreenDevice(devicesList[0].deviceId);
+      setScreenDevice(devicesList.video[0].deviceId);
+      setAudioDevice(devicesList.audio[0].deviceId);
     },
     [setDevices]
   );
@@ -56,6 +68,7 @@ export const CaptureScreen = () => {
     };
   }, [pathname]);
 
+  // Populates available devices
   React.useEffect(() => {
     // TODO: Not supported on Safari
     // (async () => {
@@ -66,22 +79,28 @@ export const CaptureScreen = () => {
     // })();
 
     navigator.mediaDevices
-      // ! It only ask for permission
+      // ! This is only for asking user for permission. Don't change
       .getUserMedia({ video: { width: 1920, height: 1080, aspectRatio: 16 / 9 }, audio: true })
       .then((stream) => navigator.mediaDevices.enumerateDevices())
       .then(handleDevices);
   }, [handleDevices]);
 
+  // Handles input device (audio/video) change
   React.useEffect(() => {
-    if (!!screenDevice.length) startScreen(screenDevice);
+    if (!!screenDevice.length || !!audioDevice.length)
+      startScreen(screenDevice, audioDevice).catch((e) => {
+        setScreenDevice("");
+      });
 
-    return () => {
-      // canvasRef.current = null;
-      if (webcamRef.current?.srcObject) webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-    };
-  }, [screenDevice]);
+    // TODO: Clean tracks
+    // return () => {
+    //   // canvasRef.current = null;
+    //   if (webcamRef.current?.srcObject) webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
+    //   if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+    // };
+  }, [screenDevice, audioDevice]);
 
+  // Handles time lapsed
   React.useEffect(() => {
     let instance;
     if (isScreenRecording) {
@@ -97,11 +116,20 @@ export const CaptureScreen = () => {
     };
   }, [isScreenRecording]);
 
-  const handleRecordedVideo = async (e) => {
+  // Observer for the media recorded
+  React.useEffect(() => {
+    if (recordedAudio && recordedVideo) handleRecordedVideo(recordedVideo, recordedAudio);
+  }, [recordedAudio, recordedVideo]);
+
+  const handleRecordedVideo = async (video, audio) => {
     setUploading(true);
 
     // TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
-    const recordedVideo = new Blob([e.data], { type: "video/mp4" });
+    const recordedVideo = new Blob([video.data, audio.data], { type: "video/mp4" });
+    // const recordedAudio = new Blob([audio.data], { type: "audio/mp4" });
+
+    // const videoSrc = URL.createObjectURL(recordedVideo);
+    // window.open(videoSrc);
 
     const request = await saveVideoIDB(recordedVideo);
 
@@ -111,32 +139,36 @@ export const CaptureScreen = () => {
   };
 
   const startRecording = async () => {
-    if (!isScreenRecording && !!screenDevice.length) {
+    if (!isScreenRecording && !!screenDevice.length && !!audioDevice.length) {
       // Define Inputs
       const video = mainRef.current.captureStream();
+      const audio = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: audioDevice } });
 
       // Generate combined stream
-      const recorder = new MediaRecorder(video);
-      recorderRef.current = recorder;
+      const videoRecorder = new MediaRecorder(video);
+      const audioRecorder = new MediaRecorder(audio);
+      videoRecorderRef.current = videoRecorder;
+      audioRecorderRef.current = audioRecorder;
 
       // Start recording
-      console.log("recording started");
-      recorder.start();
+      videoRecorder.start();
+      audioRecorder.start();
       setIsScreenRecording(true);
 
       // Video stopped
-      recorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
+      audioRecorder.addEventListener("dataavailable", setRecordedAudio);
+      videoRecorder.addEventListener("dataavailable", setRecordedVideo); // Video was stopped
+      // videoRecorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
     }
     if (isScreenRecording) {
       setIsScreenRecording(false);
-      recorderRef.current.stop();
+      videoRecorderRef.current.stop();
+      audioRecorderRef.current.stop();
     }
   };
 
-  // const stopRecording = () => {};
-
-  const startScreen = async (deviceId) => {
-    const config = { video: { width: 1920, height: 1080, deviceId }, audio: true };
+  const startScreen = async (deviceId, audioDeviceId) => {
+    const config = { video: { width: 1920, height: 1080, deviceId }, audio: false };
     const main = mainRef.current;
 
     // Set default config depending on the media source
@@ -145,6 +177,7 @@ export const CaptureScreen = () => {
       getDisplayMedia: async (props) => navigator.mediaDevices.getDisplayMedia({ ...props }),
       getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props }),
     };
+
     const stream = await mediaStore[isDisplayMedia ? "getDisplayMedia" : "getUserMedia"](config);
 
     stream.getTracks().forEach((track) => {
@@ -155,6 +188,7 @@ export const CaptureScreen = () => {
       };
     });
 
+    // Shows audio input levels
     // ! Vercel breaks with this code. I think it related how the app gets build
     // const audioContext = new AudioContext();
     // await audioContext.audioWorklet.addModule("/src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
@@ -176,11 +210,6 @@ export const CaptureScreen = () => {
     streamRef.current = stream;
     // TODO : fix this for facing mode
     // main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
-  };
-
-  const handleStartScreen = (value) => {
-    setScreenDevice(value !== "none" ? value : "");
-    startScreen();
   };
 
   return (
@@ -243,7 +272,8 @@ export const CaptureScreen = () => {
             <div style={{ width: "100%", maxWidth: "calc(85vh * 16/9)" }} className="flex flex-row justify-between items-center">
               {/* Start */}
               <div className="flex flex-row gap-4">
-                <Select value={screenDevice} onValueChange={handleStartScreen}>
+                {/* Video input */}
+                <Select value={screenDevice} onValueChange={(value) => setScreenDevice(value !== "none" ? value : "")}>
                   <SelectTrigger className="w-[180px] bg-white">
                     <div className="truncate">
                       <SelectValue placeholder="Select Screen Device" />
@@ -252,7 +282,27 @@ export const CaptureScreen = () => {
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Screen Recording">Screen Recorder</SelectItem>
-                    {devices.map(({ deviceId, label }) => {
+                    {devices.video.map(({ deviceId, label }) => {
+                      if (!label) return "";
+                      return (
+                        <SelectItem key={deviceId} value={deviceId}>
+                          {label}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+
+                {/* Audio input */}
+                <Select value={audioDevice} onValueChange={(value) => setAudioDevice(value !== "none" ? value : "")}>
+                  <SelectTrigger className="w-[180px] bg-white">
+                    <div className="truncate">
+                      <SelectValue placeholder="Select Audio Device" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {devices.audio.map(({ deviceId, label }) => {
                       if (!label) return "";
                       return (
                         <SelectItem key={deviceId} value={deviceId}>
