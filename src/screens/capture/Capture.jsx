@@ -41,7 +41,7 @@ export const CaptureScreen = () => {
   const streamRef = React.useRef();
   const audioRecorderRef = React.useRef();
   const videoRecorderRef = React.useRef();
-  const ffmpegRef = useRef(new FFmpeg());
+  const ffmpegRef = React.useRef(new FFmpeg());
 
   // TODO: handle new devices without refreshes
   // Detects all audio and video devices and populates
