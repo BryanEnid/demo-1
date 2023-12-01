@@ -60,3 +60,17 @@ export const generateRandomNumber = (minimum, maximum) => {
 
   return randomInteger;
 };
+
+export function formatTimestamp(timestamp) {
+  // Convert the timestamp to seconds
+  const seconds = Math.floor(timestamp / 1000);
+
+  // Calculate the minutes and seconds
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  // Format the result as "m:ss" (minutes:seconds)
+  const formattedTime = `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+
+  return formattedTime;
+}

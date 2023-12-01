@@ -60,7 +60,7 @@ export const Typography = ({ variant, children, className, ...rest }) => {
 
     case "p": {
       return (
-        <p {...rest} className={["leading-7 [&:not(:first-child)]:mt-6", className].join(" ")}>
+        <p {...rest} className={["leading-7", className].join(" ")}>
           {children}
         </p>
       );
@@ -76,7 +76,7 @@ export const Typography = ({ variant, children, className, ...rest }) => {
 
     case "blockquote": {
       return (
-        <blockquote {...rest} className={["mt-6 border-l-2 pl-6 italic", className].join(" ")}>
+        <blockquote {...rest} className={["border-l-2 pl-6 italic", className].join(" ")}>
           {children}
         </blockquote>
       );

@@ -55,7 +55,7 @@ export const Profile = () => {
 
       <div>
         {/* Header */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center gap-8">
           <img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48" />
           <Typography variant="h2">{profile?.name}</Typography>
           <Typography variant="blockquote">
@@ -63,7 +63,7 @@ export const Profile = () => {
           </Typography>
         </div>
 
-        <div className="flex my-20 gap-4 justify-center">
+        <div className="flex mt-8 mb-20 gap-4 justify-center">
           <NavOption title="Audio" />
           <NavOption title="Buckets" />
           <NavOption title="Experience" />
