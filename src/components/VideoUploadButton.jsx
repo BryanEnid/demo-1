@@ -8,7 +8,7 @@ export const VideoUploadButton = ({ onUpload, disabled }) => {
   const handleFileChange = (e) => {
     const files = e.target.files;
 
-    if (!!files.length) onUpload(files);
+    if (files.length) onUpload(files);
   };
 
   return (

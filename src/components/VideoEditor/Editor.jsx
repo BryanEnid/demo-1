@@ -360,7 +360,7 @@ function Editor({ videoUrl, timings, setTimings }) {
 
     try {
       //Disabling new-cap for FS function
-      // eslint-disable-next-line new-cap
+       
       ffmpeg.current.FS("writeFile", "myFile.mp4", await fetchFile(videoUrl));
 
       ffmpeg.current.setProgress(({ ratio }) => {
@@ -374,7 +374,7 @@ function Editor({ videoUrl, timings, setTimings }) {
       await ffmpeg.current.run("-ss", `${trimStart}`, "-accurate_seek", "-i", "myFile.mp4", "-to", `${trimmedVideo}`, "-codec", "copy", "output.mp4");
 
       //Disabling new-cap for FS function
-      // eslint-disable-next-line new-cap
+       
       const data = ffmpeg.current.FS("readFile", "output.mp4");
 
       const url = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));

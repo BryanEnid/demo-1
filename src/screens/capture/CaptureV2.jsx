@@ -40,7 +40,7 @@ export const CaptureScreen = () => {
 
     (async () => {
       try {
-        if (!!screenDevice.length) await startScreen(screenDevice);
+        if (screenDevice.length) await startScreen(screenDevice);
         // if (!!selfieDevice.length) await startWebcam(selfieDevice);
         // if (!!screenDevice.length || !!selfieDevice.length) drawScreen();
       } catch (e) {}
