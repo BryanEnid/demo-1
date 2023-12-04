@@ -25,6 +25,7 @@ jobs:
           cache: "npm"
 
       - name: Linter
+        uses: actions/setup-node@v3
       - run: vite build
 
       - name: Install
@@ -33,4 +34,5 @@ jobs:
           cmd: install # will run `yarn install` command
 
       - name: Build
+        uses: actions/setup-node@v3
       - run: vite build
