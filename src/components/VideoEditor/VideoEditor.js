@@ -1,4 +1,4 @@
-/* eslint-disable func-names */
+ 
 import { useState, useEffect } from "react";
 import { FileDrop } from "react-file-drop"; // https://github.com/sarink/react-file-drop
 import "../editor.css";

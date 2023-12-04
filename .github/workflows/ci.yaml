@@ -1,13 +1,11 @@
-name: React CI
+# Prettier
+name: Prettier
 
-on:
-  pull_request:
-    branches:
-      - main
-      - dev
+on: [push]
 
 jobs:
   build:
+    name: Prettier
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,7 +14,6 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      # Default steps
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
@@ -24,13 +21,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      - name: Linter
-      - run: vite build
-
-      - name: Install
+      - name: Prettier
         uses: borales/actions-yarn@v4
         with:
-          cmd: install # will run `yarn install` command
+          cmd: format
 
-      - name: Build
-      - run: vite build
+      # Start Here
+    # - run: yarn run test

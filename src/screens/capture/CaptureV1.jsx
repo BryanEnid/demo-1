@@ -36,8 +36,8 @@ export const CaptureScreen = () => {
 
   React.useEffect(() => {
     canvasRef.current = document.createElement("canvas");
-    if (!!screenDevice.length) startScreen(screenDevice);
-    if (!!selfieDevice.length) startWebcam(selfieDevice);
+    if (screenDevice.length) startScreen(screenDevice);
+    if (selfieDevice.length) startWebcam(selfieDevice);
     if (!!screenDevice.length || !!selfieDevice.length) drawScreen();
 
     return () => {
