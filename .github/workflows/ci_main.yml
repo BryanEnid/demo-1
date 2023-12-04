@@ -26,7 +26,7 @@ jobs:
 
       - name: Linter
         uses: actions/setup-node@v3
-      - run: vite build
+      - run: linter
 
       - name: Install
         uses: borales/actions-yarn@v4
