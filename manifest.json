@@ -1,18 +1,18 @@
 {
-  "name": "Observe",
-  "short_name": "Observe",
-  "description": "My Awesome App description",
-  "start_url": "/",
-  "display": "fullscreen",
-  "categories": ["books", "education", "medical"],
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "icons": [
-    {
-      "src": "src/assets/observe_logo_512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "permissions": ["camera", "microphone"]
+	"name": "Observe",
+	"short_name": "Observe",
+	"description": "My Awesome App description",
+	"start_url": "/",
+	"display": "fullscreen",
+	"categories": ["books", "education", "medical"],
+	"background_color": "#ffffff",
+	"theme_color": "#000000",
+	"icons": [
+		{
+			"src": "src/assets/observe_logo_512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	],
+	"permissions": ["camera", "microphone"]
 }

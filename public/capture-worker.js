@@ -3,8 +3,8 @@ let stream = null;
 
 // worker.js
 self.onmessage = function (e) {
-  if (e.data.action === "attach_canvas") canvasSetup(e);
-  if (e.data.action === "render") render(e);
+  if (e.data.action === 'attach_canvas') canvasSetup(e);
+  if (e.data.action === 'render') render(e);
 };
 
 const canvasSetup = (e) => {
@@ -32,7 +32,7 @@ const drawScreen = async () => {
   // Canvas
   const canvasWidth = canvas.width;
   const canvasHeight = canvas.height;
-  const ctx = canvas.getContext("2d", { alpha: false });
+  const ctx = canvas.getContext('2d', { alpha: false });
 
   // ctx.scale(dpr, dpr);
 
