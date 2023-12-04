@@ -25,12 +25,16 @@ jobs:
           cache: "npm"
 
       - name: Linter
-      - run: vite build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
 
       - name: Install
         uses: borales/actions-yarn@v4
         with:
-          cmd: install # will run `yarn install` command
+          cmd: install
 
       - name: Build
-      - run: vite build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
