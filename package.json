@@ -9,7 +9,7 @@
 		"preview": "vite preview --host",
 		"lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
 		"format": "prettier --write .",
-		"style:all": "yarn lint",
+		"style:all": "yarn lint && prettier . --check",
 		"prepare": "husky install"
 	},
 	"dependencies": {
