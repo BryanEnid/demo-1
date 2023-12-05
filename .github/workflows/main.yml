@@ -1,13 +1,9 @@
-name: React CI
+name: CI
 
-on:
-  push:
-    exclude:
-      - main
-      - dev
+on: [pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -24,7 +20,20 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      # - name: Formatter
+      # - name: Linter
+      # - run: yarn run style:all
+
+      # - name: Linter
+      # uses: borales/actions-yarn@v4
+      # with:
+      # cmd: style:all
+
+      # - name: Install
       #   uses: borales/actions-yarn@v4
       #   with:
-      #     cmd: format
+      #     cmd: install
+
+      # - name: Build
+      #   uses: borales/actions-yarn@v4
+      #   with:
+      #     cmd: build
