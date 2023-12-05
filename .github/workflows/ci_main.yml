@@ -32,12 +32,12 @@ jobs:
       # with:
       # cmd: style:all
 
-      - name: Install
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: install
+      # - name: Install
+      #   uses: borales/actions-yarn@v4
+      #   with:
+      #     cmd: install
 
-      - name: Build
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: build
+      # - name: Build
+      #   uses: borales/actions-yarn@v4
+      #   with:
+      #     cmd: build
