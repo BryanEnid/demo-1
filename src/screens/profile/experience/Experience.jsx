@@ -1,5 +1,5 @@
-import React from "react";
+import React from 'react';
 
-export const Experience = () => {
-  return <div>Experience</div>;
-};
+export function Experience() {
+	return <div>Experience</div>;
+}

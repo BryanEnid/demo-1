@@ -3,169 +3,171 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: hsl(0, 0%, 100%);
-    --foreground: hsl(222.2, 47.4%, 11.2%);
+	:root {
+		--background: hsl(0, 0%, 100%);
+		--foreground: hsl(222.2, 47.4%, 11.2%);
 
-    --muted: hsl(210, 40%, 96.1%);
-    --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+		--muted: hsl(210, 40%, 96.1%);
+		--muted-foreground: hsl(215.4, 16.3%, 46.9%);
 
-    --popover: hsl(0, 0%, 100%);
-    --popover-foreground: hsl(222.2, 47.4%, 11.2%);
+		--popover: hsl(0, 0%, 100%);
+		--popover-foreground: hsl(222.2, 47.4%, 11.2%);
 
-    --border: hsl(214.3, 31.8%, 91.4%);
-    --input: hsl(214.3, 31.8%, 91.4%);
+		--border: hsl(214.3, 31.8%, 91.4%);
+		--input: hsl(214.3, 31.8%, 91.4%);
 
-    --card: hsl(0, 0%, 100%);
-    --card-foreground: hsl(222.2, 47.4%, 11.2%);
+		--card: hsl(0, 0%, 100%);
+		--card-foreground: hsl(222.2, 47.4%, 11.2%);
 
-    --primary: hsl(210, 65%, 60%);
-    --primary-foreground: hsl(210, 40%, 98%);
+		--primary: hsl(210, 65%, 60%);
+		--primary-foreground: hsl(210, 40%, 98%);
 
-    --secondary: hsl(210, 40%, 96.1%);
-    --secondary-foreground: hsl(222.2, 47.4%, 11.2%);
+		--secondary: hsl(210, 40%, 96.1%);
+		--secondary-foreground: hsl(222.2, 47.4%, 11.2%);
 
-    --accent: hsl(210, 40%, 96.1%);
-    --accent-foreground: hsl(222.2, 47.4%, 11.2%);
+		--accent: hsl(210, 40%, 96.1%);
+		--accent-foreground: hsl(222.2, 47.4%, 11.2%);
 
-    --destructive: hsl(0, 100%, 50%);
-    --destructive-foreground: hsl(210, 40%, 98%);
+		--destructive: hsl(0, 100%, 50%);
+		--destructive-foreground: hsl(210, 40%, 98%);
 
-    --ring: hsl(215, 20.2%, 65.1%);
+		--ring: hsl(215, 20.2%, 65.1%);
 
-    --radius: 0.5rem;
-  }
+		--radius: 0.5rem;
+	}
 
-  .dark {
-    --background: hsl(224, 71%, 4%);
-    --foreground: hsl(213, 31%, 91%);
+	.dark {
+		--background: hsl(224, 71%, 4%);
+		--foreground: hsl(213, 31%, 91%);
 
-    --muted: hsl(223, 47%, 11%);
-    --muted-foreground: hsl(215.4, 16.3%, 56.9%);
+		--muted: hsl(223, 47%, 11%);
+		--muted-foreground: hsl(215.4, 16.3%, 56.9%);
 
-    --accent: hsl(216, 34%, 17%);
-    --accent-foreground: hsl(210, 40%, 98%);
+		--accent: hsl(216, 34%, 17%);
+		--accent-foreground: hsl(210, 40%, 98%);
 
-    --popover: hsl(224, 71%, 4%);
-    --popover-foreground: hsl(215, 20.2%, 65.1%);
+		--popover: hsl(224, 71%, 4%);
+		--popover-foreground: hsl(215, 20.2%, 65.1%);
 
-    --border: hsl(216, 34%, 17%);
-    --input: hsl(216, 34%, 17%);
+		--border: hsl(216, 34%, 17%);
+		--input: hsl(216, 34%, 17%);
 
-    --card: hsl(224, 71%, 4%);
-    --card-foreground: hsl(213, 31%, 91%);
+		--card: hsl(224, 71%, 4%);
+		--card-foreground: hsl(213, 31%, 91%);
 
-    --primary: hsl(210, 40%, 98%);
-    --primary-foreground: hsl(222.2, 47.4%, 1.2%);
+		--primary: hsl(210, 40%, 98%);
+		--primary-foreground: hsl(222.2, 47.4%, 1.2%);
 
-    --secondary: hsl(222.2, 47.4%, 11.2%);
-    --secondary-foreground: hsl(210, 40%, 98%);
+		--secondary: hsl(222.2, 47.4%, 11.2%);
+		--secondary-foreground: hsl(210, 40%, 98%);
 
-    --destructive: hsl(0, 63%, 31%);
-    --destructive-foreground: hsl(210, 40%, 98%);
+		--destructive: hsl(0, 63%, 31%);
+		--destructive-foreground: hsl(210, 40%, 98%);
 
-    --ring: hsl(216, 34%, 17%);
+		--ring: hsl(216, 34%, 17%);
 
-    --radius: 0.5rem;
-  }
+		--radius: 0.5rem;
+	}
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+	* {
+		@apply border-border;
+	}
 
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+	body {
+		@apply bg-background text-foreground;
+		font-feature-settings:
+			'rlig' 1,
+			'calt' 1;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-Black.otf");
-    font-weight: 900;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-Black.otf');
+		font-weight: 900;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-BlackItalic.otf");
-    font-weight: 900;
-    font-style: italic;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-BlackItalic.otf');
+		font-weight: 900;
+		font-style: italic;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-Bold.otf");
-    font-weight: bold;
-    font-style: normal;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-Bold.otf');
+		font-weight: bold;
+		font-style: normal;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-BoldItalic.otf");
-    font-weight: bold;
-    font-style: italic;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-BoldItalic.otf');
+		font-weight: bold;
+		font-style: italic;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-Medium.otf");
-    font-weight: 500;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-Medium.otf');
+		font-weight: 500;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-MediumItalic.otf");
-    font-weight: 500;
-    font-style: italic;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-MediumItalic.otf');
+		font-weight: 500;
+		font-style: italic;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-Regular.otf");
-    font-weight: normal;
-    font-style: normal;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-Regular.otf');
+		font-weight: normal;
+		font-style: normal;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-Italic.otf");
-    font-weight: normal;
-    font-style: italic;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-Italic.otf');
+		font-weight: normal;
+		font-style: italic;
+	}
 
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-Light.otf");
-    font-weight: 100;
-  }
-  @font-face {
-    font-family: "Satoshi";
-    src: url("@/assets/fonts/Satoshi/Satoshi-LightItalic.otf");
-    font-weight: 100;
-    font-style: italic;
-  }
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-Light.otf');
+		font-weight: 100;
+	}
+	@font-face {
+		font-family: 'Satoshi';
+		src: url('@/assets/fonts/Satoshi/Satoshi-LightItalic.otf');
+		font-weight: 100;
+		font-style: italic;
+	}
 }
 
 :root {
-  font-family: Satoshi, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+	font-family: Satoshi, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
 
-  /* color-scheme: light dark; */
-  /* color: rgba(255, 255, 255, 0.87); */
-  /* background-color: #242424; */
+	/* color-scheme: light dark; */
+	/* color: rgba(255, 255, 255, 0.87); */
+	/* background-color: #242424; */
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
 }
 
 body {
-  margin: 0;
-  padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 /* Apply a circular clip-path to the PiP window */
