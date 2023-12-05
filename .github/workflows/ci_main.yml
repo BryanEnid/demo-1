@@ -25,9 +25,7 @@ jobs:
           cache: 'npm'
 
       - name: Linter
-        uses: borales/actions-yarn@v4
-        with:
-          cmd: style:all
+      - run: npm run style:all
 
       - name: Install
         uses: borales/actions-yarn@v4
