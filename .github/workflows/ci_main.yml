@@ -27,7 +27,7 @@ jobs:
       - name: Linter
         uses: borales/actions-yarn@v4
         with:
-          cmd: install
+          cmd: style:all
 
       - name: Install
         uses: borales/actions-yarn@v4

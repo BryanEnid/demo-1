@@ -1,6 +1,10 @@
 name: React CI
 
-on: [push]
+on:
+  push:
+    exclude:
+      - main
+      - dev
 
 jobs:
   build:
