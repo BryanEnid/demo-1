@@ -1,8 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -18,13 +17,13 @@ import "firebase/firestore";
 // };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAoHRD5Y_qq6PtrcWDwRbRJ5ooVbr1Xu38",
-  authDomain: "observe-93479.firebaseapp.com",
-  projectId: "observe-93479",
-  storageBucket: "observe-93479.appspot.com",
-  messagingSenderId: "720749345099",
-  appId: "1:720749345099:web:a68f0b9300e7b9743350ce",
-  measurementId: "G-9H9M4JBRDN",
+	apiKey: 'AIzaSyAoHRD5Y_qq6PtrcWDwRbRJ5ooVbr1Xu38',
+	authDomain: 'observe-93479.firebaseapp.com',
+	projectId: 'observe-93479',
+	storageBucket: 'observe-93479.appspot.com',
+	messagingSenderId: '720749345099',
+	appId: '1:720749345099:web:a68f0b9300e7b9743350ce',
+	measurementId: 'G-9H9M4JBRDN'
 };
 
 // Initialize Firebase
