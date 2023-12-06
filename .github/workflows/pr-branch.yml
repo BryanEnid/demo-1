@@ -1,4 +1,4 @@
-name: Set PR default branch
+name: Update Base Branch
 
 on:
   pull_request:
@@ -6,10 +6,26 @@ on:
       - opened
 
 jobs:
-  set-pr-branch:
+  update-base-branch:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Set PR branch
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Print Installed Tools
         run: |
-          echo "base: dev" > .github/workflows/pr-branch.yml
-        shell: bash
+          echo "Installed tools:"
+          ls /usr/bin
+
+      - name: Set base branch to dev
+        run: |
+          TOKEN=$GITHUB_TOKEN
+          BASE_BRANCH=dev
+          PULL_REQUEST_URL=$(jq -r .pull_request.url $GITHUB_EVENT_PATH)
+
+          curl -X PATCH \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer $TOKEN" \
+            -d "{\"base\":\"$BASE_BRANCH\"}" \
+            "$PULL_REQUEST_URL"
