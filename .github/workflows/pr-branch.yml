@@ -26,6 +26,6 @@ jobs:
 
           curl -X PATCH \
             -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer $TOKEN" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
             -d "{\"base\":\"$BASE_BRANCH\"}" \
             "$PULL_REQUEST_URL"
