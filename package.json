@@ -78,10 +78,5 @@
 		"prettier": "^3.1.0",
 		"vite": "^4.4.5",
 		"vite-plugin-pwa": "^0.16.5"
-	},
-	"husky": {
-		"hooks": {
-			"pre-push": "prettier --write ."
-		}
 	}
 }
