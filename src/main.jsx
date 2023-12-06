@@ -1,16 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { Routes } from "./Routes";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Routes } from './Routes';
 
-import "./Global.css";
-import { GlobalProvider } from "./providers";
+import './Global.css';
+import { GlobalProvider } from './providers';
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <GlobalProvider>
-      <Routes />
-    </GlobalProvider>
-  </React.StrictMode>
+ReactDOM.createRoot(document.getElementById('root')).render(
+	<React.StrictMode>
+		<GlobalProvider>
+			<Routes />
+		</GlobalProvider>
+	</React.StrictMode>
 );
 
 // if ("serviceWorker" in navigator) {

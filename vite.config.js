@@ -1,47 +1,47 @@
-import { defineConfig } from "vite";
-import path from "path";
+import { defineConfig } from 'vite';
+import path from 'path';
 
 // Plugins
-import react from "@vitejs/plugin-react-swc";
-import { VitePWA } from "vite-plugin-pwa";
-import { qrcode } from "vite-plugin-qrcode";
+import react from '@vitejs/plugin-react-swc';
+import { VitePWA } from 'vite-plugin-pwa';
+import { qrcode } from 'vite-plugin-qrcode';
 
 // Files
-import manifest from "./manifest.json";
+import manifest from './manifest.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      // Registering PWA
-      registerType: "autoUpdate",
-      injectRegister: "script",
+	plugins: [
+		react(),
+		VitePWA({
+			// Registering PWA
+			registerType: 'autoUpdate',
+			injectRegister: 'script',
 
-      // Workbox
-      workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
-      },
+			// Workbox
+			workbox: {
+				clientsClaim: true,
+				skipWaiting: true
+			},
 
-      // Manifest
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
-      manifest: manifest,
-    }),
-    qrcode(),
-  ],
+			// Manifest
+			includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+			manifest
+		}),
+		qrcode()
+	],
 
-  server: {
-    // ! Enable this for local https
-    https: {
-      key: path.resolve(__dirname, "localhost.key"),
-      cert: path.resolve(__dirname, "localhost.crt"),
-    },
-  },
+	server: {
+		// ! Enable this for local https
+		https: {
+			key: path.resolve(__dirname, 'localhost.key'),
+			cert: path.resolve(__dirname, 'localhost.crt')
+		}
+	},
 
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"), // Create an alias named '@' pointing to the 'src' folder
-    },
-  },
+	resolve: {
+		alias: {
+			'@': path.resolve(__dirname, 'src') // Create an alias named '@' pointing to the 'src' folder
+		}
+	}
 });
