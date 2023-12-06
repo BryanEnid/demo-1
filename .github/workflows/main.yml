@@ -3,13 +3,14 @@ name: CI
 on: [pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        #
 
     steps:
       # Default steps
