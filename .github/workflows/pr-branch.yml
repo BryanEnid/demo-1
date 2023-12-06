@@ -1,0 +1,15 @@
+name: Set PR default branch
+
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  set-pr-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set PR branch
+        run: |
+          echo "base: dev" > .github/workflows/pr_branch.yml
+        shell: bash
