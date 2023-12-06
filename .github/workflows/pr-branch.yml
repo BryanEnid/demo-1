@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Set PR branch
         run: |
-          echo "base: dev" > .github/workflows/pr_branch.yml
+          echo "base: dev" > .github/workflows/pr-branch.yml
         shell: bash
