@@ -20,20 +20,14 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - name: Yarn Version
+        run: yarn --version
+
+      - name: Use Yarn
+        run: yarn
+
+      - name: Build
+        run: yarn run build
+
       - name: Linter
-      - run: yarn run style:all
-
-      # - name: Linter
-      # uses: borales/actions-yarn@v4
-      # with:
-      # cmd: style:all
-
-      # - name: Install
-      #   uses: borales/actions-yarn@v4
-      #   with:
-      #     cmd: install
-
-      # - name: Build
-      #   uses: borales/actions-yarn@v4
-      #   with:
-      #     cmd: build
+        run: yarn run style:all
