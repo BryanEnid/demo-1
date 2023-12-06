@@ -4,7 +4,7 @@
 name: React CI/CD
 
 on:
-  push:
+  pull_request:
     branches: ["main"]
 
 jobs:
