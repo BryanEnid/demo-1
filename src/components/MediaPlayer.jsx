@@ -61,7 +61,7 @@ export function VR_3D() {
 	);
 }
 
-export function Video360({ className, onVideoReady }) {
+export function Video360({ className, onVideoReady, src }) {
 	const videoRef = React.useRef();
 	const [isReady, setReady] = React.useState(null);
 
@@ -90,16 +90,8 @@ export function Video360({ className, onVideoReady }) {
 			/>
 
 			<a-assets>
-				<video
-					id="video"
-					style={{ display: 'none' }}
-					// autoplay
-					loop
-				>
-					<source
-						type="video/mp4"
-						src="https://cdn.jsdelivr.net/gh/aframevr/assets@master/360-video-boilerplate/video/city.mp4"
-					/>
+				<video id="video" style={{ display: 'none' }} autoPlay loop crossOrigin="anonymous">
+					<source type="video/mp4" src={src} />
 				</video>
 			</a-assets>
 		</a-scene>
