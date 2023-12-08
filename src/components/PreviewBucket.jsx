@@ -19,6 +19,7 @@ import { Progress } from '@/chadcn/Progress';
 import { cn, generatePreview, generateRandomNumber } from '@/lib/utils';
 import { CircularProgress } from './CircularProgress';
 import { CachedVideo } from './CachedVideo';
+import { VR_3D, Video360 } from '@/components/MediaPlayer';
 
 export function PreviewBucket({ show, onClose, data: inData, editMode, documentId }) {
 	// Hooks
@@ -29,6 +30,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		useCollection('buckets');
 
 	// State
+	const [isFullscreen, setIsFullscreen] = React.useState(false);
 	const [isEditMode, setEditMode] = React.useState(editMode ?? false);
 	const [isUploading, setUploading] = React.useState(false);
 	const [progress, setProgress] = React.useState(20);
@@ -47,6 +49,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 	// Refs
 	const dropZoneRef = React.useRef();
 	const videoRef = React.useRef();
+	const video360Ref = React.useRef();
 
 	React.useEffect(() => {
 		if (inData) {
@@ -58,6 +61,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 	// Function to toggle fullscreen
 	const toggleFullscreen = () => {
 		const videoElement = videoRef.current;
+		console.log(videoElement);
 
 		if (!videoElement) return;
 
@@ -74,7 +78,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 
 		// TODO: Fix this
 		// Toggle the fullscreen state
-		// setIsFullscreen(!isFullscreen);
+		setIsFullscreen(!isFullscreen);
 	};
 
 	const handleNextVideo = () => {
@@ -138,16 +142,17 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 				setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }));
 
 				for (const item of body) {
+					const is360Video = item.file.name.split('.').at(-1) === 'insv';
 					const reader = new FileReader();
 					reader.readAsArrayBuffer(item.file);
 					reader.onload = () =>
-						saveVideo({ result: reader.result, details: { ...item, documentId: dbid } }, item.index);
+						saveVideo({ result: reader.result, details: { ...item, documentId: dbid } }, item.index, is360Video);
 				}
 			}
 		});
 	};
 
-	const saveVideo = async (file, index) => {
+	const saveVideo = async (file, index, is360Video) => {
 		try {
 			const dbid = documentId || file.details.documentId;
 			setUploading(true);
@@ -169,7 +174,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 					// for now dont save it
 					if (dbid) {
 						appendVideo(
-							{ videoData: { image: imageUrl, videoUrl }, documentId: dbid },
+							{ videoData: { image: imageUrl, videoUrl, is360Video }, documentId: dbid },
 							{
 								onSuccess: () => {
 									// const videos = [...data.videos];
@@ -252,6 +257,13 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		}
 	};
 
+	const handle360Video = (ref, video) => {
+		video360Ref.current = { ref, video };
+		video360Ref.current.video.play();
+	};
+
+	const isCurrentVideo360 = data.videos[currentVideo]?.is360Video;
+
 	if (isEditMode) {
 		return (
 			<PageModal show={show} onClose={handleExit}>
@@ -259,16 +271,25 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 					{/* Video Player */}
 					<div className="aspect-[16/9] shadow bg-black">
 						<div className="w-full h-full backdrop-blur-md">
-							<video
-								autoPlay
-								controls={false}
-								ref={videoRef}
-								src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
-								onEnded={handleNextVideo}
-								type="video/mp4"
-								loop={data?.videos?.length === 1}
-								className="w-full h-full object-center rounded-none z-10"
-							/>
+							{!isCurrentVideo360 && (
+								<CachedVideo
+									autoPlay
+									controls={false}
+									ref={videoRef}
+									src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
+									onEnded={handleNextVideo}
+									loop={data?.videos?.length === 1}
+									className="w-full h-full object-center rounded-none z-10"
+								/>
+							)}
+
+							{isCurrentVideo360 && (
+								<Video360
+									onVideoReady={handle360Video}
+									src={data.videos[currentVideo]?.videoUrl}
+									className="w-screen h-screen"
+								/>
+							)}
 						</div>
 					</div>
 					<div className="flex flex-row  px-8 my-6">
@@ -357,9 +378,10 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 									isDragOver && 'bg-primary'
 								].join(' ')}
 							>
-								{isUploading && (
+								{/* {isUploading && (
 									<Progress value={progress} color="bg-primary" className="bg-blue-100 absolute w-full left-0 top-0" />
-								)}
+								)} */}
+
 								<ReactSortable
 									className="flex flex-wrap justify-between w-full relative"
 									list={data.videos}
@@ -378,14 +400,20 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 									{[...data.videos, ...new Array(12 - data?.videos?.length).fill('')].map((item, index) => {
 										if (item?.image) {
 											return (
-												<div
-													key={item.image}
-													className="draggable w-1/4 h-full aspect-video p-2 flex justify-center items-center"
-												>
+												<div key={item.image} className="relative draggable w-1/4 h-full aspect-video p-2 flex ">
 													<img
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
 													/>
+
+													{item.is360Video && (
+														<Button
+															variant="secondary"
+															className={cn('absolute bottom-0 right-0 bg-gray-400/20 backdrop-blur-sm text-white')}
+														>
+															<Icon icon="tabler:360-view" fontSize={30} />
+														</Button>
+													)}
 												</div>
 											);
 										}
@@ -464,19 +492,30 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 			{/* Video Player */}
 			<div className="aspect-[16/9] shadow bg-black">
 				<div className="w-full h-full backdrop-blur-md">
-					<CachedVideo
-						autoPlay
-						controls={false}
-						ref={videoRef}
-						src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
-						onEnded={handleNextVideo}
-						loop={data?.videos?.length === 1}
-						className="w-full h-full object-center rounded-none z-10"
-					/>
+					{!isCurrentVideo360 && (
+						<>
+							<CachedVideo
+								autoPlay
+								controls={false}
+								ref={videoRef}
+								src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
+								onEnded={handleNextVideo}
+								loop={data?.videos?.length === 1}
+								className="w-full h-full object-center rounded-none z-10"
+							/>
+							<div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
+								<Icon onClick={toggleFullscreen} className="text-3xl text-white" icon="iconamoon:screen-full-duotone" />
+							</div>
+						</>
+					)}
 
-					<div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
-						<Icon onClick={toggleFullscreen} className="text-3xl text-white" icon="iconamoon:screen-full-duotone" />
-					</div>
+					{isCurrentVideo360 && (
+						<Video360
+							onVideoReady={handle360Video}
+							src={data.videos[currentVideo]?.videoUrl}
+							className="w-screen h-screen"
+						/>
+					)}
 				</div>
 			</div>
 
@@ -528,8 +567,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 					{data.videos.map(({ image }, index) => {
 						if (image) {
 							return (
-								<button onClick={() => setCurrentVideo(index)}>
-									<div key={image}>
+								<button onClick={() => setCurrentVideo(index)} key={image}>
+									<div>
 										{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
 										<LazyLoadImage
 											className={cn(
