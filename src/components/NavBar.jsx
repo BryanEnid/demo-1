@@ -187,7 +187,6 @@ export function NavBar() {
 				editMode
 				onClose={handleCancel}
 				disabled={![bucketName.length, bucketDescription.length].every(Boolean)}
-				onChange={() => {}}
 				data={null}
 			/>
 		</>

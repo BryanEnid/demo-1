@@ -465,22 +465,35 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 						</div>
 					)}
 
-					<div className="flex justify-end flex-row text-center text-white/50 px-8 my-8  gap-3">
-						<Button
-							variant="secondary"
+					<div className="flex justify-between px-8 my-8" on>
+						<button
+							variant="destructive"
 							onClick={handleClose}
+							onMouseDown={() => console.log('down')}
+							onMouseUp={() => console.log('up')}
 							// disabled={![data.description.length, data.title.length].every(Boolean)}
 							className="w-full max-w-[150px]"
 						>
-							Cancel
-						</Button>
-						<Button
-							onClick={() => handleCreateBucket({ cb: handleClose })}
-							disabled={![data.description.length, data.title.length].every(Boolean)}
-							className="w-full max-w-[200px]"
-						>
-							Save
-						</Button>
+							Hold to Delete
+						</button>
+
+						<div className="flex flex-row justify-end gap-3 text-center text-white/50 w-full">
+							<Button
+								variant="secondary"
+								onClick={handleClose}
+								// disabled={![data.description.length, data.title.length].every(Boolean)}
+								className="w-full max-w-[150px]"
+							>
+								Cancel
+							</Button>
+							<Button
+								onClick={() => handleCreateBucket({ cb: handleClose })}
+								disabled={![data.description.length, data.title.length].every(Boolean)}
+								className="w-full max-w-[200px]"
+							>
+								Save
+							</Button>
+						</div>
 					</div>
 				</div>
 			</PageModal>
