@@ -36,9 +36,8 @@ import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 //   );
 // };
 
-export function CachedVideo({ videoUrl, ...props }) {
+export const CachedVideo = React.forwardRef(function CachedVideo({ videoUrl, ...props }, ref) {
 	// const [cachedVideoUrl, setCachedVideoUrl] = React.useState(null);
-	const videoRef = React.useRef();
 
 	// React.useEffect(() => {
 	//   const loadVideo = async () => {
@@ -79,9 +78,9 @@ export function CachedVideo({ videoUrl, ...props }) {
 	// );
 
 	return (
-		<video {...props}>
-			<source src={videoUrl} type="video/mp4" ref={videoRef} />
+		<video {...props} ref={ref}>
+			<source src={videoUrl} type="video/mp4" />
 			Your browser does not support the video tag.
 		</video>
 	);
-}
+});

@@ -24,7 +24,7 @@ export function BucketItem({ name, preview, data, documentId, onClick }) {
 								loop
 								src={preview}
 								// crossOrigin="use-credentials"
-								className="object-cover aspect-square rounded-full"
+								className="object-cover aspect-square rounded-full w-full h-full"
 							/>
 						)}
 
