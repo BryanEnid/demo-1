@@ -1,47 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { db } from '@/config/firebase'; // Assuming you have Firebase Storage configured
+
+import { useUser } from '@/hooks/useUser.js';
 
 export const useAuthenticationProviders = () => {
 	// Initialize Firebase Auth
 	const auth = getAuth();
-	const [user, setUser] = React.useState(null);
-	const [isLoading, setLoading] = React.useState(true);
+	const [authToken, setAuthToken] = useState(null);
+
+	// Function to sign out
+	const signOutUser = async () => signOut(auth).then(() => setUser(null));
+
+	const {
+		user,
+		isLoading: isUserLoading,
+		createUser,
+		setUser,
+		setLoading
+	} = useUser({
+		authToken,
+		logout: signOutUser
+	});
 
 	React.useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-			setUser(authUser);
+			setAuthToken(authUser?.accessToken);
+			setUser((_user) => (authUser ? { ...authUser, id: _user?.id } : null));
 			setLoading(false);
 		});
+
 		return () => {
 			unsubscribe();
-			setLoading(true);
+			// setLoading(true);
 			setUser(null);
 		};
 	}, []);
-
-	const createUser = async (documentData, documentId) => {
-		const collectionRef = collection(db, 'users');
-		const docRef = doc(collectionRef, documentId);
-		return setDoc(docRef, documentData);
-	};
 
 	// Function to sign in with Google
 	const signInWithGoogle = async () => {
 		// Get from provider
 		const provider = new GoogleAuthProvider();
 		const { user } = await signInWithPopup(auth, provider);
-		setUser(user);
-		return user;
-	};
 
-	// Function to sign out
-	const signOutUser = async () => signOut(auth).then(() => setUser(null));
+		const data = {
+			username: user.uid,
+			photoURL: user.photoURL,
+			name: user.displayName,
+			email: user.email,
+			providerData: user.providerData,
+			reloadUserInfo: user.reloadUserInfo,
+			uid: user.uid
+		};
+		await createUser(data);
+	};
 
 	return {
 		user,
-		isLoading,
+		authToken,
+		isLoading: isUserLoading,
 		signInWithGoogle,
 		signOutUser,
 		createUser

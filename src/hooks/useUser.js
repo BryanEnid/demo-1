@@ -1,30 +1,42 @@
-import React from 'react';
-import { useCollection } from './useCollection';
-import { useAuthenticationProviders } from './useAuthenticationProviders';
+import React, { useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-export const useUser = () => {
-	// Initialize Firebase Auth
-	const { user, isLoading: providerLoading } = useAuthenticationProviders();
+import { createUser as handleCreateUser, getUser } from '@/hooks/api/users.js';
 
-	const { data } = useCollection('users', {
-		keys: [user?.uid],
-		query: ['where', 'uid', '==', user?.uid],
-		select: (item) => item[0],
-		enabled: !!user?.uid
+export const useUser = (auth, id) => {
+	const [user, setUser] = React.useState(null);
+	const [isLoading, setLoading] = React.useState(true);
+
+	const { data, isLoading: isUserLoading } = useQuery({
+		gcTime: Infinity,
+		queryKey: [auth.authToken, id],
+		queryFn: () => (id && auth.authToken ? getUser(auth, id) : null)
 	});
 
-	const isLoading = (() => {
-		// if loading is false, has user, and not data -> it still loading -> TRUE
-		// if loading is false, and not user, and data -> stop loading -> FALSE
-		// if loading is false, has user, and data -> stop loading -> FALSE
-		if (providerLoading && user && !data) return true;
-		if (!providerLoading && !user && !data) return false;
-		if (!providerLoading && user && data) return false;
-		return true;
-	})();
+	useEffect(() => {
+		if (data) {
+			setUser((val) => ({ ...val, ...data }));
+		}
+	}, [data]);
+
+	const { mutateAsync } = useMutation({
+		mutationFn: async (data) => handleCreateUser(data)
+	});
+
+	const createUser = async (data) => {
+		setLoading(true);
+
+		const res = await mutateAsync(data);
+
+		setUser((val) => ({ ...val, ...res }));
+		setLoading(false);
+	};
 
 	return {
-		user: !isLoading && user && data ? { ...user, ...data } : null,
-		isLoading
+		user,
+		isLoading: isLoading || isUserLoading,
+		setUser,
+		setLoading,
+		createUser
 	};
 };

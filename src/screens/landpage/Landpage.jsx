@@ -4,16 +4,15 @@ import _ from 'lodash';
 import { Icon } from '@iconify/react';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
-import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
+// import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
 import { useCollection } from '@/hooks/useCollection';
 import { Typography } from '@/chadcn/Typography';
-import { useUser } from '@/hooks/useUser';
+import { useAuth } from '@/providers/Authentication.jsx';
 
 export function Landpage() {
 	// Hooks
 	const navigate = useNavigate(); // Get the navigate function
-	const { signInWithGoogle, signOutUser, createUser } = useAuthenticationProviders();
-	const { user } = useUser();
+	const { user, login, logout } = useAuth();
 	const { checkAvailableUsername } = useCollection('users');
 
 	// State
@@ -26,18 +25,7 @@ export function Landpage() {
 
 	const handleSignIn = (type) => {
 		// TODO: firebase functions or lambda functions when using aws to create a documents for the user
-		signInWithGoogle().then((user) => {
-			const data = {
-				username: user.uid,
-				photoURL: user.photoURL,
-				name: user.displayName,
-				email: user.email,
-				providerData: user.providerData,
-				reloadUserInfo: user.reloadUserInfo,
-				uid: user.uid
-			};
-			createUser(data, user.uid);
-		});
+		login();
 	};
 
 	const handleUsernameChange = ({ target }) => {
@@ -132,7 +120,7 @@ export function Landpage() {
 				</div>
 
 				{user && (
-					<Button variant="outline" className="text-primary" onClick={signOutUser}>
+					<Button variant="outline" className="text-primary" onClick={logout}>
 						Sign out
 					</Button>
 				)}

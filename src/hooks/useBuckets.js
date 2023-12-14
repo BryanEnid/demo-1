@@ -2,18 +2,17 @@ import React from 'react';
 
 import { useCollection } from '@/hooks/useCollection';
 import { useProfile } from './useProfile';
-import { useUser } from './useUser';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuthenticationProviders } from './useAuthenticationProviders';
+import { useAuth } from '@/providers/Authentication.jsx';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-const DOMAIN_NAME = import.meta.env.VITE_HTTP_BASE_URL;
 const collectionName = 'Buckets';
 
 export const useBuckets = (owner) => {
 	// Hooks
-	// const { data: profile } = useProfile();
-	// const { user } = useUser();
-	const { user, isLoading } = useAuthenticationProviders();
+	const { data: profile, user } = useProfile();
+	// const { user } = useAuth();
+	const { ...auth } = useAuth();
 	const queryClient = useQueryClient();
 
 	// const content = owner === 'user' ? [user?.uid] : [profile?.uid];
@@ -29,33 +28,26 @@ export const useBuckets = (owner) => {
 	// 	enabled
 	// });
 
-	const { data, error } = useQuery({
-		queryKey: [collectionName],
-		queryFn: async () => {
-			const url = new URL('/api/buckets', DOMAIN_NAME);
-			const res = await fetch(url, {
-				method: 'GET',
-				headers: { Authorization: 'Bearer ' + user.stsTokenManager.accessToken }
-			});
-			return res.json();
-		},
-		enabled: !isLoading
+	const { data } = useQuery({
+		gcTime: Infinity,
+		queryKey: [collectionName, owner],
+		queryFn: async () => {}
 	});
 
 	const createDocument = useMutation({
-		mutationFn: ({ data, documentId }) => {},
-		onSuccess: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: ['collection', collectionName] });
-		}
+		mutationFn: ({ data, documentId }) => {}
+		// onSuccess: () => {
+		// 	// Invalidate and refetch
+		// 	queryClient.invalidateQueries({ queryKey: ['collection', collectionName] });
+		// }
 	});
 
 	const deleteDocument = useMutation({
-		mutationFn: ({ data, documentId }) => {},
-		onSuccess: () => {
-			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: ['collection', collectionName] });
-		}
+		mutationFn: ({ data, documentId }) => {}
+		// onSuccess: () => {
+		// 	// Invalidate and refetch
+		// 	queryClient.invalidateQueries({ queryKey: ['collection', collectionName] });
+		// }
 	});
 
 	return { buckets: data, createDocument: createDocument.mutate, deleteDocument: deleteDocument.mutate };

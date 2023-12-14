@@ -11,7 +11,7 @@ import { Typography } from '@/chadcn/Typography';
 import { Button } from '@/chadcn/Button';
 import { useProfile } from '@/hooks/useProfile';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { useUser } from '@/hooks/useUser';
+import { useAuth } from '@/providers/Authentication.jsx';
 
 function NavOption({ title }) {
 	const navigate = useNavigate();
@@ -34,8 +34,8 @@ export function Profile() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
-	const { data: profile, isLoading } = useProfile();
-	const { user } = useUser();
+	const { data: profile, isLoading: profileLoading } = useProfile();
+	const { user, isLoading: authLoading } = useAuth();
 
 	// State
 	const [username] = pathname.slice(1).split('/');
@@ -43,9 +43,9 @@ export function Profile() {
 	React.useEffect(() => {
 		(() => {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
-			if (!profile?.uid && !isLoading) return navigate('/notfound');
+			if (!profile?.uid && !profileLoading && !authLoading) return navigate('/notfound');
 		})();
-	}, [profile, isLoading]);
+	}, [profile, profileLoading, authLoading]);
 
 	if (!profile?.uid) return <></>;
 

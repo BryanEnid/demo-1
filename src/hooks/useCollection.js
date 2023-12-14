@@ -14,13 +14,15 @@ import {
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { useAuthenticationProviders } from './useAuthenticationProviders';
+// import { useAuthenticationProviders } from './useAuthenticationProviders';
+import { useAuth } from '@/providers/Authentication.jsx';
 import { db, storage } from '@/config/firebase';
 
 const configDefaults = { keys: [], query: [] };
 
 export const useCollection = (collectionName, config = configDefaults) => {
-	const { user } = useAuthenticationProviders();
+	// const { user: _user } = useAuthenticationProviders();
+	const { user } = useAuth();
 	const queryClient = useQueryClient();
 
 	// Define query key for useQuery
@@ -55,7 +57,7 @@ export const useCollection = (collectionName, config = configDefaults) => {
 				const documents = [];
 				querySnapshot.forEach((doc) => {
 					const data = doc.data();
-					documents.push({ id: doc.id, ...data });
+					documents.push({ /*id: doc.id,*/ ...data });
 				});
 
 				return new Promise((res) => res(documents));

@@ -1,49 +1,38 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
 import { useUser } from '@/hooks/useUser';
+import { useQuery } from '@tanstack/react-query';
 
 // Create the authentication context
-const AuthContext = createContext();
+const AuthContext = createContext({
+	user: null,
+	authToken: null,
+	isLoading: false,
+	login: () => {},
+	logout: () => {}
+});
 
 // Create a custom hook to use the authentication context
-export const useAuth = () => {
-	const { user, logout, login, isLoggedIn, isLoading } = useContext(AuthContext);
-	return {
-		user,
-		logout,
-		login,
-		isLoggedIn,
-		isLoading
-	};
-};
+export const useAuth = () => useContext(AuthContext);
 
 // Create the AuthProvider component
 export function AuthProvider({ children }) {
-	const { signInWithGoogle, signOutUser, createUser } = useAuthenticationProviders();
-	const { user, isLoading } = useUser();
+	const { user, authToken, isLoading, signInWithGoogle, signOutUser } = useAuthenticationProviders();
 
 	// Function to log in
-	const login = () =>
+	const login = () => {
 		// Perform your actual login logic here
-		signInWithGoogle().then((authUser) => {
-			const data = {
-				username: authUser.uid,
-				photoURL: authUser.photoURL,
-				name: authUser.displayName,
-				email: authUser.email,
-				providerData: authUser.providerData,
-				reloadUserInfo: authUser.reloadUserInfo,
-				uid: authUser.uid
-			};
-			return createUser(data, authUser.uid);
-		});
+		return signInWithGoogle();
+	};
 	// Function to log out
 	const logout = () =>
 		// Perform your actual logout logic here
 		signOutUser();
+
 	// Context value
 	const contextValue = {
-		user,
+		user: !isLoading && user ? user : null,
+		authToken,
 		login,
 		logout,
 		isLoading
