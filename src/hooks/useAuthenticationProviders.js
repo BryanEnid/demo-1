@@ -24,7 +24,7 @@ export const useAuthenticationProviders = () => {
 
 	React.useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-			setAuthToken(authUser?.uid);
+			setAuthToken(authUser?.accessToken);
 			setUser((_user) => (authUser ? { ...authUser, id: _user?.id } : null));
 			setLoading(false);
 		});
