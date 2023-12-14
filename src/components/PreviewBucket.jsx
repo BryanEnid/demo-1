@@ -12,7 +12,6 @@ import { Input } from '@/chadcn/Input';
 import { useCollection } from '@/hooks/useCollection';
 import { useProfile } from '@/hooks/useProfile';
 
-import { useUser } from '@/hooks/useUser';
 import { Dialog } from '@/chadcn/Dialog';
 import { VideoUploadButton } from './VideoUploadButton';
 import { Progress } from '@/chadcn/Progress';
@@ -24,7 +23,6 @@ import { VR_3D, Video360 } from '@/components/MediaPlayer';
 export function PreviewBucket({ show, onClose, data: inData, editMode, documentId }) {
 	// Hooks
 	const { data: profile, isUserProfile } = useProfile();
-	// const { data: user } = useUser();
 	const navigate = useNavigate();
 	const { createDocument, deleteDocument, updateDocument, uploadFile, uploadResumableFile, appendVideo } =
 		useCollection('buckets');
@@ -534,7 +532,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 
 			<div className="flex flex-row px-8 my-6">
 				<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-					<img src={profile.photoURL} className="rounded-full object-cover w-20" />
+					<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
 					<Typography variant="small">215k</Typography>
 					<Button variant="secondary">Anchor</Button>
 				</div>
@@ -542,7 +540,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 				<div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
 					<div className="flex flex-row justify-between items-center">
 						<div>
-							<Typography variant="large">{profile.name}</Typography>
+							<Typography variant="large">{profile?.name}</Typography>
 							{/* <Typography variant="small">{profile.role}</Typography> */}
 						</div>
 						{isUserProfile && (
