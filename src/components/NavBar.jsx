@@ -24,14 +24,12 @@ import { Textarea } from '@/chadcn/Textarea';
 import { PageModal } from './PageModal';
 import { PreviewBucket } from './PreviewBucket';
 import { MediaSelector } from './MediaSelector';
-import { useUser } from '@/hooks/useUser';
 import { useAuth } from '@/providers/Authentication';
 
 export function NavBar() {
 	// Hooks
 	const navigate = useNavigate();
-	const { user } = useUser();
-	const { logout } = useAuth();
+	const { user, logout } = useAuth();
 
 	// State
 	const [show, setShow] = React.useState(false);

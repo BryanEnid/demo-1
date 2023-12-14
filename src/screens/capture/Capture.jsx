@@ -9,17 +9,17 @@ import { Typography } from '@/chadcn/Typography';
 import { useCollection } from '@/hooks/useCollection';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { Modal } from '@/components/Modal';
-import { useUser } from '@/hooks/useUser';
 import { Progress } from '@/chadcn/Progress';
 import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { formatTimestamp } from '@/lib/utils';
+import { useAuth } from '@/providers/Authentication.jsx';
 
 export function CaptureScreen() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const params = useQueryParams();
-	const { user } = useUser();
+	const { user } = useAuth();
 	const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
 
 	// State

@@ -11,7 +11,7 @@ import { Typography } from '@/chadcn/Typography';
 import { Card } from '@/chadcn/Card';
 import { BucketItem } from '../profile/buckets/BucketItem';
 import { Progress } from '@/chadcn/Progress';
-import { useUser } from '@/hooks/useUser';
+import { useAuth } from '@/providers/Authentication.jsx';
 
 function MiniaturePreview({ video, onClick, id }) {
 	const src = React.useMemo(() => URL.createObjectURL(video.blob), []);
@@ -29,7 +29,7 @@ export function Preview() {
 	const { id: videoIdIDB } = useQueryParams();
 	const { uploadFile, uploadResumableFile, appendVideo } = useCollection('buckets');
 	const { buckets } = useBuckets('user');
-	const { user } = useUser();
+	const { user } = useAuth();
 	const navigate = useNavigate();
 
 	// State
@@ -85,7 +85,10 @@ export function Preview() {
 						{
 							onSuccess: () => {
 								setUploading(false);
-								navigate({ pathname: '/profile', search: createSearchParams({ focus: selectedBucket.id }).toString() });
+								navigate({
+									pathname: `/${user.id}`,
+									search: createSearchParams({ focus: selectedBucket.id }).toString()
+								});
 							},
 							onError: (e) => console.log('appendVideo', e)
 						}

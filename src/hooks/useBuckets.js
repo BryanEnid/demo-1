@@ -2,12 +2,12 @@ import React from 'react';
 
 import { useCollection } from '@/hooks/useCollection';
 import { useProfile } from './useProfile';
-import { useUser } from './useUser';
+import { useAuth } from '@/providers/Authentication.jsx';
 
 export const useBuckets = (owner) => {
 	// Hooks
 	const { data: profile } = useProfile();
-	const { user } = useUser();
+	const { user } = useAuth();
 
 	const content = owner === 'user' ? [user?.uid] : [profile?.uid];
 	const enabled = !!user?.uid || !!profile?.uid;
