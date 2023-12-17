@@ -47,6 +47,7 @@
 		"react-grid-dnd": "^2.1.2",
 		"react-grid-layout": "^1.4.2",
 		"react-lazy-load-image-component": "^1.6.0",
+		"react-qr-code": "^2.0.12",
 		"react-resizable-panels": "^0.0.55",
 		"react-router-dom": "^6.15.0",
 		"react-sortablejs": "^6.1.4",
