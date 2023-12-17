@@ -35,15 +35,20 @@ const QRShareView = ({ show, onClose }) => {
 	const { toast } = useToast();
 
 	return (
-		<PageModal show={show} onClose={onClose} width="800px">
-			<div className="flex flex-col justify-center items-center p-10">
-				<div className="flex flex-col justify-center items-center w-[400px] gap-10">
+		<PageModal show={show} onClose={onClose} width="600px">
+			<div className="flex flex-col justify-center items-center p-16">
+				<div className="flex flex-col justify-center items-center gap-10 ">
 					<Typography variant="h3">Share this bucket!</Typography>
 
-					<QRCode size={256} value={value} viewBox={`0 0 256 256`} />
+					<QRCode fgColor="#1688df" size={256} value={value} viewBox={`0 0 256 256`} />
 
-					<Input value={value} />
-					<Icon />
+					<Input
+						value={value}
+						onClick={() => {
+							navigator.clipboard.writeText(value);
+							toast({ title: 'Copied to clipboard !' });
+						}}
+					/>
 				</div>
 			</div>
 		</PageModal>

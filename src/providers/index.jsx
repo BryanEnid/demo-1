@@ -12,7 +12,7 @@ export function GlobalProvider({ children }) {
 
 				{/* Overlay */}
 				<ReactQueryDevtools />
-				{/* <Toaster /> */}
+				<Toaster />
 			</AuthProvider>
 		</ReactQueryProvider>
 	);
