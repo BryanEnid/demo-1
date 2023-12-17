@@ -2,9 +2,11 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BucketItem } from './BucketItem';
 import { useBuckets } from '@/hooks/useBuckets';
+import { useProfile } from '@/hooks/useProfile';
 
 export function Buckets() {
-	const { buckets } = useBuckets();
+	const { data: profile } = useProfile();
+	const { data: buckets } = useBuckets(profile);
 
 	if (!buckets?.length) return <></>;
 

@@ -17,38 +17,33 @@ function dataURItoBlob(dataURI) {
 }
 
 export const generatePreview = async (recordedVideo) => {
-	try {
-		const videoUrl = URL.createObjectURL(recordedVideo);
+	const videoUrl = URL.createObjectURL(recordedVideo);
 
-		const videoElement = document.createElement('video');
-		videoElement.src = videoUrl;
-		document.body.appendChild(videoElement);
+	const videoElement = document.createElement('video');
+	videoElement.src = videoUrl;
+	document.body.appendChild(videoElement);
 
-		await videoElement.play();
+	await videoElement.play();
 
-		const canvas = document.createElement('canvas');
-		canvas.width = videoElement.videoWidth;
-		canvas.height = videoElement.videoHeight;
-		const ctx = canvas.getContext('2d');
+	const canvas = document.createElement('canvas');
+	canvas.width = videoElement.videoWidth;
+	canvas.height = videoElement.videoHeight;
+	const ctx = canvas.getContext('2d');
 
-		// Draw the video frame onto the canvas
-		ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+	// Draw the video frame onto the canvas
+	ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-		// Convert the canvas content to a data URL (screenshot)
-		const screenshot = canvas.toDataURL('image/png');
+	// Convert the canvas content to a data URL (screenshot)
+	const screenshot = canvas.toDataURL('image/png');
 
-		// Clean up elements
-		document.body.removeChild(videoElement);
-		URL.revokeObjectURL(videoUrl);
+	// Clean up elements
+	document.body.removeChild(videoElement);
+	URL.revokeObjectURL(videoUrl);
 
-		// Convert the screenshot to a Blob
-		const screenshotBlob = dataURItoBlob(screenshot);
+	// Convert the screenshot to a Blob
+	const screenshotBlob = dataURItoBlob(screenshot);
 
-		return screenshotBlob;
-	} catch (err) {
-		console.error('Error generating preview:', err);
-		throw err;
-	}
+	return screenshotBlob;
 };
 
 export const generateRandomNumber = (minimum, maximum) => {

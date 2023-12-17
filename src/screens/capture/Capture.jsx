@@ -6,7 +6,6 @@ import { AspectRatio } from '@/chadcn/AspectRatio';
 import { Button } from '@/chadcn/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select';
 import { Typography } from '@/chadcn/Typography';
-import { useCollection } from '@/hooks/useCollection';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { Modal } from '@/components/Modal';
 import { Progress } from '@/chadcn/Progress';

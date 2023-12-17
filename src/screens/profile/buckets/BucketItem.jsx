@@ -2,19 +2,34 @@ import React from 'react';
 import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
 import { PreviewBucket } from '@/components/PreviewBucket';
+import { useSearchParams } from 'react-router-dom';
 
 export function BucketItem({ name, preview, data, documentId, onClick }) {
 	// State
 	const [open, setOpen] = React.useState(false);
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	React.useEffect(() => {
+		if (searchParams.get('bucketid') === documentId && open === false) {
+			setOpen(true);
+		}
+		// if (searchParams)
+	}, [searchParams]);
 
 	const handleExit = () => {
 		setOpen(false);
+		setSearchParams('');
+	};
+
+	const handleOpenPreview = () => {
+		setSearchParams('bucketid=' + documentId);
+		setOpen(true);
 	};
 
 	return (
 		<>
 			<div className="flex flex-col items-center">
-				<button onClick={onClick ? () => onClick(data) : () => setOpen(true)} className="w-[200px]">
+				<button onClick={onClick ? () => onClick(data) : handleOpenPreview} className="w-[200px]">
 					<div className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full">
 						{preview && (
 							<video

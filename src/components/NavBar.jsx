@@ -40,7 +40,7 @@ export function NavBar() {
 	const inputRef = React.useRef();
 
 	const handleCreateBucket = () => {
-		navigate(`/${user.username}/buckets`);
+		navigate(`/${user.uid}/buckets`);
 		setShow(true);
 	};
 

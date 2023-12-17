@@ -1,31 +1,60 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
-import { createSearchParams, useNavigate } from 'react-router-dom';
+import { createSearchParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ReactSortable } from 'react-sortablejs';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { Button } from '@/chadcn/Button';
-import { Typography } from '@/chadcn/Typography';
 import { PageModal } from '@/components/PageModal';
-
-import { Textarea } from '@/chadcn/Textarea';
-import { Input } from '@/chadcn/Input';
-import { useCollection } from '@/hooks/useCollection';
 import { useProfile } from '@/hooks/useProfile';
 
-import { Dialog } from '@/chadcn/Dialog';
 import { VideoUploadButton } from './VideoUploadButton';
-import { Progress } from '@/chadcn/Progress';
 import { cn, generatePreview, generateRandomNumber } from '@/lib/utils';
 import { CircularProgress } from './CircularProgress';
 import { CachedVideo } from './CachedVideo';
 import { VR_3D, Video360 } from '@/components/MediaPlayer';
+import { useBuckets } from '@/hooks/useBuckets';
+import QRCode from 'react-qr-code';
+import { useToast } from '@/hooks/useToast';
+
+import { Button } from '@/chadcn/Button';
+import { Input } from '@/chadcn/Input';
+import { Typography } from '@/chadcn/Typography';
+import { Textarea } from '@/chadcn/Textarea';
+import { Dialog } from '@/chadcn/Dialog';
+import { Progress } from '@/chadcn/Progress';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuTrigger
+} from '@/chadcn/DropDown';
+
+const QRShareView = ({ show, onClose }) => {
+	const [value, setValue] = React.useState(window.location.href);
+
+	const { toast } = useToast();
+
+	return (
+		<PageModal show={show} onClose={onClose} width="800px">
+			<div className="flex flex-col justify-center items-center p-10">
+				<div className="flex flex-col justify-center items-center w-[400px] gap-10">
+					<Typography variant="h3">Share this bucket!</Typography>
+
+					<QRCode size={256} value={value} viewBox={`0 0 256 256`} />
+
+					<Input value={value} />
+					<Icon />
+				</div>
+			</div>
+		</PageModal>
+	);
+};
 
 export function PreviewBucket({ show, onClose, data: inData, editMode, documentId }) {
 	// Hooks
-	const { data: profile, isUserProfile } = useProfile();
 	const navigate = useNavigate();
-	const { createDocument, deleteDocument, updateDocument, uploadFile, uploadResumableFile, appendVideo } =
-		useCollection('buckets');
+	const { data: profile, isUserProfile } = useProfile();
+	const { createBucket, updateBucket, deleteBucket, uploadVideo } = useBuckets(profile);
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -34,9 +63,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 	const [progress, setProgress] = React.useState(20);
 	const [currentVideo, setCurrentVideo] = React.useState(0);
 	const [enableDelete, setEnableDelete] = React.useState(false);
-	const [files, setFiles] = React.useState(null);
-	const [state, setState] = React.useState([]);
 	const [isDragOver, setIsDragOver] = React.useState(false);
+	const [isSharing, setSharing] = React.useState(false);
 	const [data, setData] = React.useState({
 		videos: [],
 		name: '',
@@ -52,14 +80,12 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 	React.useEffect(() => {
 		if (inData) {
 			setData(inData);
-			setState(inData.videos);
 		}
 	}, [inData]);
 
 	// Function to toggle fullscreen
 	const toggleFullscreen = () => {
 		const videoElement = videoRef.current;
-		console.log(videoElement);
 
 		if (!videoElement) return;
 
@@ -85,6 +111,13 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		return setCurrentVideo(0);
 	};
 
+	// TODO: MERGE HANDLEEXIT AND HANDLECLOSE
+	const handleClose = () => {
+		setEditMode(false);
+		onClose();
+		clear();
+	};
+
 	const handleExit = (...props) => {
 		setCurrentVideo(0);
 		onClose(...props);
@@ -106,12 +139,23 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		}
 	};
 
+	const clear = () => {
+		if (editMode) {
+			setData({
+				videos: [],
+				name: '',
+				title: '',
+				description: ''
+			});
+		}
+	};
+
 	const handleToCaptureScreen = (dbid) =>
 		navigate({ pathname: '/capture', search: createSearchParams({ bucketid: dbid }).toString() });
 
 	const handleCreateBucket = (params) => {
 		const { willRedirect = false, cb = () => {}, onSuccess = () => {} } = params;
-		const crudFunction = documentId ? updateDocument : createDocument;
+		const crudFunction = documentId ? updateBucket : createBucket;
 
 		crudFunction(
 			{ data, documentId },
@@ -125,7 +169,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		);
 	};
 
-	const handleSaveVideos = (files = []) => {
+	const handlePrepareVideosToSave = (files = []) => {
 		setEditMode(true);
 
 		handleCreateBucket({
@@ -140,78 +184,48 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 				setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }));
 
 				for (const item of body) {
-					const is360Video = item.file.name.split('.').at(-1) === 'insv';
+					const videoType = item.file.name.split('.').at(-1);
 					const reader = new FileReader();
 					reader.readAsArrayBuffer(item.file);
 					reader.onload = () =>
-						saveVideo({ result: reader.result, details: { ...item, documentId: dbid } }, item.index, is360Video);
+						saveVideo({ result: reader.result, details: { ...item, documentId: dbid } }, videoType, {
+							onLoading: () => setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }))
+						});
 				}
 			}
 		});
 	};
 
-	const saveVideo = async (file, index, is360Video) => {
-		try {
-			const dbid = documentId || file.details.documentId;
-			setUploading(true);
-			const recordedVideo = new Blob([file.result], { type: 'video/mp4' });
+	const saveVideo = async (file, videoType, { onLoading }) => {
+		setUploading(true);
+		const bucketId = documentId || file.details.documentId;
 
-			const preview = await generatePreview(recordedVideo);
-			const imageUrl = await uploadFile({ file: preview, fileType: 'image' });
-			const { uploadTask, getDownloadURL } = await uploadResumableFile({ file: recordedVideo, fileType: 'video' });
+		const video = new Blob([file.result], { type: 'video/mp4' }); // Video File
+		const image = await generatePreview(video);
 
-			// uploadTask.on("state_changed", (snapshot) => {
-			//   setProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes));
-			// });
-
-			// When finish uploading
-			uploadTask.then(() => {
-				getDownloadURL().then((videoUrl) => {
-					// if bucket id -> save it to that bucket id
-					// otherwise set it to unlisted
-					// for now dont save it
-					if (dbid) {
-						appendVideo(
-							{ videoData: { image: imageUrl, videoUrl, is360Video }, documentId: dbid },
-							{
-								onSuccess: () => {
-									// const videos = [...data.videos];
-									// videos[index] = { image: imageUrl, videoUrl: videoUrl };
-									// setData((prev) => ({ ...prev, videos }));
-									// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
-								},
-								onError: (e) => console.log('appendVideo', e),
-								onSettled: () => {
-									setUploading(false);
-									setProgress(0);
-								}
-							}
-						);
-					}
-				});
-			});
-		} catch (e) {
-			console.log(e);
-		}
+		// ! TODO: Display progress setProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes));
+		// ! TODO: Only save when clicking save button.
+		uploadVideo(
+			{ id: bucketId, data: { video, image, videoType }, onLoading },
+			{
+				onSuccess: (response) => {
+					// console.log(response, variables, ctx);
+					// const videos = [...data.videos];
+					// videos[index] = { image, videoUrl: video };
+					// setData((prev) => ({ ...prev, videos }));
+					// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
+				},
+				onSettled: () => {
+					setUploading(false);
+					setProgress(0);
+				},
+				onError: console.error
+			}
+		);
 	};
 
-	// const handleFileChange = (e) => {
-	// 	const file = e.target.files[0];
-
-	// 	// Check if a file is selected
-	// 	if (file) {
-	// 		// Check if the selected file is a video
-	// 		if (file.type.startsWith('video/')) {
-	// 			setSelectedVideo(file);
-	// 			onUpload(file);
-	// 		} else {
-	// 			alert('Please select a valid video file.');
-	// 		}
-	// 	}
-	// };
-
 	const handleDeleteBucket = () => {
-		deleteDocument(documentId);
+		deleteBucket(documentId);
 	};
 
 	const handleDragOver = (e) => {
@@ -235,24 +249,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 			if (!item.type.startsWith('video/')) return alert('Please drop a valid video file.');
 		}
 
-		handleSaveVideos(files);
-	};
-
-	const handleClose = () => {
-		setEditMode(false);
-		onClose();
-		clear();
-	};
-
-	const clear = () => {
-		if (editMode) {
-			setData({
-				videos: [],
-				name: '',
-				title: '',
-				description: ''
-			});
-		}
+		handlePrepareVideosToSave(files);
 	};
 
 	const handle360Video = (ref, video) => {
@@ -264,7 +261,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 
 	if (isEditMode) {
 		return (
-			<PageModal show={show} onClose={handleExit}>
+			<PageModal show={show} onClose={handleExit} width="80vw">
 				<div>
 					{/* Video Player */}
 					<div className="aspect-[16/9] shadow bg-black">
@@ -306,7 +303,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 								<div>
 									<Button
 										variant="secondary"
-										onClick={() => handleCreateBucket({ cb: () => onClose() })}
+										onClick={() => handleCreateBucket({ cb: () => setEditMode(false) })}
 										disabled={![data.description.length, data.title.length].every(Boolean)}
 									>
 										{isEditMode ? (editMode ? 'Create bucket' : 'Done editing') : 'Edit Bucket'}
@@ -355,7 +352,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 									Capture
 								</Button>
 								<VideoUploadButton
-									onUpload={handleSaveVideos}
+									onUpload={handlePrepareVideosToSave}
 									disabled={![data.description.length, data.title.length].every(Boolean)}
 								/>
 							</div>
@@ -478,7 +475,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 						<div className="flex flex-row justify-end gap-3 text-center text-white/50 w-full">
 							<Button
 								variant="secondary"
-								onClick={handleClose}
+								onClick={handleExit}
 								// disabled={![data.description.length, data.title.length].every(Boolean)}
 								className="w-full max-w-[150px]"
 							>
@@ -499,7 +496,9 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 	}
 
 	return (
-		<PageModal show={show} onClose={handleExit}>
+		<PageModal show={show} onClose={handleExit} width="80vw">
+			<QRShareView show={isSharing} onClose={() => setSharing(false)} />
+
 			{/* Video Player */}
 			<div className="aspect-[16/9] shadow bg-black">
 				<div className="w-full h-full backdrop-blur-md">
@@ -553,11 +552,26 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 									Capture
 								</Button>
 
-								<VideoUploadButton onUpload={handleSaveVideos} />
+								<VideoUploadButton onUpload={handlePrepareVideosToSave} />
 
-								<Button variant="secondary" onClick={() => setEditMode(true)}>
-									Edit
-								</Button>
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<Button variant="secondary">
+											<Icon icon="tabler:dots" />
+										</Button>
+									</DropdownMenuTrigger>
+
+									<DropdownMenuContent>
+										<DropdownMenuItem onClick={() => setEditMode(true)}>
+											<Icon icon="material-symbols:edit" className="mr-2 h-4 w-4" />
+											Edit
+										</DropdownMenuItem>
+										<DropdownMenuItem onClick={() => setSharing(true)}>
+											<Icon icon="jam:share-alt" className="mr-2 h-4 w-4" />
+											Share
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						)}
 					</div>

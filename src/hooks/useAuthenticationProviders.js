@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 
 import { useUser } from '@/hooks/useUser.js';
+import { app } from '@/config/firebase';
 
 export const useAuthenticationProviders = () => {
 	// Initialize Firebase Auth
-	const auth = getAuth();
+	const auth = getAuth(app);
 	const [authToken, setAuthToken] = useState(null);
 
 	// Function to sign out

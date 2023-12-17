@@ -5,13 +5,13 @@ import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { Button } from '@/chadcn/Button';
 import { generatePreview } from '@/lib/utils';
-import { useCollection } from '@/hooks/useCollection';
 import { useBuckets } from '@/hooks/useBuckets';
 import { Typography } from '@/chadcn/Typography';
 import { Card } from '@/chadcn/Card';
 import { BucketItem } from '../profile/buckets/BucketItem';
 import { Progress } from '@/chadcn/Progress';
 import { useAuth } from '@/providers/Authentication.jsx';
+import { useProfile } from '@/hooks/useProfile';
 
 function MiniaturePreview({ video, onClick, id }) {
 	const src = React.useMemo(() => URL.createObjectURL(video.blob), []);
@@ -27,13 +27,13 @@ export function Preview() {
 	// Hooks
 	const { getVideo, videos } = useIndexedDBVideos('local-unlisted-videos', 1);
 	const { id: videoIdIDB } = useQueryParams();
-	const { uploadFile, uploadResumableFile, appendVideo } = useCollection('buckets');
-	const { buckets } = useBuckets('user');
 	const { user } = useAuth();
+	const { data: buckets, uploadVideo } = useBuckets(user);
+
 	const navigate = useNavigate();
 
 	// State
-	const [video, setVideo] = React.useState();
+	const [selectedVideo, setVideo] = React.useState();
 	const [isLoading, setLoading] = React.useState(true);
 	const [uploadProgress, setUploadProgress] = React.useState(0);
 	const [selectedBucket, setSelectedBucket] = React.useState();
@@ -64,50 +64,34 @@ export function Preview() {
 
 	const handleSaveVideo = async () => {
 		setUploading(true);
-		const recordedVideo = new Blob([video.blob], { type: 'video/mp4' });
 
-		const preview = await generatePreview(recordedVideo);
-		const imageUrl = await uploadFile({ file: preview, fileType: 'image' });
-		const { uploadTask, getDownloadURL } = await uploadResumableFile({ file: recordedVideo, fileType: 'video' });
-		// Render progress
-		uploadTask.on('state_changed', (snapshot) =>
-			setUploadProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes))
+		const video = new Blob([selectedVideo.blob], { type: 'video/mp4' }); // Video File
+		const image = await generatePreview(video);
+
+		uploadVideo(
+			{ data: { image, video }, id: selectedBucket.id },
+			{
+				onSuccess: () => {
+					setUploading(false);
+					navigate({
+						pathname: `/${user.uid}`,
+						search: createSearchParams({ focus: selectedBucket.id }).toString()
+					});
+				},
+				onError: (e) => console.log('appendVideo', e)
+			}
 		);
-		// When finish uploading
-		uploadTask.then(() => {
-			getDownloadURL().then((videoUrl) => {
-				// if bucket id -> save it to that bucket id
-				// otherwise set it to unlisted
-				// for now dont save it
-				if (selectedBucket.id) {
-					appendVideo(
-						{ videoData: { image: imageUrl, videoUrl }, documentId: selectedBucket.id },
-						{
-							onSuccess: () => {
-								setUploading(false);
-								navigate({
-									pathname: `/${user.id}`,
-									search: createSearchParams({ focus: selectedBucket.id }).toString()
-								});
-							},
-							onError: (e) => console.log('appendVideo', e)
-						}
-					);
-					if (isUploading) setUploading(false);
-				}
-			});
-		});
 	};
 
 	if (isLoading) return <>loading ...</>;
 
-	if (!video) return <>THERE ARE NO VIDEOS</>;
+	if (!selectedVideo) return <>THERE ARE NO VIDEOS</>;
 
 	return (
 		<div className="grid grid-cols-5 h-screen">
 			<div className="flex flex-col col-span-4">
 				<div className="flex flex-1 justify-center  bg-black">
-					<video src={video.src} controls autoPlay muted loop controlsList="nofullscreen" />
+					<video src={selectedVideo.src} controls autoPlay muted loop controlsList="nofullscreen" />
 				</div>
 
 				<div className="flex flex-col min-h-[200px] max-h-[400px] overflow-y-auto p-4">

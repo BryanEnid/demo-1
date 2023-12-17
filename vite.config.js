@@ -32,7 +32,7 @@ export default defineConfig({
 	],
 
 	server: {
-		port: 3000
+		// port: 3000
 		// ! Enable this for local https
 		// https: {
 		// 	key: path.resolve(__dirname, 'localhost.key'),
