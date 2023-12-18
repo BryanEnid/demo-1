@@ -2,6 +2,7 @@ import React from 'react';
 import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
 import { PreviewBucket } from '@/components/PreviewBucket';
+import { useSearchParams } from 'react-router-dom';
 
 export const BucketItem = ({
 	name,
@@ -15,16 +16,30 @@ export const BucketItem = ({
 }) => {
 	// State
 	const [open, setOpen] = React.useState(false);
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	React.useEffect(() => {
+		if (searchParams.get('bucketid') === documentId && open === false) {
+			setOpen(true);
+		}
+		// if (searchParams)
+	}, [searchParams]);
 
 	const handleExit = () => {
 		setOpen(false);
+		setSearchParams('');
+	};
+
+	const handleOpenPreview = () => {
+		setSearchParams('bucketid=' + documentId);
+		setOpen(true);
 	};
 
 	return (
 		<>
 			<div className="flex flex-col items-center">
 				<button
-					onClick={onClick ? () => onClick(data) : () => setOpen(true)}
+					onClick={onClick ? () => onClick(data) : handleOpenPreview}
 					className={`${width} transition ease-in-out hover:scale-110`}
 				>
 					<div className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary">

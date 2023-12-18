@@ -1,13 +1,12 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-export function PageModal({ children, show, onClose }) {
+export function PageModal({ children, show, onClose, width }) {
 	const cancelButtonRef = useRef(null);
 
 	return (
 		<Transition.Root show={show} as={Fragment}>
 			<Dialog
-				as="div"
 				className="relative z-10"
 				initialFocus={cancelButtonRef}
 				onClose={(...props) => {
@@ -48,7 +47,7 @@ export function PageModal({ children, show, onClose }) {
 										<div
 											className="text-center sm:text-left "
 											style={{
-												width: '80vw',
+												width,
 												maxHeight: '95vh', // Set a max height for the modal content
 												overflowY: 'auto' // Allow content to scroll if it exceeds the max height
 											}}

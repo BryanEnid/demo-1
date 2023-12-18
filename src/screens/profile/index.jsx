@@ -46,6 +46,8 @@ export function Profile() {
 	React.useEffect(() => {
 		(() => {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
+
+			// ! This doesn't longer work
 			if (!profile?.uid && !profileLoading && !authLoading) return navigate('/notfound');
 		})();
 	}, [profile, profileLoading, authLoading]);
@@ -53,7 +55,7 @@ export function Profile() {
 	if (!profile?.uid) return <></>;
 
 	const handleCreateBucket = (data) => {
-		navigate(`/${user.id}/buckets`);
+		navigate(`/${user.uid}/buckets`);
 		setShow(true);
 		setBucketData(data);
 	};
