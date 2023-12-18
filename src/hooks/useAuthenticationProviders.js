@@ -23,7 +23,20 @@ export const useAuthenticationProviders = () => {
 	});
 
 	React.useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+		const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+			if (authUser && !user?.id) {
+				const data = {
+					username: authUser.uid,
+					photoURL: authUser.photoURL,
+					name: authUser.displayName,
+					email: authUser.email,
+					providerData: authUser.providerData,
+					reloadUserInfo: authUser.reloadUserInfo,
+					uid: authUser.uid
+				};
+				await createUser(data);
+			}
+
 			setAuthToken(authUser?.accessToken);
 			setUser((_user) => (authUser ? { ...authUser, id: _user?.id } : null));
 			setLoading(false);
@@ -40,18 +53,7 @@ export const useAuthenticationProviders = () => {
 	const signInWithGoogle = async () => {
 		// Get from provider
 		const provider = new GoogleAuthProvider();
-		const { user } = await signInWithPopup(auth, provider);
-
-		const data = {
-			username: user.uid,
-			photoURL: user.photoURL,
-			name: user.displayName,
-			email: user.email,
-			providerData: user.providerData,
-			reloadUserInfo: user.reloadUserInfo,
-			uid: user.uid
-		};
-		await createUser(data);
+		await signInWithPopup(auth, provider);
 	};
 
 	return {

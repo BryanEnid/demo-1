@@ -3,7 +3,16 @@ import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
 import { PreviewBucket } from '@/components/PreviewBucket';
 
-export function BucketItem({ name, preview, data, documentId, onClick }) {
+export const BucketItem = ({
+	name,
+	preview,
+	data,
+	documentId,
+	onClick,
+	width = 'w-[200px]',
+	iconProps,
+	defaultIcon = 'solar:gallery-circle-broken'
+}) => {
 	// State
 	const [open, setOpen] = React.useState(false);
 
@@ -14,7 +23,7 @@ export function BucketItem({ name, preview, data, documentId, onClick }) {
 	return (
 		<>
 			<div className="flex flex-col items-center">
-				<button onClick={onClick ? () => onClick(data) : () => setOpen(true)} className="w-[200px]">
+				<button onClick={onClick ? () => onClick(data) : () => setOpen(true)} className={`${width}`}>
 					<div className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full">
 						{preview && (
 							<video
@@ -30,7 +39,7 @@ export function BucketItem({ name, preview, data, documentId, onClick }) {
 
 						{!preview && (
 							<div className="flex h-full w-full justify-center items-center text-gray-300">
-								<Icon fontSize="130" icon="solar:gallery-circle-broken" />
+								<Icon fontSize="130" icon={defaultIcon} {...iconProps} />
 							</div>
 						)}
 					</div>
@@ -42,4 +51,4 @@ export function BucketItem({ name, preview, data, documentId, onClick }) {
 			{!onClick && <PreviewBucket show={open} onClose={handleExit} data={data} documentId={documentId} />}
 		</>
 	);
-}
+};

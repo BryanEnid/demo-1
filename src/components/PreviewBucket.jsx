@@ -51,8 +51,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 
 	React.useEffect(() => {
 		if (inData) {
-			setData(inData);
-			setState(inData.videos);
+			setData((val) => ({ ...val, ...inData }));
+			setState(inData.videos || []);
 		}
 	}, [inData]);
 
@@ -328,6 +328,13 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 									value={data.title}
 									placeholder="Title"
 									onChange={({ target }) => setData((prev) => ({ ...prev, title: target.value }))}
+									className="bg-white/10"
+								/>
+								<Input
+									name="category"
+									placeholder="Category"
+									value={data.category}
+									onChange={({ target }) => setData((prev) => ({ ...prev, category: target.value }))}
 									className="bg-white/10"
 								/>
 								<Textarea
