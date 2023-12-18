@@ -23,8 +23,11 @@ export const BucketItem = ({
 	return (
 		<>
 			<div className="flex flex-col items-center">
-				<button onClick={onClick ? () => onClick(data) : () => setOpen(true)} className={`${width}`}>
-					<div className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full">
+				<button
+					onClick={onClick ? () => onClick(data) : () => setOpen(true)}
+					className={`${width} transition ease-in-out hover:scale-110`}
+				>
+					<div className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary">
 						{preview && (
 							<video
 								type="video/mp4"
