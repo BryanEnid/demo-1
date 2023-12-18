@@ -84,7 +84,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 
 	React.useEffect(() => {
 		if (inData) {
-			setData(inData);
+			// setData(inData);
 			setData((val) => ({ ...val, ...inData }));
 		}
 	}, [inData]);
