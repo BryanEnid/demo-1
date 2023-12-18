@@ -26,27 +26,13 @@ import { PreviewBucket } from './PreviewBucket';
 import { MediaSelector } from './MediaSelector';
 import { useAuth } from '@/providers/Authentication';
 
-export function NavBar() {
+export function NavBar({ createBucket }) {
 	// Hooks
 	const navigate = useNavigate();
 	const { user, logout } = useAuth();
 
-	// State
-	const [show, setShow] = React.useState(false);
-	const [bucketName, setBucketName] = React.useState('');
-	const [bucketDescription, setBucketDescription] = React.useState('');
-
 	// Refs
 	const inputRef = React.useRef();
-
-	const handleCreateBucket = () => {
-		navigate(`/${user.uid}/buckets`);
-		setShow(true);
-	};
-
-	const handleCancel = () => {
-		setShow(false);
-	};
 
 	const handleLogOut = () => {
 		logout().then(() => navigate('/'));
@@ -68,7 +54,7 @@ export function NavBar() {
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent className="w-56">
-							<DropdownMenuItem onClick={handleCreateBucket}>
+							<DropdownMenuItem onClick={createBucket}>
 								<Icon icon="fluent:album-add-24-regular" className="pr-1 text-3xl" />
 								Create a bucket
 							</DropdownMenuItem>
@@ -179,14 +165,6 @@ export function NavBar() {
 					</DropdownMenu>
 				)}
 			</nav>
-
-			<PreviewBucket
-				show={show}
-				editMode
-				onClose={handleCancel}
-				disabled={![bucketName.length, bucketDescription.length].every(Boolean)}
-				data={null}
-			/>
 		</>
 	);
 }
