@@ -11,7 +11,8 @@ import { Typography } from '@/chadcn/Typography';
 import { Button } from '@/chadcn/Button';
 import { useProfile } from '@/hooks/useProfile';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { useUser } from '@/hooks/useUser';
+import { useAuth } from '@/providers/Authentication.jsx';
+import { PreviewBucket } from '@/components/PreviewBucket.jsx';
 
 function NavOption({ title }) {
 	const navigate = useNavigate();
@@ -34,25 +35,38 @@ export function Profile() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
-	const { data: profile, isLoading } = useProfile();
-	const { user } = useUser();
+	const { data: profile, isUserProfile, isLoading: profileLoading } = useProfile();
+	const { user, isLoading: authLoading } = useAuth();
 
 	// State
+	const [show, setShow] = React.useState(false);
+	const [bucketData, setBucketData] = React.useState(null);
 	const [username] = pathname.slice(1).split('/');
 
 	React.useEffect(() => {
 		(() => {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
-			if (!profile?.uid && !isLoading) return navigate('/notfound');
+			if (!profile?.uid && !profileLoading && !authLoading) return navigate('/notfound');
 		})();
-	}, [profile, isLoading]);
+	}, [profile, profileLoading, authLoading]);
 
 	if (!profile?.uid) return <></>;
+
+	const handleCreateBucket = (data) => {
+		navigate(`/${user.id}/buckets`);
+		setShow(true);
+		setBucketData(data);
+	};
+
+	const handleCancel = () => {
+		setShow(false);
+		setBucketData(null);
+	};
 
 	return (
 		<div className="container">
 			{/* Overlay */}
-			<NavBar />
+			<NavBar createBucket={handleCreateBucket} />
 
 			<SideBar />
 
@@ -77,7 +91,9 @@ export function Profile() {
 			</div>
 
 			{/* Screens */}
-			<Outlet />
+			<Outlet context={[{ isUserProfile, createBucket: handleCreateBucket }]} />
+
+			<PreviewBucket editMode show={show} data={bucketData} onClose={handleCancel} />
 		</div>
 	);
 }

@@ -8,7 +8,6 @@ import { Input } from '@/chadcn/Input';
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
 import { useCollection } from '@/hooks/useCollection';
 import { Typography } from '@/chadcn/Typography';
-import { useUser } from '@/hooks/useUser';
 import { Separator } from '@/chadcn/Separator';
 import { ObserveIcon } from '@/components/ObserveIcon';
 import { useAuth } from '@/providers/Authentication';
@@ -58,7 +57,7 @@ export function SignIn() {
 	};
 
 	if (isLoading) return <></>;
-	if (user) return <Navigate to="/profile" />;
+	if (user) return <Navigate to={`/${user?.id}`} />;
 
 	return (
 		<div className="flex flex-col h-screen items-center justify-center">

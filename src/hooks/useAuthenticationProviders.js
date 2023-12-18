@@ -1,47 +1,65 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { collection, doc, setDoc } from 'firebase/firestore';
-import { db } from '@/config/firebase'; // Assuming you have Firebase Storage configured
+
+import { useUser } from '@/hooks/useUser.js';
 
 export const useAuthenticationProviders = () => {
 	// Initialize Firebase Auth
 	const auth = getAuth();
-	const [user, setUser] = React.useState(null);
-	const [isLoading, setLoading] = React.useState(true);
+	const [authToken, setAuthToken] = useState(null);
+
+	// Function to sign out
+	const signOutUser = async () => signOut(auth).then(() => setUser(null));
+
+	const {
+		user,
+		isLoading: isUserLoading,
+		createUser,
+		setUser,
+		setLoading
+	} = useUser({
+		authToken,
+		logout: signOutUser
+	});
 
 	React.useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-			setUser(authUser);
+		const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+			if (authUser && !user?.id) {
+				const data = {
+					username: authUser.uid,
+					photoURL: authUser.photoURL,
+					name: authUser.displayName,
+					email: authUser.email,
+					providerData: authUser.providerData,
+					reloadUserInfo: authUser.reloadUserInfo,
+					uid: authUser.uid
+				};
+				await createUser(data);
+			}
+
+			setAuthToken(authUser?.accessToken);
+			setUser((_user) => (authUser ? { ...authUser, id: _user?.id } : null));
 			setLoading(false);
 		});
+
 		return () => {
 			unsubscribe();
-			setLoading(true);
+			// setLoading(true);
 			setUser(null);
 		};
 	}, []);
-
-	const createUser = async (documentData, documentId) => {
-		const collectionRef = collection(db, 'users');
-		const docRef = doc(collectionRef, documentId);
-		return setDoc(docRef, documentData);
-	};
 
 	// Function to sign in with Google
 	const signInWithGoogle = async () => {
 		// Get from provider
 		const provider = new GoogleAuthProvider();
-		const { user } = await signInWithPopup(auth, provider);
-		setUser(user);
-		return user;
+		await signInWithPopup(auth, provider);
 	};
-
-	// Function to sign out
-	const signOutUser = async () => signOut(auth).then(() => setUser(null));
 
 	return {
 		user,
-		isLoading,
+		authToken,
+		isLoading: isUserLoading,
 		signInWithGoogle,
 		signOutUser,
 		createUser
