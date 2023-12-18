@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
@@ -12,6 +12,7 @@ import { Card } from '@/chadcn/Card';
 import { BucketItem } from '../profile/buckets/BucketItem';
 import { Progress } from '@/chadcn/Progress';
 import { useAuth } from '@/providers/Authentication.jsx';
+import { PreviewBucket } from '@/components/PreviewBucket.jsx';
 
 function MiniaturePreview({ video, onClick, id }) {
 	const src = React.useMemo(() => URL.createObjectURL(video.blob), []);
@@ -40,22 +41,37 @@ export function Preview() {
 	const [isSubmitable, setSubmitable] = React.useState(false);
 	const [isUploading, setUploading] = React.useState(false);
 	const [unlistedVideoSelected, setUnlistedVideoSelected] = React.useState();
+	const [show, setShow] = React.useState(false);
 
-	React.useEffect(() => {
-		getVideo(Number(videoIdIDB))
-			.then((video) => {
-				const src = URL.createObjectURL(video.blob);
-				setVideo({ ...video, src });
-			})
-			.finally(() => {
-				setLoading(false);
-			});
+	const loadVideo = (videoId) => {
+		if (videoId) {
+			getVideo(Number(videoId))
+				.then((video) => {
+					const src = URL.createObjectURL(video.blob);
+					setVideo({ ...video, src });
+				})
+				.finally(() => {
+					setLoading(false);
+				});
+		}
 
 		return () => {
 			setLoading(true);
 			setVideo(null);
 		};
+	};
+
+	useEffect(() => {
+		if (videoIdIDB) {
+			return loadVideo(videoIdIDB);
+		}
 	}, [videoIdIDB]);
+
+	useEffect(() => {
+		if (!videoIdIDB && videos.length) {
+			return loadVideo(videos[0].id);
+		}
+	}, [videos.length]);
 
 	const handleSelectedBucket = (data) => {
 		setSelectedBucket(data);
@@ -101,7 +117,7 @@ export function Preview() {
 
 	if (isLoading) return <>loading ...</>;
 
-	if (!video) return <>THERE ARE NO VIDEOS</>;
+	if (!video && !videos.length) return <>THERE ARE NO VIDEOS</>;
 
 	return (
 		<div className="grid grid-cols-5 h-screen">
@@ -122,7 +138,7 @@ export function Preview() {
 				</div>
 			</div>
 
-			<div className="flex flex-col h-screen justify-between p-4 bg-[#001027]">
+			<div className="flex flex-col h-screen justify-between p-4 bg-[#001027] overflow-y-auto">
 				<div className="text-white flex flex-col gap-4">
 					{buckets?.map((bucket) => (
 						<div key={bucket.id} className={selectedBucket?.id === bucket?.id ? 'opacity-100' : 'opacity-50'}>
@@ -135,6 +151,14 @@ export function Preview() {
 							/>
 						</div>
 					))}
+					<div>
+						<BucketItem
+							defaultIcon="ic:round-plus"
+							width="w-[64px]"
+							iconProps={{ color: '#06f', fontSize: '42px' }}
+							onClick={() => setShow(true)}
+						/>
+					</div>
 				</div>
 
 				{!isUploading ? (
@@ -160,6 +184,7 @@ export function Preview() {
 					</div>
 				)}
 			</div>
+			<PreviewBucket editMode show={show} data={null} onClose={() => setShow(false)} />
 		</div>
 	);
 }
