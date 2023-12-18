@@ -42,6 +42,9 @@
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+4. **Install Server locally**
+   - Follow instruction on this repo: https://github.com/BryanEnid/Observe-Services
+
 ## Scripts
 
 - `yarn dev`: Run the development server.
