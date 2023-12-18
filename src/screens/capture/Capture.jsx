@@ -132,6 +132,7 @@ export function CaptureScreen() {
 
 	const handleRecordedVideo = async (video, audio) => {
 		setUploading(true);
+		// overlayCameraRef.current.srcElement.exitPictureInPicture();
 
 		// TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
 		const recordedVideo = new Blob([video.data, audio.data], { type: 'video/mp4' });
@@ -194,12 +195,14 @@ export function CaptureScreen() {
 			track.onended = (evt) => {
 				if (isRecording) startRecording();
 				setScreenDevice('');
+				setScreenDevice2('');
 				mainRef.current = null;
 			};
 		});
 
 		// Shows audio input levels
 		// ! Vercel breaks with this code. I think it related how the app gets build
+		// ! The worklet needs to be served as an static file
 		// const audioContext = new AudioContext();
 		// await audioContext.audioWorklet.addModule("/src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
 		// const source = audioContext.createMediaStreamSource(stream);
@@ -239,9 +242,9 @@ export function CaptureScreen() {
 		main.current = stream;
 		main.srcObject = deviceId ? stream : null;
 
-		main.onloadedmetadata = ({ srcElement }) => {
-			srcElement.requestPictureInPicture();
-			srcElement.style.transform = !isDisplayMedia ? 'scaleX(-1)' : 'scaleX(1)';
+		main.onloadedmetadata = async (e) => {
+			main.current.srcElement = e.srcElement;
+			e.srcElement.requestPictureInPicture();
 		};
 	};
 
