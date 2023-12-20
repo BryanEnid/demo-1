@@ -1,5 +1,3 @@
-import CircularJSON from 'circular-json';
-
 const formatBody = (body) => {
 	// If multipart return FormData instance
 	if (body instanceof FormData) return [body, {}];
