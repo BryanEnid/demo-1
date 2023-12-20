@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createBrowserRouter, redirect, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, redirect, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 
 // Screens
 import { Landpage } from './screens/landpage/Landpage';
@@ -33,13 +33,31 @@ export function Routes(props) {
 			element: <Profile />,
 			children: [
 				{ path: '', element: <Buckets /> },
-
 				{ path: 'audio', element: <>audio</> },
 				{ path: 'buckets', element: <Buckets /> },
 				{ path: 'experience', element: <Experience /> },
 				{ path: 'recommends', element: <>recommends</> },
 				{ path: 'quests', element: <>quests</> },
-				{ path: 'website', element: <>website</> }
+				{ path: 'website', element: <>website</> },
+
+				{
+					path: 'about',
+					element: <Outlet />,
+					children: [
+						{ path: '', element: <Navigate to="mission" replace /> },
+						{ path: 'mission', element: <>Mission, Vision, & Values</> },
+						{ path: 'culture', element: <>Culture</> },
+						{ path: 'people', element: <>People</> },
+						{ path: 'resources', element: <>Resources</> },
+						{ path: 'website', element: <>Website</> },
+						{ path: '*', element: <Navigate to="mission" replace /> }
+					]
+				},
+				{ path: 'open-roles', element: <>Open Roles</> },
+				{ path: 'resources', element: <>Resources</> },
+				{ path: 'teams', element: <>Teams</> },
+				{ path: 'training', element: <>Training</> },
+				{ path: 'website', element: <>Website</> }
 			]
 		},
 		{
