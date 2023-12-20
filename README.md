@@ -24,7 +24,7 @@
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/your-username/observe-pwa.git
+   git clone https://github.com/bryanenid/observe-pwa.git
    ```
 
 2. **Install Dependencies:**
@@ -40,7 +40,7 @@
    yarn dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+   Open [https://localhost:5173](https://localhost:5173/) in your browser.
 
 4. **Install Server locally**
    - Follow instruction on this repo: https://github.com/BryanEnid/Observe-Services
