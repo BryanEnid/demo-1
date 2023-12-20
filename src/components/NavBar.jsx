@@ -54,7 +54,7 @@ export function NavBar({ createBucket }) {
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent className="w-56">
-							<DropdownMenuItem onClick={createBucket}>
+							<DropdownMenuItem onClick={() => createBucket()}>
 								<Icon icon="fluent:album-add-24-regular" className="pr-1 text-3xl" />
 								Create a bucket
 							</DropdownMenuItem>
