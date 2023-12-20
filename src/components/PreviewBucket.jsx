@@ -83,10 +83,7 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 	const video360Ref = React.useRef();
 
 	React.useEffect(() => {
-		if (inData) {
-			// setData(inData);
-			setData((val) => ({ ...val, ...inData }));
-		}
+		if (inData) setData((val) => ({ ...val, ...inData }));
 	}, [inData]);
 
 	// Function to toggle fullscreen

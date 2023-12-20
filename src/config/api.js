@@ -1,2 +1,2 @@
 // TODO:...
-export const BASE_URL = 'http://localhost:3300';
+export const BASE_URL = import.meta.env.VITE_SERVER_BASE_URL;

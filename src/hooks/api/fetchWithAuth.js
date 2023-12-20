@@ -1,3 +1,5 @@
+import CircularJSON from 'circular-json';
+
 const formatBody = (body) => {
 	// If multipart return FormData instance
 	if (body instanceof FormData) return [body, {}];
@@ -9,12 +11,13 @@ const formatBody = (body) => {
 	return [null, null];
 };
 
-export const handleFetch = (url, opts = {}) => {
-	const [body, headers] = formatBody(opts.body);
+export const handleFetch = (url, opts) => {
+	const { body, ...options } = opts;
+	const [payload, headers] = formatBody(body);
 
 	return fetch(url, {
-		...opts,
-		body,
+		...options,
+		body: payload,
 		headers: { ...headers, ...opts.headers }
 	}).then((res) => res.json());
 };
@@ -29,9 +32,7 @@ export const fetchWithAuth = async ({ authToken, logout }, url, opts = {}) => {
 			}
 		});
 	} catch (err) {
-		if (err.response.status === 401) {
-			logout();
-		}
+		if (err.response?.status === 401) logout();
 
 		throw err;
 	}
