@@ -6,7 +6,6 @@ import { AspectRatio } from '@/chadcn/AspectRatio';
 import { Button } from '@/chadcn/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select';
 import { Typography } from '@/chadcn/Typography';
-import { useCollection } from '@/hooks/useCollection';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { Modal } from '@/components/Modal';
 import { Progress } from '@/chadcn/Progress';
@@ -23,9 +22,10 @@ export function CaptureScreen() {
 	const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
 
 	// State
-	const [isScreenRecording, setIsScreenRecording] = React.useState(false);
+	const [isRecording, setRecording] = React.useState(false);
 	const [devices, setDevices] = React.useState({ audio: [], video: [] });
 	const [screenDevice, setScreenDevice] = React.useState('');
+	const [screenDevice2, setScreenDevice2] = React.useState('');
 	const [audioDevice, setAudioDevice] = React.useState('');
 	const [isUploading, setUploading] = React.useState(false);
 	const [uploadProgress, setUploadProgress] = React.useState(0);
@@ -37,6 +37,7 @@ export function CaptureScreen() {
 	// Refs
 	const webcamRef = React.useRef(null);
 	const videoRef = React.useRef(null);
+	const overlayCameraRef = React.useRef(null);
 	const mainRef = React.useRef();
 	const streamRef = React.useRef();
 	const audioRecorderRef = React.useRef();
@@ -102,21 +103,27 @@ export function CaptureScreen() {
 		// };
 	}, [screenDevice, audioDevice]);
 
+	React.useEffect(() => {
+		if (screenDevice2.length) {
+			startScreen2(screenDevice2);
+		}
+	}, [screenDevice2]);
+
 	// Handles time lapsed
 	React.useEffect(() => {
 		let instance;
-		if (isScreenRecording) {
+		if (isRecording) {
 			instance = setInterval(() => {
 				setTimeLapsed((prev) => prev + 1000);
 			}, 1000);
 		}
 
-		if (timelapsed !== 0 && !isScreenRecording) setTimeLapsed(0);
+		if (timelapsed !== 0 && !isRecording) setTimeLapsed(0);
 
 		return () => {
 			clearInterval(instance);
 		};
-	}, [isScreenRecording]);
+	}, [isRecording]);
 
 	// Observer for the media recorded
 	React.useEffect(() => {
@@ -125,6 +132,7 @@ export function CaptureScreen() {
 
 	const handleRecordedVideo = async (video, audio) => {
 		setUploading(true);
+		// overlayCameraRef.current.srcElement.exitPictureInPicture();
 
 		// TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
 		const recordedVideo = new Blob([video.data, audio.data], { type: 'video/mp4' });
@@ -141,7 +149,7 @@ export function CaptureScreen() {
 	};
 
 	const startRecording = async () => {
-		if (!isScreenRecording && !!screenDevice.length && !!audioDevice.length) {
+		if (!isRecording && !!screenDevice.length && !!audioDevice.length) {
 			// Define Inputs
 			const video = mainRef.current.captureStream();
 			const audio = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: audioDevice } });
@@ -155,20 +163,21 @@ export function CaptureScreen() {
 			// Start recording
 			videoRecorder.start();
 			audioRecorder.start();
-			setIsScreenRecording(true);
+			setRecording(true);
 
 			// Video stopped
 			audioRecorder.addEventListener('dataavailable', setRecordedAudio);
 			videoRecorder.addEventListener('dataavailable', setRecordedVideo); // Video was stopped
 			// videoRecorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
 		}
-		if (isScreenRecording) {
-			setIsScreenRecording(false);
+		if (isRecording) {
+			setRecording(false);
 			videoRecorderRef.current.stop();
 			audioRecorderRef.current.stop();
 		}
 	};
 
+	// TODO: Make this start screen more modular (independent) from state
 	const startScreen = async (deviceId, audioDeviceId) => {
 		const config = { video: { width: 1920, height: 1080, deviceId }, audio: false };
 		const main = mainRef.current;
@@ -184,14 +193,16 @@ export function CaptureScreen() {
 
 		stream.getTracks().forEach((track) => {
 			track.onended = (evt) => {
-				if (isScreenRecording) startRecording();
+				if (isRecording) startRecording();
 				setScreenDevice('');
+				setScreenDevice2('');
 				mainRef.current = null;
 			};
 		});
 
 		// Shows audio input levels
 		// ! Vercel breaks with this code. I think it related how the app gets build
+		// ! The worklet needs to be served as an static file
 		// const audioContext = new AudioContext();
 		// await audioContext.audioWorklet.addModule("/src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
 		// const source = audioContext.createMediaStreamSource(stream);
@@ -214,44 +225,42 @@ export function CaptureScreen() {
 		// main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
 	};
 
+	const startScreen2 = async (deviceId) => {
+		const config = { video: { width: 1920, height: 1080, deviceId }, audio: false };
+		const main = overlayCameraRef.current;
+		// new HTMLVideoElement().onloadedmetadata;
+
+		// Set default config depending on the media source
+		const isDisplayMedia = deviceId === 'Screen Recording';
+		const mediaStore = {
+			getDisplayMedia: async (props) => navigator.mediaDevices.getDisplayMedia({ ...props }),
+			getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props })
+		};
+
+		const stream = await mediaStore[isDisplayMedia ? 'getDisplayMedia' : 'getUserMedia'](config);
+
+		main.current = stream;
+		main.srcObject = deviceId ? stream : null;
+
+		main.onloadedmetadata = async (e) => {
+			main.current.srcElement = e.srcElement;
+			e.srcElement.requestPictureInPicture();
+		};
+	};
+
 	return (
 		<>
-			{/* TODO: Replace this with https://www.figma.com/file/SmttzZOlFETqjtOu9vUixc/Observe?type=design&node-id=3231-4389&mode=dev */}
-			{/* <Modal show>
-        <div className="flex flex-col gap-4 max-w-2xl">
-          {data.map((item) => {
-            return (
-              <button className="grid grid-cols-4 text-start border rounded-md py-4 px-8 gap-6 w-full">
-                <div>
-                  {item.videos?.[0]?.image ? (
-                    <img className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full" src={item.videos?.[0]?.image} />
-                  ) : (
-                    <div className="bg-black object-cover aspect-square shadow drop-shadow-xl p-1 rounded-full w-32" />
-                  )}
-                </div>
-
-                <div className="col-span-3">
-                  <Typography variant="large">{item.title}</Typography>
-                  <Typography variant="small">{item.description}</Typography>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </Modal> */}
-
 			<div className="flex-inline pt-2 h-screen bg-[#001027]">
 				{/* Resources */}
 				<video ref={webcamRef} autoPlay className="h-full hidden" />
 				<video ref={videoRef} autoPlay className="h-full hidden" />
+				<video ref={overlayCameraRef} autoPlay className="h-full hidden" />
 
 				<div className="w-screen flex justify-center relative">
 					<div
 						className="flex justify-center items-center max-w-screen-2xl bg-gray-700 rounded-3xl overflow-hidden"
 						style={{ width: '100%', maxWidth: 'calc(85vh * 16/9)' }}
 					>
-						{/* TODO ! –  */}
-						{/* <canvas ref={canvasRef} width={1920} height={1080} className="w-full h-full" /> */}
 						<video
 							muted
 							ref={mainRef}
@@ -278,45 +287,96 @@ export function CaptureScreen() {
 							{/* Start */}
 							<div className="flex flex-row gap-4">
 								{/* Video input */}
-								<Select value={screenDevice} onValueChange={(value) => setScreenDevice(value !== 'none' ? value : '')}>
-									<SelectTrigger className="w-[180px] bg-white">
-										<div className="truncate">
-											<SelectValue placeholder="Select Screen Device" />
+								<div className="flex flex-col gap-3 m-2">
+									<Typography variant="small" className="text-white">
+										Video Input
+									</Typography>
+
+									<div className="flex justify-center items-center">
+										<Icon icon="clarity:video-camera-line" color="white" className="mr-2" />
+										<Select
+											value={screenDevice}
+											onValueChange={(value) => setScreenDevice(value !== 'none' ? value : '')}
+										>
+											<SelectTrigger className="w-[180px] bg-white">
+												<div className="truncate">
+													<SelectValue placeholder="Select Screen Device" />
+												</div>
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">None</SelectItem>
+												<SelectItem value="Screen Recording">Screen Recorder</SelectItem>
+												{devices.video.map(({ deviceId, label }) => {
+													if (!label) return '';
+													return (
+														<SelectItem key={deviceId} value={deviceId}>
+															{label}
+														</SelectItem>
+													);
+												})}
+											</SelectContent>
+										</Select>
+									</div>
+
+									{screenDevice === 'Screen Recording' && (
+										<div className="flex justify-center items-center">
+											<Icon icon="iconamoon:profile-duotone" color="white" className="mr-2" />
+											<Select
+												value={screenDevice2}
+												onValueChange={(value) => setScreenDevice2(value !== 'none' ? value : '')}
+											>
+												<SelectTrigger className="w-[180px] bg-white">
+													<div className="truncate">
+														<SelectValue placeholder="Select Screen Device" />
+													</div>
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="none">None</SelectItem>
+													{devices.video.map(({ deviceId, label }) => {
+														if (!label) return '';
+														return (
+															<SelectItem key={deviceId} value={deviceId}>
+																{label}
+															</SelectItem>
+														);
+													})}
+												</SelectContent>
+											</Select>
 										</div>
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="none">None</SelectItem>
-										<SelectItem value="Screen Recording">Screen Recorder</SelectItem>
-										{devices.video.map(({ deviceId, label }) => {
-											if (!label) return '';
-											return (
-												<SelectItem key={deviceId} value={deviceId}>
-													{label}
-												</SelectItem>
-											);
-										})}
-									</SelectContent>
-								</Select>
+									)}
+								</div>
 
 								{/* Audio input */}
-								<Select value={audioDevice} onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}>
-									<SelectTrigger className="w-[180px] bg-white">
-										<div className="truncate">
-											<SelectValue placeholder="Select Audio Device" />
-										</div>
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="none">None</SelectItem>
-										{devices.audio.map(({ deviceId, label }) => {
-											if (!label) return '';
-											return (
-												<SelectItem key={deviceId} value={deviceId}>
-													{label}
-												</SelectItem>
-											);
-										})}
-									</SelectContent>
-								</Select>
+								<div className="flex flex-col gap-3 m-2">
+									<Typography variant="small" className="text-white">
+										Audio Input
+									</Typography>
+
+									<div className="flex justify-center items-center">
+										<Icon icon="iconamoon:microphone-duotone" color="white" className="mr-2" />
+										<Select
+											value={audioDevice}
+											onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}
+										>
+											<SelectTrigger className="w-[180px] bg-white">
+												<div className="truncate">
+													<SelectValue placeholder="Select Audio Device" />
+												</div>
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">None</SelectItem>
+												{devices.audio.map(({ deviceId, label }) => {
+													if (!label) return '';
+													return (
+														<SelectItem key={deviceId} value={deviceId}>
+															{label}
+														</SelectItem>
+													);
+												})}
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
 							</div>
 
 							{/* End */}
@@ -328,7 +388,7 @@ export function CaptureScreen() {
 										</div>
 
 										<div className="text-yellow-300 absolute -bottom-8">
-											<Typography variant="small">Recording ...</Typography>
+											{timelapsed > 0 && <Typography variant="small">Recording ...</Typography>}
 										</div>
 									</>
 								)}
@@ -369,10 +429,10 @@ export function CaptureScreen() {
 								>
 									{/* <Icon icon="fluent:record-stop-48-filled" /> */}
 									<Icon
-										icon={!isScreenRecording ? 'fluent:record-48-filled' : 'fluent:record-stop-48-filled'}
+										icon={!isRecording ? 'fluent:record-48-filled' : 'fluent:record-stop-48-filled'}
 										className="z-10"
 									/>
-									{isScreenRecording && (
+									{isRecording && (
 										<div className="animate-ping absolute inline-flex h-5/6 w-5/6 rounded-full bg-red-400 opacity-75 z-0" />
 									)}
 									{/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">

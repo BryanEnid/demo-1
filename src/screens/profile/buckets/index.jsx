@@ -3,6 +3,8 @@ import { useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 import { useBuckets } from '@/hooks/useBuckets';
+import { useProfile } from '@/hooks/useProfile';
+
 import { Typography } from '@/chadcn/Typography.jsx';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { Button } from '@/chadcn/Button.jsx';
@@ -13,14 +15,17 @@ import { BucketItem } from './BucketItem';
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
 
 export function Buckets() {
+	// Hooks
+	const { data: profile } = useProfile();
+	const { data: buckets } = useBuckets(profile);
 	const [{ isUserProfile, createBucket }] = useOutletContext();
-	const { buckets } = useBuckets();
 
+	// State
 	const [showNewCategory, setShowNewCategory] = useState(false);
 	const [newCategoryValue, setNewCategoryValue] = useState('');
-
 	const [tmpCategories, setTmpCategories] = useState([]);
 
+	// Refs
 	const newCategoryRef = useRef();
 
 	const groupedBucket = useMemo(

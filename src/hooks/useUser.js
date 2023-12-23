@@ -7,10 +7,12 @@ export const useUser = (auth, id) => {
 	const [user, setUser] = React.useState(null);
 	const [isLoading, setLoading] = React.useState(true);
 
+	const enabled = id && auth.authToken && id != 'profile';
+
 	const { data, isLoading: isUserLoading } = useQuery({
 		gcTime: Infinity,
-		queryKey: [auth.authToken, id],
-		queryFn: () => (id && auth.authToken ? getUser(auth, id) : null)
+		queryKey: ['Users', id, auth?.authToken],
+		queryFn: () => (enabled ? getUser(auth, id) : null)
 	});
 
 	useEffect(() => {

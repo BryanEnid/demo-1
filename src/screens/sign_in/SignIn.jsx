@@ -1,17 +1,11 @@
 import React, { useMemo } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import _ from 'lodash';
-import { Icon } from '@iconify/react';
-import { getAuth } from 'firebase/auth';
 import { Button } from '@/chadcn/Button';
-import { Input } from '@/chadcn/Input';
-import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
-import { useCollection } from '@/hooks/useCollection';
 import { Typography } from '@/chadcn/Typography';
 import { Separator } from '@/chadcn/Separator';
 import { ObserveIcon } from '@/components/ObserveIcon';
 import { useAuth } from '@/providers/Authentication';
-import { Spinner } from '@/components/Spinner';
 
 export function SignIn() {
 	// Hooks
@@ -19,12 +13,10 @@ export function SignIn() {
 	// const { user, signInWithGoogle, signOutUser, createUser } = useAuthenticationProviders();
 	const { user, login, isLoading } = useAuth();
 
-	const { checkAvailableUsername } = useCollection('users');
-
 	// State
-	const [username, setUsername] = React.useState('');
-	const [isUsernameAvailable, setUsernameAvailable] = React.useState(null);
-	const [isChecking, setChecking] = React.useState(false);
+	// const [username, setUsername] = React.useState('');
+	// const [isUsernameAvailable, setUsernameAvailable] = React.useState(null);
+	// const [isChecking, setChecking] = React.useState(false);
 
 	// Refs
 	const debounceRef = React.useRef(null);
@@ -34,30 +26,30 @@ export function SignIn() {
 		login();
 	};
 
-	const handleUsernameChange = ({ target }) => {
-		setChecking(true);
-		debounceRef.current?.cancel();
+	// const handleUsernameChange = ({ target }) => {
+	// 	setChecking(true);
+	// 	debounceRef.current?.cancel();
 
-		// Declare
-		const newUsername = target.value;
-		const handleDebounce = () => {
-			checkAvailableUsername(newUsername).then((value) => {
-				setUsernameAvailable(value);
-				setChecking(false);
-			});
-		};
+	// 	// Declare
+	// 	const newUsername = target.value;
+	// 	const handleDebounce = () => {
+	// 		checkAvailableUsername(newUsername).then((value) => {
+	// 			setUsernameAvailable(value);
+	// 			setChecking(false);
+	// 		});
+	// 	};
 
-		// Set input
-		setUsername(newUsername);
+	// 	// Set input
+	// 	setUsername(newUsername);
 
-		// start debouncing
-		const debounceInstance = _.debounce(handleDebounce, 500);
-		debounceRef.current = debounceInstance;
-		debounceInstance();
-	};
+	// 	// start debouncing
+	// 	const debounceInstance = _.debounce(handleDebounce, 500);
+	// 	debounceRef.current = debounceInstance;
+	// 	debounceInstance();
+	// };
 
 	if (isLoading) return <></>;
-	if (user) return <Navigate to={`/${user?.id}`} />;
+	if (user) return <Navigate to={`/${user?.uid}`} />;
 
 	return (
 		<div className="flex flex-col h-screen items-center justify-center">

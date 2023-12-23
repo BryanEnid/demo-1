@@ -5,7 +5,6 @@ import { Icon } from '@iconify/react';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
 // import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
-import { useCollection } from '@/hooks/useCollection';
 import { Typography } from '@/chadcn/Typography';
 import { useAuth } from '@/providers/Authentication.jsx';
 
@@ -13,7 +12,7 @@ export function Landpage() {
 	// Hooks
 	const navigate = useNavigate(); // Get the navigate function
 	const { user, login, logout } = useAuth();
-	const { checkAvailableUsername } = useCollection('users');
+	// const { checkAvailableUsername } = useCollection('users');
 
 	// State
 	const [username, setUsername] = React.useState('');
@@ -28,27 +27,27 @@ export function Landpage() {
 		login();
 	};
 
-	const handleUsernameChange = ({ target }) => {
-		setChecking(true);
-		debounceRef.current?.cancel();
+	// const handleUsernameChange = ({ target }) => {
+	// 	setChecking(true);
+	// 	debounceRef.current?.cancel();
 
-		// Declare
-		const newUsername = target.value;
-		const handleDebounce = () => {
-			checkAvailableUsername(newUsername).then((value) => {
-				setUsernameAvailable(value);
-				setChecking(false);
-			});
-		};
+	// 	// Declare
+	// 	const newUsername = target.value;
+	// 	const handleDebounce = () => {
+	// 		checkAvailableUsername(newUsername).then((value) => {
+	// 			setUsernameAvailable(value);
+	// 			setChecking(false);
+	// 		});
+	// 	};
 
-		// Set input
-		setUsername(newUsername);
+	// 	// Set input
+	// 	setUsername(newUsername);
 
-		// start debouncing
-		const debounceInstance = _.debounce(handleDebounce, 500);
-		debounceRef.current = debounceInstance;
-		debounceInstance();
-	};
+	// 	// start debouncing
+	// 	const debounceInstance = _.debounce(handleDebounce, 500);
+	// 	debounceRef.current = debounceInstance;
+	// 	debounceInstance();
+	// };
 
 	return (
 		<div className="flex flex-col h-screen items-center justify-center">
