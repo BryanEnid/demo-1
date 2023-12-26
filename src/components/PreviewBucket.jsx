@@ -28,6 +28,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger
 } from '@/chadcn/DropDown';
+import { motion, useMotionValue, useTime, useTransform } from 'framer-motion';
+import { Spinner } from './Spinner';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -52,6 +54,105 @@ const QRShareView = ({ show, onClose }) => {
 				</div>
 			</div>
 		</PageModal>
+	);
+};
+
+const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
+	const [isHolding, setIsHolding] = React.useState(false);
+	const [success, setSuccess] = React.useState(false);
+	const [isLoading, setLoading] = React.useState(false);
+
+	const timer = React.useRef();
+
+	React.useEffect(() => {
+		let holdTimeout;
+
+		const handleMouseDown = () => {
+			setIsHolding(true);
+
+			// Animate the width using Framer Motion
+			const animation = {
+				width: '100%',
+				transition: { duration: holdTime, ease: 'linear' }
+			};
+
+			// Set up a timeout to trigger onRelease when holdTime elapses
+			holdTimeout = setTimeout(() => handleRelease(), holdTime);
+
+			// Animate the width
+			width.set('100%');
+		};
+
+		const handleMouseUp = () => {
+			clearTimeout(holdTimeout);
+			handleRelease();
+		};
+
+		// Cleanup function to clear the timeout if the component unmounts
+		return () => {
+			clearTimeout(holdTimeout);
+		};
+
+		// Attach event listeners
+		const button = document.getElementById('your-button-id'); // Replace with the actual ID or use another method to get the button element
+		button.addEventListener('mousedown', handleMouseDown);
+		button.addEventListener('mouseup', handleMouseUp);
+
+		// Cleanup event listeners
+		return () => {
+			button.removeEventListener('mousedown', handleMouseDown);
+			button.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, [isHolding, onRelease, holdTime]);
+
+	const handleHoldPress = () => {
+		setIsHolding(true);
+		timer.current = setTimeout(() => setSuccess(true), holdTime);
+	};
+
+	const handleRelease = ({ cancel }) => {
+		clearTimeout(timer.current);
+
+		// If you release the button in any invalid way it will unload the bar
+		if ((!success || cancel) && !isLoading) setIsHolding(false);
+
+		// If you release on a valid way, it will show the spinner and the bar will not deplete
+		if (success && !cancel) setLoading(true);
+
+		// Skip calling the release when invalid releases were called
+		if (cancel) return;
+
+		onRelease({ success });
+	};
+
+	return (
+		<div className="relative flex justify-center items-center w-full max-w-[150px] border-red-500 rounded-sm border">
+			<button
+				className="w-full h-full z-20 text-red-500"
+				onMouseLeave={() => handleRelease({ cancel: true })}
+				onMouseDown={handleHoldPress}
+				onMouseUp={handleRelease}
+			>
+				{text}
+			</button>
+
+			<motion.div
+				className={`absolute z-20 text-white`}
+				initial={{ opacity: 0 }}
+				animate={isHolding ? { opacity: 1 } : { opacity: 0 }}
+				transition={isHolding ? { duration: holdTime / 1000 } : { duration: 0.2 }}
+			>
+				{isLoading && <Spinner size={24} />}
+				{!isLoading && <Icon fontSize={22} icon="heroicons-solid:trash" />}
+			</motion.div>
+
+			<motion.div
+				className="absolute top-0 left-0 h-full bg-red-500 z-10"
+				initial={{ width: '0%' }}
+				animate={isHolding ? { width: '100%' } : { width: '0%' }}
+				transition={isHolding ? { duration: holdTime / 1000 } : { duration: 0.2 }}
+			/>
+		</div>
 	);
 };
 
@@ -227,8 +328,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		);
 	};
 
-	const handleDeleteBucket = () => {
-		deleteBucket(documentId);
+	const handleDeleteBucket = ({ success }) => {
+		if (success) deleteBucket({ documentId });
 	};
 
 	const handleDragOver = (e) => {
@@ -470,17 +571,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 						</div>
 					)}
 
-					<div className="flex justify-between px-8 my-8" on>
-						<button
-							variant="destructive"
-							onClick={handleClose}
-							onMouseDown={() => console.log('down')}
-							onMouseUp={() => console.log('up')}
-							// disabled={![data.description.length, data.title.length].every(Boolean)}
-							className="w-full max-w-[150px]"
-						>
-							Hold to Delete
-						</button>
+					<div className="flex justify-between px-8 my-8">
+						{!editMode && <HoldToTriggerButton onRelease={handleDeleteBucket} text="Delete bucket" holdTime={1500} />}
 
 						<div className="flex flex-row justify-end gap-3 text-center text-white/50 w-full">
 							<Button
