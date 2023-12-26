@@ -64,47 +64,6 @@ const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
 
 	const timer = React.useRef();
 
-	React.useEffect(() => {
-		let holdTimeout;
-
-		const handleMouseDown = () => {
-			setIsHolding(true);
-
-			// Animate the width using Framer Motion
-			const animation = {
-				width: '100%',
-				transition: { duration: holdTime, ease: 'linear' }
-			};
-
-			// Set up a timeout to trigger onRelease when holdTime elapses
-			holdTimeout = setTimeout(() => handleRelease(), holdTime);
-
-			// Animate the width
-			width.set('100%');
-		};
-
-		const handleMouseUp = () => {
-			clearTimeout(holdTimeout);
-			handleRelease();
-		};
-
-		// Cleanup function to clear the timeout if the component unmounts
-		return () => {
-			clearTimeout(holdTimeout);
-		};
-
-		// Attach event listeners
-		const button = document.getElementById('your-button-id'); // Replace with the actual ID or use another method to get the button element
-		button.addEventListener('mousedown', handleMouseDown);
-		button.addEventListener('mouseup', handleMouseUp);
-
-		// Cleanup event listeners
-		return () => {
-			button.removeEventListener('mousedown', handleMouseDown);
-			button.removeEventListener('mouseup', handleMouseUp);
-		};
-	}, [isHolding, onRelease, holdTime]);
-
 	const handleHoldPress = () => {
 		setIsHolding(true);
 		timer.current = setTimeout(() => setSuccess(true), holdTime);
