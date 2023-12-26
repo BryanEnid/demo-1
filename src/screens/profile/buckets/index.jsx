@@ -14,6 +14,15 @@ import { BucketItem } from './BucketItem';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
 
+// ! Remove this when ios supports Array.groupBy
+const groupBy = (array, keyFunc) => {
+	return array.reduce((result, item) => {
+		const key = keyFunc(item);
+		(result[key] = result[key] || []).push(item);
+		return result;
+	}, {});
+};
+
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
@@ -29,7 +38,7 @@ export function Buckets() {
 	const newCategoryRef = useRef();
 
 	const groupedBucket = useMemo(
-		() => Object.groupBy(buckets || [], ({ category }) => category || UNCATEGORIZED_BUCKETS_LABEL),
+		() => groupBy(buckets || [], ({ category }) => category || UNCATEGORIZED_BUCKETS_LABEL),
 		[buckets]
 	);
 
