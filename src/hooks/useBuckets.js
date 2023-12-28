@@ -21,7 +21,7 @@ export const useBuckets = (owner) => {
 	const { data } = useQuery({
 		gcTime: Infinity,
 		queryKey: [COLLECTION_NAME, owner?.uid],
-		queryFn: async () => handleGetBuckets(auth, owner.uid),
+		queryFn: async () => handleGetBuckets(auth, owner.id),
 		enabled: Boolean(owner?.uid)
 	});
 
