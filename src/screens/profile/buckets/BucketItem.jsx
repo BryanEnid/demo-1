@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
-import { PreviewBucket } from '@/components/PreviewBucket';
+import PreviewBucket from '@/components/PreviewBucket';
 import { useSearchParams } from 'react-router-dom';
 
 export const BucketItem = ({

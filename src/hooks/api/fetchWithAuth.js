@@ -9,11 +9,24 @@ const formatBody = (body) => {
 	return [null, null];
 };
 
-export const handleFetch = (url, opts) => {
+const getUrlWithParams = (url, params) => {
+	if (!params) {
+		return url;
+	}
+
+	const query = new URLSearchParams(params).toString();
+	if (query?.length) {
+		return `${url}?${query}`;
+	}
+
+	return url;
+};
+
+export const handleFetch = (url, opts = {}) => {
 	const { body, ...options } = opts;
 	const [payload, headers] = formatBody(body);
 
-	return fetch(url, {
+	return fetch(getUrlWithParams(url, opts.params), {
 		...options,
 		body: payload,
 		headers: { ...headers, ...opts.headers }
