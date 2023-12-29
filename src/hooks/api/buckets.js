@@ -1,7 +1,7 @@
 import { handleFetch, fetchWithAuth } from '@/hooks/api/fetchWithAuth.js';
 import { BASE_URL } from '@/config/api.js';
 
-export const getBuckets = (auth) => fetchWithAuth(auth, `${BASE_URL}/api/buckets`, { method: 'GET' });
+export const getBuckets = (auth, params) => fetchWithAuth(auth, `${BASE_URL}/api/buckets`, { params });
 
 export const getBucket = (auth, id) => fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}`, { method: 'GET' });
 

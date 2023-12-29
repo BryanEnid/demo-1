@@ -22,6 +22,11 @@ const getUrlWithParams = (url, params) => {
 	return url;
 };
 
+const handleErrors = async (res) => {
+	if (res.status === 500) throw res;
+	return res;
+};
+
 export const handleFetch = (url, opts = {}) => {
 	const { body, ...options } = opts;
 	const [payload, headers] = formatBody(body);
@@ -30,7 +35,9 @@ export const handleFetch = (url, opts = {}) => {
 		...options,
 		body: payload,
 		headers: { ...headers, ...opts.headers }
-	}).then((res) => res.json());
+	})
+		.then(handleErrors)
+		.then((res) => res.json());
 };
 
 export const fetchWithAuth = async ({ authToken, logout }, url, opts = {}) => {

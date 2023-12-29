@@ -18,18 +18,20 @@ export const useBuckets = (owner) => {
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
+	const queryKey = [COLLECTION_NAME, owner?.id];
+
 	const { data } = useQuery({
 		gcTime: Infinity,
-		queryKey: [COLLECTION_NAME, owner?.uid],
-		queryFn: async () => handleGetBuckets(auth, owner.uid),
-		enabled: Boolean(owner?.uid)
+		queryKey,
+		queryFn: async () => handleGetBuckets(auth, { ownerId: owner.id }),
+		enabled: Boolean(owner?.id)
 	});
 
 	const createBucket = useMutation({
 		mutationFn: async ({ data }) => handleCreateBucket(auth, data),
 		onSuccess: () => {
 			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: [COLLECTION_NAME, owner?.uid] });
+			queryClient.invalidateQueries({ queryKey });
 		}
 	});
 
@@ -38,7 +40,7 @@ export const useBuckets = (owner) => {
 		onSuccess: () => {
 			// TODO: Optimistic updates
 			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: [COLLECTION_NAME, owner?.uid] });
+			queryClient.invalidateQueries({ queryKey });
 		}
 	});
 
@@ -46,7 +48,7 @@ export const useBuckets = (owner) => {
 		mutationFn: ({ documentId }) => handleDeleteBucket(auth, documentId),
 		onSuccess: () => {
 			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: [COLLECTION_NAME, owner?.uid] });
+			queryClient.invalidateQueries({ queryKey });
 		}
 	});
 
@@ -63,7 +65,7 @@ export const useBuckets = (owner) => {
 		onSuccess: () => {
 			// TODO: Optimistic updates
 			// Invalidate and refetch
-			queryClient.invalidateQueries({ queryKey: [COLLECTION_NAME, owner?.uid] });
+			queryClient.invalidateQueries({ queryKey });
 		}
 	});
 
