@@ -10,6 +10,7 @@ import { Buckets } from './screens/profile/buckets';
 import { Experience } from './screens/profile/experience/Experience';
 import { Preview } from './screens/video_preview/Preview';
 import { SignIn } from './screens/sign_in/SignIn';
+import Quests from './screens/profile/quests/index';
 
 export function Routes(props) {
 	// TODO: Preload all icons
@@ -37,7 +38,7 @@ export function Routes(props) {
 				{ path: 'buckets', element: <Buckets /> },
 				{ path: 'experience', element: <Experience /> },
 				{ path: 'recommends', element: <>recommends</> },
-				{ path: 'quests', element: <>quests</> },
+				{ path: 'quests', element: <Quests /> },
 				{ path: 'website', element: <>website</> },
 
 				{

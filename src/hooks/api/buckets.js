@@ -1,12 +1,7 @@
 import { handleFetch, fetchWithAuth } from '@/hooks/api/fetchWithAuth.js';
 import { BASE_URL } from '@/config/api.js';
 
-export const getBuckets = (auth, ownerId) => {
-	let parameters = '';
-	if (ownerId) parameters = '?' + new URLSearchParams({ ownerId }).toString();
-
-	return fetchWithAuth(auth, `${BASE_URL}/api/buckets${parameters}`, { method: 'GET' });
-};
+export const getBuckets = (auth, params) => fetchWithAuth(auth, `${BASE_URL}/api/buckets`, { params });
 
 export const getBucket = (auth, id) => fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}`, { method: 'GET' });
 
