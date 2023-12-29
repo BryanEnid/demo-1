@@ -12,7 +12,8 @@ export const useUser = (auth, id) => {
 	const { data, isLoading: isUserLoading } = useQuery({
 		gcTime: Infinity,
 		queryKey: ['Users', id, auth?.authToken],
-		queryFn: () => (enabled ? getUser(auth, id) : null)
+		queryFn: () => (enabled ? getUser(auth, id) : null),
+		enabled: Boolean(enabled)
 	});
 
 	useEffect(() => {

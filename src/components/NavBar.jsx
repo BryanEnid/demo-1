@@ -22,7 +22,6 @@ import { Typography } from '@/chadcn/Typography';
 import { Input } from '@/chadcn/Input';
 import { Textarea } from '@/chadcn/Textarea';
 import { PageModal } from './PageModal';
-import { PreviewBucket } from './PreviewBucket';
 import { MediaSelector } from './MediaSelector';
 import { useAuth } from '@/providers/Authentication';
 

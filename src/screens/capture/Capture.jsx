@@ -1,25 +1,30 @@
 import React from 'react';
-import { Icon } from '@iconify/react';
 import { createSearchParams, useLocation, useNavigate, useParams, useRoutes } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
+
 import { AspectRatio } from '@/chadcn/AspectRatio';
 import { Button } from '@/chadcn/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select';
 import { Typography } from '@/chadcn/Typography';
 import { useQueryParams } from '@/hooks/useQueryParams';
+import useQuestions from '@/hooks/useQuestions.js';
+import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { Modal } from '@/components/Modal';
 import { Progress } from '@/chadcn/Progress';
-import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { formatTimestamp } from '@/lib/utils';
 import { useAuth } from '@/providers/Authentication.jsx';
 
 export function CaptureScreen() {
 	// Hooks
 	const navigate = useNavigate();
-	const { pathname } = useLocation();
+	const { pathname, search } = useLocation();
 	const params = useQueryParams();
 	const { user } = useAuth();
 	const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
+	const { data: questions } = useQuestions({ forUser: user?.id });
+
+	const query = new URLSearchParams(search);
 
 	// State
 	const [isRecording, setRecording] = React.useState(false);
@@ -33,6 +38,7 @@ export function CaptureScreen() {
 	const [timelapsed, setTimeLapsed] = React.useState(0);
 	const [recordedAudio, setRecordedAudio] = React.useState();
 	const [recordedVideo, setRecordedVideo] = React.useState();
+	const [question, setQuestion] = React.useState(query.get('questionId'));
 
 	// Refs
 	const webcamRef = React.useRef(null);
@@ -144,7 +150,8 @@ export function CaptureScreen() {
 		const request = await saveVideoIDB(recordedVideo);
 
 		request.onsuccess = ({ target }) => {
-			navigate({ pathname: 'preview', search: createSearchParams({ id: target.result }).toString() });
+			query.set('id', target.result);
+			navigate({ pathname: 'preview', search: query.toString() });
 		};
 	};
 
@@ -288,12 +295,15 @@ export function CaptureScreen() {
 							<div className="flex flex-row gap-4">
 								{/* Video input */}
 								<div className="flex flex-col gap-3 m-2">
-									<Typography variant="small" className="text-white">
+									<Typography variant="small">
+										{' '}
+										{/* className="text-white" */}
 										Video Input
 									</Typography>
 
 									<div className="flex justify-center items-center">
-										<Icon icon="clarity:video-camera-line" color="white" className="mr-2" />
+										<Icon icon="clarity:video-camera-line" className="mr-2" />
+										{/* color="white" */}
 										<Select
 											value={screenDevice}
 											onValueChange={(value) => setScreenDevice(value !== 'none' ? value : '')}
@@ -320,7 +330,8 @@ export function CaptureScreen() {
 
 									{screenDevice === 'Screen Recording' && (
 										<div className="flex justify-center items-center">
-											<Icon icon="iconamoon:profile-duotone" color="white" className="mr-2" />
+											<Icon icon="iconamoon:profile-duotone" className="mr-2" />
+											{/* color="white" */}
 											<Select
 												value={screenDevice2}
 												onValueChange={(value) => setScreenDevice2(value !== 'none' ? value : '')}
@@ -348,12 +359,14 @@ export function CaptureScreen() {
 
 								{/* Audio input */}
 								<div className="flex flex-col gap-3 m-2">
-									<Typography variant="small" className="text-white">
+									<Typography variant="small">
+										{/* className="text-white" */}
 										Audio Input
 									</Typography>
 
 									<div className="flex justify-center items-center">
-										<Icon icon="iconamoon:microphone-duotone" color="white" className="mr-2" />
+										<Icon icon="iconamoon:microphone-duotone" className="mr-2" />
+										{/* color="white" */}
 										<Select
 											value={audioDevice}
 											onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}
@@ -379,26 +392,54 @@ export function CaptureScreen() {
 								</div>
 							</div>
 
-							{/* End */}
-							<div className="flex flex-col items-center gap-2 text-white relative">
-								{true && (
-									<>
-										<div className="rounded-xl p-1 px-6 bg-blue-600 text-center">
-											<Typography variant="large">{formatTimestamp(timelapsed)}</Typography>
-										</div>
+							<div className="flex items-center gap-10">
+								{/* End */}
+								<div className="flex flex-col items-center gap-2 text-white relative">
+									{true && (
+										<>
+											<div className="rounded-xl p-1 px-6 bg-blue-600 text-center">
+												<Typography variant="large">{formatTimestamp(timelapsed)}</Typography>
+											</div>
 
-										<div className="text-yellow-300 absolute -bottom-8">
-											{timelapsed > 0 && <Typography variant="small">Recording ...</Typography>}
-										</div>
-									</>
-								)}
+											<div className="text-yellow-300 absolute -bottom-8">
+												{timelapsed > 0 && <Typography variant="small">Recording ...</Typography>}
+											</div>
+										</>
+									)}
+								</div>
+
+								<div className="flex flex-col gap-3 m-2">
+									<Typography variant="small">
+										{/* className="text-white" */}
+										Question
+									</Typography>
+
+									<div className="flex justify-center items-center">
+										{/*<Icon icon="iconamoon:microphone-duotone" className="mr-2" />/!* color="white" *!/*/}
+										<Select value={question} onValueChange={(value) => setQuestion(value !== 'none' ? value : '')}>
+											<SelectTrigger className="w-[180px] bg-white">
+												<div className="truncate">
+													<SelectValue placeholder="Select Question" />
+												</div>
+											</SelectTrigger>
+											<SelectContent className="max-h-[90vh] overflow-x-auto">
+												<SelectItem value="none">None</SelectItem>
+												{(questions || []).map(({ id, text }) => (
+													<SelectItem key={id} value={id}>
+														{text}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 
 					{/* Overlay */}
 					<div className="absolute flex flex-row justify-center">
-						<div className="flex flex-row gap-16 text-4xl text-white">
+						<div className="flex flex-row gap-10 text-4xl text-white">
 							<div>
 								<div className="relative">
 									<button className="rounded-full p-3 bg-blue-600 relative z-10 scale-95">

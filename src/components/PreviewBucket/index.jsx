@@ -1,33 +1,29 @@
 import React from 'react';
-import { Icon } from '@iconify/react';
-import { createSearchParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { createSearchParams, useNavigate } from 'react-router-dom';
 import { ReactSortable } from 'react-sortablejs';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { PageModal } from '@/components/PageModal';
-import { useProfile } from '@/hooks/useProfile';
-
-import { VideoUploadButton } from './VideoUploadButton';
-import { cn, generatePreview, generateRandomNumber } from '@/lib/utils';
-import { CircularProgress } from './CircularProgress';
-import { CachedVideo } from './CachedVideo';
-import { VR_3D, Video360 } from '@/components/MediaPlayer';
-import { useBuckets } from '@/hooks/useBuckets';
+import { Icon } from '@iconify/react';
 import QRCode from 'react-qr-code';
-import { useToast } from '@/hooks/useToast';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { motion } from 'framer-motion';
 
+import { PageModal } from '@/components/PageModal.jsx';
+import { VR_3D, Video360 } from '@/components/MediaPlayer.jsx';
+import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
+import QuestionsList from '@/components/QuestionsList.jsx';
+import { cn, generatePreview, generateRandomNumber } from '@/lib/utils.js';
+import { useProfile } from '@/hooks/useProfile.js';
+import { useBuckets } from '@/hooks/useBuckets.js';
+import { useToast } from '@/hooks/useToast.js';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
 import { Typography } from '@/chadcn/Typography';
 import { Textarea } from '@/chadcn/Textarea';
-import { Dialog } from '@/chadcn/Dialog';
-import { Progress } from '@/chadcn/Progress';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuTrigger
-} from '@/chadcn/DropDown';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/chadcn/Tabs.jsx';
+
+import { VideoUploadButton } from '../VideoUploadButton.jsx';
+import { CircularProgress } from '../CircularProgress.jsx';
+import { CachedVideo } from '../CachedVideo.jsx';
+import { Spinner } from '../Spinner';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -55,7 +51,65 @@ const QRShareView = ({ show, onClose }) => {
 	);
 };
 
-export function PreviewBucket({ show, onClose, data: inData, editMode, documentId }) {
+const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
+	const [isHolding, setIsHolding] = React.useState(false);
+	const [success, setSuccess] = React.useState(false);
+	const [isLoading, setLoading] = React.useState(false);
+
+	const timer = React.useRef();
+
+	const handleHoldPress = () => {
+		setIsHolding(true);
+		timer.current = setTimeout(() => setSuccess(true), holdTime);
+	};
+
+	const handleRelease = ({ cancel }) => {
+		clearTimeout(timer.current);
+
+		// If you release the button in any invalid way it will unload the bar
+		if ((!success || cancel) && !isLoading) setIsHolding(false);
+
+		// If you release on a valid way, it will show the spinner and the bar will not deplete
+		if (success && !cancel) setLoading(true);
+
+		// Skip calling the release when invalid releases were called
+		if (cancel) return;
+
+		onRelease({ success });
+	};
+
+	return (
+		<div className="relative flex justify-center items-center w-full max-w-[150px] border-red-500 rounded-sm border">
+			<button
+				className="w-full h-full z-20 text-red-500"
+				onMouseLeave={() => handleRelease({ cancel: true })}
+				onMouseDown={handleHoldPress}
+				onMouseUp={handleRelease}
+			>
+				{text}
+			</button>
+
+			<motion.div
+				className={`absolute z-20 text-white`}
+				initial={{ opacity: 0 }}
+				animate={isHolding ? { opacity: 1 } : { opacity: 0 }}
+				transition={isHolding ? { duration: holdTime / 1000 } : { duration: 0.2 }}
+			>
+				{isLoading && <Spinner size={24} />}
+				{!isLoading && <Icon fontSize={22} icon="heroicons-solid:trash" />}
+			</motion.div>
+
+			<motion.div
+				className="absolute top-0 left-0 h-full bg-red-500 z-10"
+				initial={{ width: '0%' }}
+				animate={isHolding ? { width: '100%' } : { width: '0%' }}
+				transition={isHolding ? { duration: holdTime / 1000 } : { duration: 0.2 }}
+			/>
+		</div>
+	);
+};
+
+const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
 	// Hooks
 	const navigate = useNavigate();
 	const { data: profile, isUserProfile } = useProfile();
@@ -227,8 +281,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 		);
 	};
 
-	const handleDeleteBucket = () => {
-		deleteBucket(documentId);
+	const handleDeleteBucket = ({ success }) => {
+		if (success) deleteBucket({ documentId });
 	};
 
 	const handleDragOver = (e) => {
@@ -470,17 +524,8 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 						</div>
 					)}
 
-					<div className="flex justify-between px-8 my-8" on>
-						<button
-							variant="destructive"
-							onClick={handleClose}
-							onMouseDown={() => console.log('down')}
-							onMouseUp={() => console.log('up')}
-							// disabled={![data.description.length, data.title.length].every(Boolean)}
-							className="w-full max-w-[150px]"
-						>
-							Hold to Delete
-						</button>
+					<div className="flex justify-between px-8 my-8">
+						{!editMode && <HoldToTriggerButton onRelease={handleDeleteBucket} text="Delete bucket" holdTime={1500} />}
 
 						<div className="flex flex-row justify-end gap-3 text-center text-white/50 w-full">
 							<Button
@@ -539,88 +584,32 @@ export function PreviewBucket({ show, onClose, data: inData, editMode, documentI
 				</div>
 			</div>
 
-			<div className="flex flex-row px-8 my-6">
-				<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-					<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
-					<Typography variant="small">215k</Typography>
-					<Button variant="secondary">Anchor</Button>
-				</div>
-
-				<div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
-					<div className="flex flex-row justify-between items-center">
-						<div>
-							<Typography variant="large">{profile?.name}</Typography>
-							{/* <Typography variant="small">{profile.role}</Typography> */}
-						</div>
-						{isUserProfile && (
-							<div className="flex gap-3 items-center">
-								<Button
-									iconBegin={<Icon icon="humbleicons:camera-video" />}
-									variant="secondary"
-									onClick={() => handleCreateBucket({ willRedirect: true })}
-								>
-									Capture
-								</Button>
-
-								<VideoUploadButton onUpload={handlePrepareVideosToSave} />
-
-								<DropdownMenu>
-									<DropdownMenuTrigger>
-										<Button variant="secondary">
-											<Icon icon="tabler:dots" />
-										</Button>
-									</DropdownMenuTrigger>
-
-									<DropdownMenuContent>
-										<DropdownMenuItem onClick={() => setEditMode(true)}>
-											<Icon icon="material-symbols:edit" className="mr-2 h-4 w-4" />
-											Edit
-										</DropdownMenuItem>
-										<DropdownMenuItem onClick={() => setSharing(true)}>
-											<Icon icon="jam:share-alt" className="mr-2 h-4 w-4" />
-											Share
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
-						)}
+			<Tabs defaultValue="overview" className="w-full">
+				<TabsList>
+					<TabsTrigger value="overview">Overview</TabsTrigger>
+					<TabsTrigger value="q&a">Q&A</TabsTrigger>
+				</TabsList>
+				<TabsContent value="overview">
+					<Overview
+						data={data}
+						profile={profile}
+						isUserProfile={isUserProfile}
+						setSharing={setSharing}
+						setEditMode={setEditMode}
+						currentVideo={currentVideo}
+						handlePrepareVideosToSave={handlePrepareVideosToSave}
+						handleCreateBucket={handleCreateBucket}
+						setCurrentVideo={setCurrentVideo}
+					/>
+				</TabsContent>
+				<TabsContent value="q&a" disabled={isEditMode}>
+					<div className="py-10">
+						<QuestionsList profile={profile} scope={{ bucketId: documentId }} />
 					</div>
-
-					<div>
-						<div>
-							<Typography variant="large">{data.title}</Typography>
-							<Typography variant="p" className="whitespace-pre-line">
-								{data.description}
-							</Typography>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div className="flex justify-center items-center my-6 mt-10">
-				<div className="grid grid-cols-4 gap-5">
-					{data.videos.map(({ image }, index) => {
-						if (image) {
-							return (
-								<button onClick={() => setCurrentVideo(index)} key={image}>
-									<div>
-										{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
-										<LazyLoadImage
-											className={cn(
-												'rounded-lg object-cover w-40 h-28 transition-all border-transparent border-[4px]',
-												currentVideo === index && 'border-primary scale-110'
-											)}
-											// alt={image.alt}
-											// height={image.height}
-											src={image}
-										/>
-									</div>
-								</button>
-							);
-						}
-					})}
-				</div>
-			</div>
+				</TabsContent>
+			</Tabs>
 		</PageModal>
 	);
-}
+};
+
+export default PreviewBucket;

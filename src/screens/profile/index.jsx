@@ -13,7 +13,7 @@ import { Separator } from '@/chadcn/Separator.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { useAuth } from '@/providers/Authentication.jsx';
-import { PreviewBucket } from '@/components/PreviewBucket.jsx';
+import PreviewBucket from '@/components/PreviewBucket';
 
 // TODO: dynamic url
 import orgBgImg from '@/assets/image-org-bg.png';
