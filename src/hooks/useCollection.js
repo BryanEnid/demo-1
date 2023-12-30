@@ -14,14 +14,12 @@ import {
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ref, uploadBytes, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-// import { useAuthenticationProviders } from './useAuthenticationProviders';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { db, storage } from '@/config/firebase';
 
 const configDefaults = { keys: [], query: [] };
 
 export const useCollection = (collectionName, config = configDefaults) => {
-	// const { user: _user } = useAuthenticationProviders();
 	const { user } = useAuth();
 	const queryClient = useQueryClient();
 

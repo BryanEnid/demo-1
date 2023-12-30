@@ -41,9 +41,9 @@ export function NavBar({ createBucket }) {
 		<>
 			<div className="h-20 w-full" />
 			<nav className="flex fixed z-10 top-0 left-[96px] right-0 flex-row h-20 items-center justify-end p-8 gap-8 text-gray-600 bg-white">
-				<button>Career portal</button>
-				<button>Explore companies</button>
-				<button>Observatory</button>
+				{/* <button>Career portal</button> */}
+				{/* <button>Explore companies</button> */}
+				{/* <button>Observatory</button> */}
 
 				{/* Create */}
 				{user && (

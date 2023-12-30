@@ -2,14 +2,12 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useAuth } from '@/providers/Authentication.jsx';
-import { useUser } from './useUser';
 import { useQuery } from '@tanstack/react-query';
 import { createUser as handleCreateUser, getUser } from '@/hooks/api/users.js';
 
 export const useProfile = () => {
 	const { id } = useParams();
 	const { user, ...auth } = useAuth();
-	// const { user: userProfile, ...restData } = useUser(auth, id);
 
 	const enabled = id && id != 'profile';
 

@@ -1,7 +1,5 @@
 import React, { createContext, useContext } from 'react';
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
-import { useUser } from '@/hooks/useUser';
-import { useQuery } from '@tanstack/react-query';
 
 // Create the authentication context
 const AuthContext = createContext({
