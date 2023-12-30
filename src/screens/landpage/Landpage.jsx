@@ -4,7 +4,6 @@ import _ from 'lodash';
 import { Icon } from '@iconify/react';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
-// import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
 import { Typography } from '@/chadcn/Typography';
 import { useAuth } from '@/providers/Authentication.jsx';
 

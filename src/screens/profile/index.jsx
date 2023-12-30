@@ -106,7 +106,8 @@ export function Profile() {
 	return (
 		<div>
 			<SideBar />
-			<div className="pl-[96px]">
+
+			<div>
 				<NavBar createBucket={handleCreateBucket} />
 
 				{isOrganization ? (
