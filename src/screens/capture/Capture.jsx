@@ -63,7 +63,7 @@ export function CaptureScreen() {
 
 	// Loading FFMPEG over CDN
 	React.useEffect(() => {
-		loadFFMPEG().then(console.log);
+		loadFFMPEG().catch(console.error);
 	}, []);
 
 	// Stop tracks when leaving to another screen
@@ -133,7 +133,7 @@ export function CaptureScreen() {
 
 	// Observer for the media recorded
 	React.useEffect(() => {
-		if (recordedAudio && recordedVideo) handleRecordedVideo(recordedVideo, recordedAudio).catch(console.error);
+		if (recordedAudio && recordedVideo) handleRecordedVideo(recordedVideo, recordedAudio).catch(console.log);
 	}, [recordedAudio, recordedVideo]);
 
 	const handleRecordedVideo = async (video, audio) => {
@@ -145,7 +145,8 @@ export function CaptureScreen() {
 		const recordedVideo = new Blob([video.data], { type: 'video/mp4' });
 		const recordedAudio = new Blob([audio.data], { type: 'audio/mp4' });
 
-		console.log(recordedVideo, recordedAudio);
+		const videoURL = URL.createObjectURL(recordedVideo);
+		const audioURL = URL.createObjectURL(recordedAudio);
 
 		const muxedTrackURL = await mux(recordedVideo, recordedAudio);
 
