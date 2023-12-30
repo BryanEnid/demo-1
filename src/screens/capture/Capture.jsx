@@ -21,7 +21,7 @@ export function CaptureScreen() {
 	const { pathname, search } = useLocation();
 	const params = useQueryParams();
 	const { user } = useAuth();
-	const { videos, saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
+	const { saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
 	const { data: questions } = useQuestions({ forUser: user?.id });
 
 	const query = new URLSearchParams(search);
@@ -255,58 +255,54 @@ export function CaptureScreen() {
 		};
 	};
 
-	return (
-		<>
-			<div className="flex-inline pt-2 h-screen bg-[#001027]">
-				{/* Resources */}
-				<video ref={webcamRef} autoPlay className="h-full hidden" />
-				<video ref={videoRef} autoPlay className="h-full hidden" />
-				<video ref={overlayCameraRef} autoPlay className="h-full hidden" />
+	const BottomTools = () => (
+		<div className="relative flex flex-col items-center justify-center w-full text-white">
+			<div className="flex flex-row justify-center w-full items-center">
+				<div
+					style={{ width: '100%', maxWidth: 'calc(85vh * 16/9)' }}
+					className="flex flex-row justify-between items-center"
+				>
+					{/* Start */}
+					<div className="flex flex-row gap-4">
+						{/* Video input */}
+						<div className="flex flex-col gap-3 m-2">
+							<Typography variant="small">Video Input</Typography>
 
-				<div className="w-screen flex justify-center relative">
-					<div
-						className="flex justify-center items-center max-w-screen-2xl bg-gray-700 rounded-3xl overflow-hidden"
-						style={{ width: '100%', maxWidth: 'calc(85vh * 16/9)' }}
-					>
-						<video
-							muted
-							ref={mainRef}
-							autoPlay
-							controls={false}
-							width={1920}
-							height={1080}
-							className={`h-[1080px] max-w-[1920px] ${screenDevice === 'Screen Recording' && 'opacity-0'}`}
-						/>
-						{screenDevice === 'Screen Recording' && (
-							<div className="absolute text-white">
-								<Typography variant="large">You are screen recording ...</Typography>
+							<div className="flex justify-center items-center ">
+								<Icon icon="clarity:video-camera-line" className="mr-2" />
+								<div className="text-black">
+									<Select
+										value={screenDevice}
+										onValueChange={(value) => setScreenDevice(value !== 'none' ? value : '')}
+									>
+										<SelectTrigger className="w-[180px] bg-white">
+											<div className="truncate">
+												<SelectValue placeholder="Select Screen Device" />
+											</div>
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none">None</SelectItem>
+											<SelectItem value="Screen Recording">Screen Recorder</SelectItem>
+											{devices.video.map(({ deviceId, label }) => {
+												if (!label) return '';
+												return (
+													<SelectItem key={deviceId} value={deviceId}>
+														{label}
+													</SelectItem>
+												);
+											})}
+										</SelectContent>
+									</Select>
+								</div>
 							</div>
-						)}
-					</div>
-				</div>
 
-				<div className="relative flex flex-col items-center justify-center mt-10 w-full">
-					<div className="flex flex-row justify-center w-full items-center">
-						<div
-							style={{ width: '100%', maxWidth: 'calc(85vh * 16/9)' }}
-							className="flex flex-row justify-between items-center"
-						>
-							{/* Start */}
-							<div className="flex flex-row gap-4">
-								{/* Video input */}
-								<div className="flex flex-col gap-3 m-2">
-									<Typography variant="small">
-										{' '}
-										{/* className="text-white" */}
-										Video Input
-									</Typography>
-
-									<div className="flex justify-center items-center">
-										<Icon icon="clarity:video-camera-line" className="mr-2" />
-										{/* color="white" */}
+							{screenDevice === 'Screen Recording' && (
+								<div className="flex justify-center items-center">
+									<Icon icon="iconamoon:profile-duotone" className="mr-2" />
+									<div className="text-black">
 										<Select
-											value={screenDevice}
-											onValueChange={(value) => setScreenDevice(value !== 'none' ? value : '')}
+											value={screenDevice2}
+											onValueChange={(value) => setScreenDevice2(value !== 'none' ? value : '')}
 										>
 											<SelectTrigger className="w-[180px] bg-white">
 												<div className="truncate">
@@ -315,7 +311,6 @@ export function CaptureScreen() {
 											</SelectTrigger>
 											<SelectContent>
 												<SelectItem value="none">None</SelectItem>
-												<SelectItem value="Screen Recording">Screen Recorder</SelectItem>
 												{devices.video.map(({ deviceId, label }) => {
 													if (!label) return '';
 													return (
@@ -327,177 +322,161 @@ export function CaptureScreen() {
 											</SelectContent>
 										</Select>
 									</div>
-
-									{screenDevice === 'Screen Recording' && (
-										<div className="flex justify-center items-center">
-											<Icon icon="iconamoon:profile-duotone" className="mr-2" />
-											{/* color="white" */}
-											<Select
-												value={screenDevice2}
-												onValueChange={(value) => setScreenDevice2(value !== 'none' ? value : '')}
-											>
-												<SelectTrigger className="w-[180px] bg-white">
-													<div className="truncate">
-														<SelectValue placeholder="Select Screen Device" />
-													</div>
-												</SelectTrigger>
-												<SelectContent>
-													<SelectItem value="none">None</SelectItem>
-													{devices.video.map(({ deviceId, label }) => {
-														if (!label) return '';
-														return (
-															<SelectItem key={deviceId} value={deviceId}>
-																{label}
-															</SelectItem>
-														);
-													})}
-												</SelectContent>
-											</Select>
-										</div>
-									)}
 								</div>
+							)}
+						</div>
 
-								{/* Audio input */}
-								<div className="flex flex-col gap-3 m-2">
-									<Typography variant="small">
-										{/* className="text-white" */}
-										Audio Input
-									</Typography>
+						{/* Audio input */}
+						<div className="flex flex-col gap-3 m-2">
+							<Typography variant="small">
+								{/* className="text-white" */}
+								Audio Input
+							</Typography>
 
-									<div className="flex justify-center items-center">
-										<Icon icon="iconamoon:microphone-duotone" className="mr-2" />
-										{/* color="white" */}
-										<Select
-											value={audioDevice}
-											onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}
-										>
-											<SelectTrigger className="w-[180px] bg-white">
-												<div className="truncate">
-													<SelectValue placeholder="Select Audio Device" />
-												</div>
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="none">None</SelectItem>
-												{devices.audio.map(({ deviceId, label }) => {
-													if (!label) return '';
-													return (
-														<SelectItem key={deviceId} value={deviceId}>
-															{label}
-														</SelectItem>
-													);
-												})}
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-							</div>
-
-							<div className="flex items-center gap-10">
-								{/* End */}
-								<div className="flex flex-col items-center gap-2 text-white relative">
-									{true && (
-										<>
-											<div className="rounded-xl p-1 px-6 bg-blue-600 text-center">
-												<Typography variant="large">{formatTimestamp(timelapsed)}</Typography>
+							<div className="flex justify-center items-center">
+								<Icon icon="iconamoon:microphone-duotone" className="mr-2" />
+								<div className="text-black">
+									<Select value={audioDevice} onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}>
+										<SelectTrigger className="w-[180px] bg-white">
+											<div className="truncate">
+												<SelectValue placeholder="Select Audio Device" />
 											</div>
-
-											<div className="text-yellow-300 absolute -bottom-8">
-												{timelapsed > 0 && <Typography variant="small">Recording ...</Typography>}
-											</div>
-										</>
-									)}
-								</div>
-
-								<div className="flex flex-col gap-3 m-2">
-									<Typography variant="small">
-										{/* className="text-white" */}
-										Question
-									</Typography>
-
-									<div className="flex justify-center items-center">
-										{/*<Icon icon="iconamoon:microphone-duotone" className="mr-2" />/!* color="white" *!/*/}
-										<Select value={question} onValueChange={(value) => setQuestion(value !== 'none' ? value : '')}>
-											<SelectTrigger className="w-[180px] bg-white">
-												<div className="truncate">
-													<SelectValue placeholder="Select Question" />
-												</div>
-											</SelectTrigger>
-											<SelectContent className="max-h-[90vh] overflow-x-auto">
-												<SelectItem value="none">None</SelectItem>
-												{(questions || []).map(({ id, text }) => (
-													<SelectItem key={id} value={id}>
-														{text}
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none">None</SelectItem>
+											{devices.audio.map(({ deviceId, label }) => {
+												if (!label) return '';
+												return (
+													<SelectItem key={deviceId} value={deviceId}>
+														{label}
 													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</div>
+												);
+											})}
+										</SelectContent>
+									</Select>
 								</div>
 							</div>
 						</div>
 					</div>
 
-					{/* Overlay */}
-					<div className="absolute flex flex-row justify-center">
-						<div className="flex flex-row gap-10 text-4xl text-white">
-							<div>
-								<div className="relative">
-									<button className="rounded-full p-3 bg-blue-600 relative z-10 scale-95">
-										<Icon icon="ph:microphone-bold" />
-									</button>
+					{/* End */}
+					<div className="flex items-center gap-10">
+						<div className="flex flex-col items-center gap-2 text-white relative">
+							{true && (
+								<>
+									<div className="rounded-xl p-1 px-6 bg-blue-600 text-center">
+										<Typography variant="large">{formatTimestamp(timelapsed)}</Typography>
+									</div>
 
-									<div
-										style={{ transform: `scale(${volumeDisplay})`, transition: 'transform 0.1s linear' }}
-										className="absolute top-0 left-0 w-full h-full bg-blue-400 rounded-full"
-									/>
+									<div className="text-yellow-300 absolute -bottom-8">
+										{timelapsed > 0 && <Typography variant="small">Recording ...</Typography>}
+									</div>
+								</>
+							)}
+						</div>
+
+						<div className="flex flex-col gap-3 m-2">
+							<Typography variant="small">Question</Typography>
+
+							<div className="flex justify-center items-center">
+								{/* <Icon icon="iconamoon:microphone-duotone" className="mr-2" /> */}
+								<div className="text-black">
+									<Select value={question} onValueChange={(value) => setQuestion(value !== 'none' ? value : '')}>
+										<SelectTrigger className="w-[180px] bg-white">
+											<div className="truncate">
+												<SelectValue placeholder="Select Question" />
+											</div>
+										</SelectTrigger>
+										<SelectContent className="max-h-[90vh] overflow-x-auto">
+											<SelectItem value="none">None</SelectItem>
+											{(questions || []).map(({ id, text }) => (
+												<SelectItem key={id} value={id}>
+													{text}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
 								</div>
 							</div>
-
-							{/* <button className="rounded-full p-3 bg-blue-600">
-                <Icon icon="majesticons:video" />
-              </button> */}
-
-							{/* <button className="rounded-full p-3 bg-white text-black">
-                <Icon icon="iconamoon:restart" />
-              </button> */}
-
-							{/* <button className="rounded-full p-3">Pause</button> */}
-
-							{!isUploading ? (
-								<button
-									onClick={startRecording}
-									className="flex rounded-full p-3 bg-[#E87259] relative justify-center items-center"
-								>
-									{/* <Icon icon="fluent:record-stop-48-filled" /> */}
-									<Icon
-										icon={!isRecording ? 'fluent:record-48-filled' : 'fluent:record-stop-48-filled'}
-										className="z-10"
-									/>
-									{isRecording && (
-										<div className="animate-ping absolute inline-flex h-5/6 w-5/6 rounded-full bg-red-400 opacity-75 z-0" />
-									)}
-									{/* <div className="absolute bottom-[-50px] flex flex-row gap-4 text-xl">
-                <button className="bg-slate-600 rounded-full p-2 px-3">3s</button>
-                <button className="bg-slate-600 rounded-full p-2 px-3">10s</button>
-              </div> */}
-								</button>
-							) : (
-								<div className="flex rounded-full p-2 bg-white relative justify-center items-center text-primary">
-									<Icon width={45} icon="line-md:uploading-loop" />
-
-									<div className="absolute bottom-[-60px] flex flex-row text-sm">
-										<div className="flex flex-col gap-1 font-medium justify-center items-center bg-white rounded-full p-2 px-6">
-											<div className="flex flex-row truncate gap-2">{uploadProgress}% Uploading ...</div>
-
-											{/* <Progress className="border" value={uploadProgress} /> */}
-										</div>
-									</div>
-								</div>
-							)}
 						</div>
 					</div>
 				</div>
 			</div>
-		</>
+
+			{/* Overlay */}
+			<div className="absolute flex flex-row justify-center ">
+				<div className="flex flex-row gap-10 text-4xl text-white">
+					<div>
+						<div className="relative">
+							<button className="rounded-full p-3 bg-blue-600 relative z-10 scale-95">
+								<Icon icon="ph:microphone-bold" />
+							</button>
+
+							<div
+								style={{ transform: `scale(${volumeDisplay})`, transition: 'transform 0.1s linear' }}
+								className="absolute top-0 left-0 w-full h-full bg-blue-400 rounded-full"
+							/>
+						</div>
+					</div>
+
+					{/* <button className="rounded-full p-3 bg-blue-600">
+						<Icon icon="majesticons:video" />
+					</button> */}
+
+					{/* <button className="rounded-full p-3 bg-white text-black">
+						<Icon icon="iconamoon:restart" />
+					</button> */}
+
+					{/* <button className="rounded-full p-3">
+						<Icon icon="iconamoon:stop" />
+					</button> */}
+
+					<button
+						onClick={startRecording}
+						className="flex rounded-full p-3 bg-[#E87259] relative justify-center items-center"
+					>
+						<Icon icon={!isRecording ? 'fluent:record-48-filled' : 'fluent:record-stop-48-filled'} className="z-10" />
+						{isRecording && (
+							<div className="animate-ping absolute inline-flex h-5/6 w-5/6 rounded-full bg-red-400 opacity-75 z-0" />
+						)}
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+
+	return (
+		<div className="flex flex-col h-screen justify-evenly bg-[#001027]">
+			<div className="flex flex-col items-center justify-center">
+				{/* Resources */}
+				<video ref={webcamRef} autoPlay className="h-full hidden" />
+				<video ref={videoRef} autoPlay className="h-full hidden" />
+				<video ref={overlayCameraRef} autoPlay className="h-full hidden" />
+
+				<div className="w-full h-full flex justify-center relative">
+					<div
+						className="flex justify-center items-center max-w-screen-2xl  bg-gray-700 rounded-3xl overflow-hidden"
+						style={{ width: '100%', maxWidth: 'calc(85vh * 16/9)', height: '100%', maxHeight: 'calc(26vw * 16/9)' }}
+					>
+						<video
+							muted
+							ref={mainRef}
+							autoPlay
+							controls={false}
+							width={1920}
+							height={1080}
+							className={`h-full w-full ${screenDevice === 'Screen Recording' && 'opacity-0'}`}
+						/>
+						{screenDevice === 'Screen Recording' && (
+							<div className="absolute text-white">
+								<Typography variant="large">You are screen recording ...</Typography>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+
+			<BottomTools />
+		</div>
 	);
 }
