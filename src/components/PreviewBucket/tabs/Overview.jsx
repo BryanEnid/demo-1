@@ -22,7 +22,7 @@ const Overview = ({
 		<>
 			<div className="flex flex-row px-8 my-6 outline-none">
 				<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
-					<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
+					<img src={profile?.photoURL} className="rounded-full object-cover w-20" crossOrigin="anonymous" />
 					<Typography variant="small">215k</Typography>
 					<Button variant="secondary">Anchor</Button>
 				</div>
@@ -93,6 +93,7 @@ const Overview = ({
 											)}
 											// alt={image.alt}
 											// height={image.height}
+											crossOrigin="anonymous"
 											src={image}
 										/>
 									</div>

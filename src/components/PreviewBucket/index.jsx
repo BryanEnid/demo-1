@@ -347,7 +347,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					<div className="flex flex-row  px-8 my-6">
 						<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
 							{/* TODO: picture */}
-							<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
+							<img src={profile?.photoURL} className="rounded-full object-cover w-20" crossOrigin="anonymous" />
 							<Typography variant="small">215k</Typography>
 						</div>
 
@@ -463,6 +463,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 													<img
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
+														crossOrigin="anonymous"
 													/>
 
 													{item.is360Video && (

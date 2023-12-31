@@ -12,7 +12,7 @@ export function SideBar() {
 	const { pathname } = useLocation();
 	const { user, isLoading } = useAuthenticationProviders();
 
-	if (isLoading) return <></>;
+	// if (isLoading) return <></>;
 
 	return (
 		<aside className="inline-flex items-center flex-col  h-screen p-4 text-gray-400 fixed top-0 left-0 border-r-2">
@@ -25,14 +25,14 @@ export function SideBar() {
 					onClick={() => navigate('/profile')}
 					className={cn(
 						'transition ease-in-out hover:text-primary hover:scale-105  rounded-full p-2 shadow-xl',
-						user.uid === pathname.split('/')[1] && 'text-primary'
+						user?.uid === pathname.split('/')[1] && 'text-primary'
 					)}
 				>
 					<Icon width={40} icon="iconamoon:profile" />
 				</button>
 
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
-					<Icon width={40} icon="ion:compass-outline" />
+					<Icon width={45} icon="ion:compass-outline" />
 				</button>
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={40} icon="ion:briefcase-outline" />

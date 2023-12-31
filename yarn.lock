@@ -2033,10 +2033,10 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@ffmpeg/ffmpeg@^0.12.7":
-  version "0.12.7"
-  resolved "https://registry.yarnpkg.com/@ffmpeg/ffmpeg/-/ffmpeg-0.12.7.tgz#fbe8b28cae2183ff74456d77fdc2803e54048df0"
-  integrity sha512-Uw9h1tNU4/Q4YRrgBKvnKiH5gpL+nl8h4HRfvSK0K93MqVOan6Qs3Lj82l9i1qj6xQLPramXw0Wl6g65W4pfnA==
+"@ffmpeg/ffmpeg@^0.12.10":
+  version "0.12.10"
+  resolved "https://registry.yarnpkg.com/@ffmpeg/ffmpeg/-/ffmpeg-0.12.10.tgz#e3cce21f21f11f33dfc1ec1d5ad5694f4a3073c9"
+  integrity sha512-lVtk8PW8e+NUzGZhPTWj2P1J4/NyuCrbDD3O9IGpSeLYtUZKBqZO8CNj1WYGghep/MXoM8e1qVY1GztTkf8YYQ==
   dependencies:
     "@ffmpeg/types" "^0.12.2"
 

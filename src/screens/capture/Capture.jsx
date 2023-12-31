@@ -1,28 +1,24 @@
 import React from 'react';
-import { createSearchParams, useLocation, useNavigate, useParams, useRoutes } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-
-import { AspectRatio } from '@/chadcn/AspectRatio';
-import { Button } from '@/chadcn/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select';
 import { Typography } from '@/chadcn/Typography';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import useQuestions from '@/hooks/useQuestions.js';
 import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
-import { Modal } from '@/components/Modal';
-import { Progress } from '@/chadcn/Progress';
 import { formatTimestamp } from '@/lib/utils';
 import { useAuth } from '@/providers/Authentication.jsx';
+import { useFFMPEG } from '@/hooks/useFFMPEG';
 
 export function CaptureScreen() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname, search } = useLocation();
-	const params = useQueryParams();
 	const { user } = useAuth();
 	const { saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
 	const { data: questions } = useQuestions({ forUser: user?.id });
+	const { mux, loadFFMPEG } = useFFMPEG();
 
 	const query = new URLSearchParams(search);
 
@@ -33,7 +29,7 @@ export function CaptureScreen() {
 	const [screenDevice2, setScreenDevice2] = React.useState('');
 	const [audioDevice, setAudioDevice] = React.useState('');
 	const [isUploading, setUploading] = React.useState(false);
-	const [uploadProgress, setUploadProgress] = React.useState(0);
+	// const [uploadProgress, setUploadProgress] = React.useState(0);
 	const [volumeDisplay, setVolumeDisplay] = React.useState(0);
 	const [timelapsed, setTimeLapsed] = React.useState(0);
 	const [recordedAudio, setRecordedAudio] = React.useState();
@@ -48,7 +44,6 @@ export function CaptureScreen() {
 	const streamRef = React.useRef();
 	const audioRecorderRef = React.useRef();
 	const videoRecorderRef = React.useRef();
-	const ffmpegRef = React.useRef(new FFmpeg());
 
 	// TODO: handle new devices without refreshes
 	// Detects all audio and video devices and populates
@@ -65,6 +60,11 @@ export function CaptureScreen() {
 		},
 		[setDevices]
 	);
+
+	// Loading FFMPEG over CDN
+	React.useEffect(() => {
+		loadFFMPEG().catch(console.error);
+	}, []);
 
 	// Stop tracks when leaving to another screen
 	React.useEffect(
@@ -133,21 +133,28 @@ export function CaptureScreen() {
 
 	// Observer for the media recorded
 	React.useEffect(() => {
-		if (recordedAudio && recordedVideo) handleRecordedVideo(recordedVideo, recordedAudio);
+		if (recordedAudio && recordedVideo) handleRecordedVideo(recordedVideo, recordedAudio).catch(console.log);
 	}, [recordedAudio, recordedVideo]);
 
 	const handleRecordedVideo = async (video, audio) => {
-		setUploading(true);
+		// setUploading(true);
 		// overlayCameraRef.current.srcElement.exitPictureInPicture();
 
 		// TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
-		const recordedVideo = new Blob([video.data, audio.data], { type: 'video/mp4' });
-		// const recordedAudio = new Blob([audio.data], { type: "audio/mp4" });
+		const recordedVideo = new Blob([video.data], { type: 'video/mp4' });
+		const recordedAudio = new Blob([audio.data], { type: 'audio/mp4' });
 
-		// const videoSrc = URL.createObjectURL(recordedVideo);
-		// window.open(videoSrc);
+		const videoURL = URL.createObjectURL(recordedVideo);
+		const audioURL = URL.createObjectURL(recordedAudio);
 
-		const request = await saveVideoIDB(recordedVideo);
+		const { blob: muxedVideo } = await mux(videoURL, audioURL);
+
+		// console.log(blob, url);
+
+		// ? For testing
+		// window.open(muxedTrackURL);
+
+		const request = await saveVideoIDB(muxedVideo);
 
 		request.onsuccess = ({ target }) => {
 			query.set('id', target.result);

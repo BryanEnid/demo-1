@@ -20,8 +20,8 @@ export function VR_3D() {
 	return (
 		<Scene>
 			<a-assets>
-				<img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" />
-				<img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" />
+				<img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" crossOrigin="anonymous" />
+				<img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" crossOrigin="anonymous" />
 			</a-assets>
 
 			<Entity primitive="a-plane" src="#groundTexture" rotation="-90 0 0" height="100" width="100" />

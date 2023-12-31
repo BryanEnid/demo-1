@@ -78,7 +78,7 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ videoUrl, ...
 	// );
 
 	return (
-		<video {...props} ref={ref}>
+		<video {...props} ref={ref} crossOrigin="anonymous">
 			<source src={videoUrl} type="video/mp4" />
 			Your browser does not support the video tag.
 		</video>
