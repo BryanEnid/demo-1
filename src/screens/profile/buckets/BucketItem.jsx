@@ -50,7 +50,7 @@ export const BucketItem = ({
 								muted
 								loop
 								src={preview}
-								// crossOrigin="use-credentials"
+								crossOrigin="anonymous"
 								className="object-cover aspect-square rounded-full w-full h-full"
 							/>
 						)}
