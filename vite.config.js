@@ -42,6 +42,7 @@ export default defineConfig({
 			key: path.resolve(__dirname, 'localhost.key'),
 			cert: path.resolve(__dirname, 'localhost.crt')
 		},
+
 		headers: {
 			'Cross-Origin-Opener-Policy': 'same-origin',
 			'Cross-Origin-Embedder-Policy': 'require-corp'

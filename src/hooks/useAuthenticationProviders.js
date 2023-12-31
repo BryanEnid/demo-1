@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import {
+	getAuth,
+	onAuthStateChanged,
+	signInWithPopup,
+	GoogleAuthProvider,
+	signOut,
+	signInWithRedirect
+} from 'firebase/auth';
 
 import { useUser } from '@/hooks/useUser.js';
 import { app } from '@/config/firebase';
@@ -54,6 +61,7 @@ export const useAuthenticationProviders = () => {
 	const signInWithGoogle = async () => {
 		// Get from provider
 		const provider = new GoogleAuthProvider();
+
 		await signInWithPopup(auth, provider);
 	};
 
