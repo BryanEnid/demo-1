@@ -1,7 +1,19 @@
 import React from 'react';
 
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { toBlobURL, fetchFile } from '@ffmpeg/util';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
+
+// const toBlobURL = async (url, type) => {
+// 	const headers = {
+// 		'Cross-Origin-Opener-Policy': 'same-origin',
+// 		'Cross-Origin-Embedder-Policy': 'require-corp'
+// 	};
+
+// 	const res = await fetch(url, { headers });
+// 	const buf = await res.arrayBuffer();
+// 	const blob = new Blob([buf], { type });
+// 	return URL.createObjectURL(blob);
+// };
 
 export const useFFMPEG = () => {
 	const [loaded, setLoaded] = React.useState(false);
@@ -41,25 +53,24 @@ export const useFFMPEG = () => {
 		return URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
 	};
 
-	const mux = async (videoBlob, audioBlob) => {
+	const mux = async (videoURL, audioURL) => {
 		const ffmpeg = ffmpegRef.current;
 
-		console.log('Writing files...');
 		// Assuming videoURL is the video file and trackURL is the audio file
-		await ffmpeg.writeFile('input_video.mp4', videoBlob);
-		await ffmpeg.writeFile('input_audio.mp3', audioBlob);
-		console.log('Files created');
+		await ffmpeg.writeFile('input_video.mp4', await fetchFile(videoURL));
+		await ffmpeg.writeFile('input_audio.mp3', await fetchFile(audioURL));
 
-		console.log('Muxing files...');
 		// Executing the command to mux the video and audio
 		await ffmpeg.exec(['-i', 'input_video.mp4', '-i', 'input_audio.mp3', '-c', 'copy', 'output_combined.mp4']);
-		console.log('Track with video and audio created');
 
 		const fileData = await ffmpeg.readFile('output_combined.mp4');
 		const data = new Uint8Array(fileData);
 
+		const dataBlob = new Blob([data.buffer], { type: 'video/mp4' });
+		const dataURL = URL.createObjectURL(dataBlob);
+
 		// Return URL
-		return URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+		return { blob: dataBlob, url: dataURL };
 	};
 
 	return {

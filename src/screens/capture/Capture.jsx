@@ -137,7 +137,6 @@ export function CaptureScreen() {
 	}, [recordedAudio, recordedVideo]);
 
 	const handleRecordedVideo = async (video, audio) => {
-		console.log('starting process');
 		// setUploading(true);
 		// overlayCameraRef.current.srcElement.exitPictureInPicture();
 
@@ -148,17 +147,19 @@ export function CaptureScreen() {
 		const videoURL = URL.createObjectURL(recordedVideo);
 		const audioURL = URL.createObjectURL(recordedAudio);
 
-		const muxedTrackURL = await mux(recordedVideo, recordedAudio);
+		const { blob: muxedVideo } = await mux(videoURL, audioURL);
 
-		// const videoSrc = URL.createObjectURL(recordedVideo);
-		window.open(muxedTrackURL);
+		// console.log(blob, url);
 
-		// const request = await saveVideoIDB(recordedVideo);
+		// ? For testing
+		// window.open(muxedTrackURL);
 
-		// request.onsuccess = ({ target }) => {
-		// 	query.set('id', target.result);
-		// 	navigate({ pathname: 'preview', search: query.toString() });
-		// };
+		const request = await saveVideoIDB(muxedVideo);
+
+		request.onsuccess = ({ target }) => {
+			query.set('id', target.result);
+			navigate({ pathname: 'preview', search: query.toString() });
+		};
 	};
 
 	const startRecording = async () => {
