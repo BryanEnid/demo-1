@@ -19,7 +19,7 @@ function MiniaturePreview({ video, onClick, id }) {
 
 	return (
 		<button key={id} onClick={() => onClick(src)}>
-			<video src={src} className="w-[250px] border-4 rounded-xl" autoPlay muted loop />
+			<video src={src} className="w-[250px] border-4 rounded-xl" autoPlay muted loop crossrigin="anonymous" />
 		</button>
 	);
 }
@@ -64,9 +64,7 @@ export function Preview() {
 	};
 
 	useEffect(() => {
-		if (videoIdIDB) {
-			return loadVideo(videoIdIDB);
-		}
+		if (videoIdIDB) loadVideo(videoIdIDB);
 	}, [videoIdIDB]);
 
 	useEffect(() => {
@@ -140,7 +138,15 @@ export function Preview() {
 		<div className="grid grid-cols-5 h-screen">
 			<div className="flex flex-col col-span-4">
 				<div className="flex flex-1 justify-center  bg-black">
-					<video src={selectedVideo.src} controls autoPlay muted loop controlsList="nofullscreen" />
+					<video
+						src={selectedVideo.src}
+						controls
+						autoPlay
+						muted
+						loop
+						controlsList="nofullscreen"
+						crossOrigin="anonymous"
+					/>
 				</div>
 
 				<div className="flex flex-col min-h-[200px] max-h-[400px] overflow-y-auto p-4">
