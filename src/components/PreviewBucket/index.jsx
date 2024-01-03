@@ -2,22 +2,23 @@ import React from 'react';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { ReactSortable } from 'react-sortablejs';
 import { Icon } from '@iconify/react';
-import QRCode from 'react-qr-code';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
+import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
-import { PageModal } from '@/components/PageModal.jsx';
-import { VR_3D, Video360 } from '@/components/MediaPlayer.jsx';
+import { cn, generatePreview, generateRandomNumber } from '@/lib/utils';
+import { PageModal } from '@/components/PageModal';
+import TextEditor from '@/components/TextEditor';
+import { VR_3D, Video360 } from '@/components/MediaPlayer';
 import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
 import QuestionsList from '@/components/QuestionsList.jsx';
-import { cn, generatePreview, generateRandomNumber } from '@/lib/utils.js';
-import { useProfile } from '@/hooks/useProfile.js';
-import { useBuckets } from '@/hooks/useBuckets.js';
-import { useToast } from '@/hooks/useToast.js';
+import { useProfile } from '@/hooks/useProfile';
+import { useBuckets } from '@/hooks/useBuckets';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
 import { Typography } from '@/chadcn/Typography';
-import { Textarea } from '@/chadcn/Textarea';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/chadcn/Tabs.jsx';
 
 import { VideoUploadButton } from '../VideoUploadButton.jsx';
@@ -127,9 +128,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const [data, setData] = React.useState({
 		videos: [],
 		name: '',
-		title: '',
-		description: ''
+		title: ''
 	});
+	const [editorState, setEditorState] = React.useState(EditorState.createEmpty());
 
 	// Refs
 	const dropZoneRef = React.useRef();
@@ -137,7 +138,16 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const video360Ref = React.useRef();
 
 	React.useEffect(() => {
-		if (inData) setData((val) => ({ ...val, ...inData }));
+		if (inData) {
+			setData((val) => ({ ...val, ...inData }));
+
+			const { description = '' } = inData;
+			setEditorState(
+				typeof description === 'string'
+					? EditorState.createWithText(description || '')
+					: EditorState.createWithContent(convertFromRaw({ entityMap: {}, ...description }))
+			);
+		}
 	}, [inData]);
 
 	// Function to toggle fullscreen
@@ -184,9 +194,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 				setData({
 					videos: [],
 					name: '',
-					title: '',
-					description: ''
+					title: ''
 				});
+				setEditorState(EditorState.createEmpty());
 				setEditMode(true);
 			}, 1000);
 		} else {
@@ -201,9 +211,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			setData({
 				videos: [],
 				name: '',
-				title: '',
-				description: ''
+				title: ''
 			});
+			setEditorState(EditorState.createEmpty());
 		}
 	};
 
@@ -215,7 +225,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		const crudFunction = documentId ? updateBucket : createBucket;
 
 		crudFunction(
-			{ data, documentId },
+			{ data: { ...data, description: convertToRaw(editorState.getCurrentContent()) }, documentId },
 			{
 				onSuccess: (dbid) => {
 					if (willRedirect) handleToCaptureScreen(documentId);
@@ -314,6 +324,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		video360Ref.current.video.play();
 	};
 
+	const isValid = [editorState.getCurrentContent().hasText(), data.title.length].every(Boolean);
 	const isCurrentVideo360 = data.videos[currentVideo]?.is360Video;
 
 	if (isEditMode) {
@@ -361,7 +372,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									<Button
 										variant="secondary"
 										onClick={() => handleCreateBucket({ cb: () => setEditMode(false) })}
-										disabled={![data.description.length, data.title.length].every(Boolean)}
+										disabled={!isValid}
 									>
 										{isEditMode ? (editMode ? 'Create bucket' : 'Done editing') : 'Edit Bucket'}
 									</Button>
@@ -391,12 +402,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									onChange={({ target }) => setData((prev) => ({ ...prev, category: target.value }))}
 									className="bg-white/10"
 								/>
-								<Textarea
+
+								{/*<Textarea
 									value={data.description}
 									placeholder="Description"
 									onChange={({ target }) => setData((prev) => ({ ...prev, description: target.value }))}
 									className="bg-white/10 min-h-[100px]"
-								/>
+								/>*/}
+								<TextEditor placeholder="Description" state={editorState} setState={setEditorState} />
 							</div>
 						</div>
 					</div>
@@ -411,14 +424,11 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									iconBegin={<Icon icon="humbleicons:camera-video" />}
 									variant="secondary"
 									onClick={() => handleCreateBucket({ willRedirect: true })}
-									disabled={![data.description.length, data.title.length].every(Boolean)}
+									disabled={!isValid}
 								>
 									Capture
 								</Button>
-								<VideoUploadButton
-									onUpload={handlePrepareVideosToSave}
-									disabled={![data.description.length, data.title.length].every(Boolean)}
-								/>
+								<VideoUploadButton onUpload={handlePrepareVideosToSave} disabled={!isValid} />
 							</div>
 
 							<div className="text-center text-black/50 mt-8">
@@ -532,14 +542,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 							<Button
 								variant="secondary"
 								onClick={handleExit}
-								// disabled={![data.description.length, data.title.length].every(Boolean)}
+								// disabled={!isValid}
 								className="w-full max-w-[150px]"
 							>
 								Cancel
 							</Button>
 							<Button
 								onClick={() => handleCreateBucket({ cb: handleClose })}
-								disabled={![data.description.length, data.title.length].every(Boolean)}
+								disabled={!isValid}
 								className="w-full max-w-[200px]"
 							>
 								Save
@@ -598,6 +608,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						setSharing={setSharing}
 						setEditMode={setEditMode}
 						currentVideo={currentVideo}
+						description={editorState}
+						setDescription={setEditorState}
 						handlePrepareVideosToSave={handlePrepareVideosToSave}
 						handleCreateBucket={handleCreateBucket}
 						setCurrentVideo={setCurrentVideo}
