@@ -1,9 +1,14 @@
-.public-DraftEditor-content {
+.DraftEditor-root {
 	padding-left: 0.75rem;
 	padding-right: 0.75rem;
 	padding-top: 0.25rem;
 	padding-bottom: 0.25rem;
 }
+
+.public-DraftEditor-content {
+	min-height: 100px;
+}
+
 .readonly .public-DraftEditor-content {
 	padding-left: 0;
 	padding-right: 0;
@@ -21,6 +26,12 @@
 	background-color: rgba(0, 0, 0, 0.05);
 	padding: 1rem;
 	border-radius: 0.4rem;
+}
+
+.is-pinned {
+	box-shadow: 0px 0px 10px #d9d9d9;
+	border-radius: 10px;
+	transform: scale(0.95) translateY(15px);
 }
 
 .DraftEditor-root h1,
@@ -43,6 +54,7 @@
 	line-height: 40px;
 }
 
+/* TODO: Apply themes */
 .DraftEditor-root h2 {
 	font-size: 31px;
 }
