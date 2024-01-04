@@ -1,14 +1,12 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-export function PageModal({ children, show, onClose, width }) {
-	const cancelButtonRef = useRef(null);
-
+export function PageModal({ children, show, onClose, width, initialFocus }) {
 	return (
 		<Transition.Root show={show} as={Fragment}>
 			<Dialog
 				className="relative z-10"
-				initialFocus={cancelButtonRef}
+				initialFocus={initialFocus}
 				onClose={(...props) => {
 					onClose(...props);
 				}}

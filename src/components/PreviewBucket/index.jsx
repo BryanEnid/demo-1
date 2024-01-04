@@ -7,7 +7,7 @@ import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
-import { cn, generatePreview, generateRandomNumber } from '@/lib/utils';
+import { cn, generatePreview } from '@/lib/utils';
 import { PageModal } from '@/components/PageModal';
 import TextEditor from '@/components/TextEditor';
 import { VR_3D, Video360 } from '@/components/MediaPlayer';
@@ -372,7 +372,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									<Button
 										variant="secondary"
 										onClick={() => handleCreateBucket({ cb: () => setEditMode(false) })}
-										disabled={!isValid}
+										// disabled={!isValid}
 									>
 										{isEditMode ? (editMode ? 'Create bucket' : 'Done editing') : 'Edit Bucket'}
 									</Button>
@@ -389,19 +389,19 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									/>
 								)}
 
-								<Input
+								{/* <Input
 									value={data.title}
 									placeholder="Title"
 									onChange={({ target }) => setData((prev) => ({ ...prev, title: target.value }))}
 									className="bg-white/10"
-								/>
-								<Input
+								/> */}
+								{/* <Input
 									name="category"
 									placeholder="Category"
 									value={data.category}
 									onChange={({ target }) => setData((prev) => ({ ...prev, category: target.value }))}
 									className="bg-white/10"
-								/>
+								/> */}
 
 								{/*<Textarea
 									value={data.description}
@@ -549,7 +549,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 							</Button>
 							<Button
 								onClick={() => handleCreateBucket({ cb: handleClose })}
-								disabled={!isValid}
+								// disabled={!isValid}
 								className="w-full max-w-[200px]"
 							>
 								Save
@@ -562,7 +562,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	}
 
 	return (
-		<PageModal show={show} onClose={handleExit} width="80vw">
+		<PageModal show={show} onClose={handleExit} width="80vw" initialFocus={videoRef}>
 			<QRShareView show={isSharing} onClose={() => setSharing(false)} />
 
 			{/* Video Player */}
@@ -572,16 +572,16 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						<>
 							<CachedVideo
 								autoPlay
-								controls={false}
+								controls={true}
 								ref={videoRef}
 								src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
 								onEnded={handleNextVideo}
 								loop={data?.videos?.length === 1}
 								className="w-full h-full object-center rounded-none z-10"
 							/>
-							<div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
+							{/* <div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
 								<Icon onClick={toggleFullscreen} className="text-3xl text-white" icon="iconamoon:screen-full-duotone" />
-							</div>
+							</div> */}
 						</>
 					)}
 

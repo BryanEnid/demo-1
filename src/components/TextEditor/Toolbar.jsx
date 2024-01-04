@@ -4,7 +4,26 @@ import { RichUtils } from 'draft-js';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { Button } from '@/chadcn/Button.jsx';
 
-const Toolbar = ({ editorState, setEditorState }) => {
+export const Toolbar = ({ editorState, setEditorState }) => {
+	const toolbarRef = React.useRef();
+
+	React.useEffect(() => {
+		let observer;
+		if (toolbarRef.current) {
+			const toggleStyles = ([e]) => {
+				console.log(e.intersectionRatio < 1);
+				e.target.children[0].classList.toggle('is-pinned', e.intersectionRatio < 1);
+			};
+			observer = new IntersectionObserver(toggleStyles, {
+				threshold: [1]
+			});
+
+			observer.observe(toolbarRef.current);
+		}
+
+		return () => observer?.disconnect();
+	}, [toolbarRef]);
+
 	const tools = [
 		{
 			label: 'bold',
@@ -76,21 +95,23 @@ const Toolbar = ({ editorState, setEditorState }) => {
 	};
 
 	return (
-		<div className="flex items-center">
-			{tools.map((item, i) => (
-				<Button
-					variant="ghost"
-					className={`px-3 ${!isActive(item.style, item.method) ? 'opacity-50' : ''}`}
-					key={item.label}
-					title={item.label}
-					onClick={(e) => applyStyle(e, item.style, item.method)}
-					onMouseDown={(e) => e.preventDefault()}
-				>
-					{item.icon ? <Icon icon={item.icon} className="text-2xl" /> : item.label}
-				</Button>
-			))}
+		<div className="sticky top-0 z-10" ref={toolbarRef}>
+			<div className="w-full h-full bg-white transition-all">
+				<div className="flex items-center">
+					{tools.map((item, i) => (
+						<Button
+							variant="ghost"
+							className={`px-3 ${!isActive(item.style, item.method) ? 'opacity-50' : ''}`}
+							key={item.label}
+							title={item.label}
+							onClick={(e) => applyStyle(e, item.style, item.method)}
+							onMouseDown={(e) => e.preventDefault()}
+						>
+							{item.icon ? <Icon icon={item.icon} className="text-2xl" /> : item.label}
+						</Button>
+					))}
+				</div>
+			</div>
 		</div>
 	);
 };
-
-export default Toolbar;

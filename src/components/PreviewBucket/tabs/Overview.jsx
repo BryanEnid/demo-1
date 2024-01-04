@@ -25,7 +25,7 @@ const Overview = ({
 	return (
 		<>
 			<div className="flex flex-row px-8 my-6 outline-none">
-				<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
+				<div className="flex basis-2/12 flex-col items-center gap-2 mt-2">
 					<img src={profile?.photoURL} className="rounded-full object-cover w-20" crossOrigin="anonymous" />
 					<Typography variant="small">215k</Typography>
 					<Button variant="secondary">Anchor</Button>
@@ -73,7 +73,7 @@ const Overview = ({
 
 					<div>
 						<div>
-							<Typography variant="large">{data.title}</Typography>
+							{/* <Typography variant="large">{data.title}</Typography> */}
 							<Typography variant="p" className="whitespace-pre-line">
 								<TextEditor readOnly state={description} setState={setDescription} />
 							</Typography>
