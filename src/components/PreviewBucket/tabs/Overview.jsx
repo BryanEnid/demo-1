@@ -1,16 +1,20 @@
 import React from 'react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { Icon } from '@iconify/react/dist/iconify.js';
+
 import { Typography } from '@/chadcn/Typography.jsx';
 import { Button } from '@/chadcn/Button.jsx';
-import { Icon } from '@iconify/react/dist/iconify.js';
 import { VideoUploadButton } from '@/components/VideoUploadButton.jsx';
+import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { cn } from '@/lib/utils.js';
 
 const Overview = ({
 	data,
 	profile,
 	isUserProfile,
+	description,
+	setDescription,
 	handleCreateBucket,
 	handlePrepareVideosToSave,
 	setEditMode,
@@ -71,7 +75,7 @@ const Overview = ({
 						<div>
 							<Typography variant="large">{data.title}</Typography>
 							<Typography variant="p" className="whitespace-pre-line">
-								{data.description}
+								<TextEditor readOnly state={description} setState={setDescription} />
 							</Typography>
 						</div>
 					</div>
