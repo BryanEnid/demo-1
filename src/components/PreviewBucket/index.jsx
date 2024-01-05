@@ -32,7 +32,7 @@ const QRShareView = ({ show, onClose }) => {
 	const { toast } = useToast();
 
 	return (
-		<PageModal show={show} onClose={onClose} width="600px">
+		<PageModal show={show} onClose={onClose} width="600px" zIndex={20}>
 			<div className="flex flex-col justify-center items-center p-16">
 				<div className="flex flex-col justify-center items-center gap-10 ">
 					<Typography variant="h3">Share this bucket!</Typography>
@@ -46,6 +46,109 @@ const QRShareView = ({ show, onClose }) => {
 							toast({ title: 'Copied to clipboard !' });
 						}}
 					/>
+				</div>
+			</div>
+		</PageModal>
+	);
+};
+
+const extractVideoId = (url) => {
+	const urlObject = new URL(url);
+	const searchParams = new URLSearchParams(urlObject.search);
+	return searchParams.get('v');
+};
+
+const VideoAddURLModal = ({ show, onClose }) => {
+	const [inputs, setInputs] = React.useState({
+		0: { video: null, image: null, source: null, valid: false, type: 'url' }
+	});
+
+	// Function to check if the URL is from YouTube
+	const isYouTubeUrl = (url) => {
+		return url.includes('youtube.com') || url.includes('youtu.be');
+	};
+
+	const handleVideoAdded = (url, index) => {
+		if (isYouTubeUrl(url)) {
+			// Extract video ID from the URL
+			const videoId = extractVideoId(url);
+
+			// Check if videoId is present before creating thumbnailUrl
+			const thumbnailUrl = videoId && `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+			const body = {
+				[index]: { video: url, image: thumbnailUrl, valid: !!videoId, type: 'url', source: 'youtube.com' }
+			};
+
+			setInputs((prev) => ({ ...prev, ...body }));
+
+			return body;
+		}
+
+		// Default
+		const { video, image } = inputs[index];
+		if (video === null || image === null) return;
+
+		const body = { [index]: { video: null, image: null } };
+		setInputs((prev) => ({ ...prev, ...body }));
+	};
+
+	const handleAddNewItem = () => {
+		const maxLength = 10;
+		const currentLength = Object.values(inputs).length;
+		if (currentLength >= maxLength) return;
+
+		const newItem = { [currentLength]: { video: null, image: null } };
+		setInputs((prev) => ({ ...prev, ...newItem }));
+	};
+
+	const handleDeleteItem = (propertyName) => {
+		const byDifferentKey = ([key]) => key !== propertyName;
+		const newState = Object.fromEntries(Object.entries(inputs).filter(byDifferentKey));
+		setInputs(newState);
+	};
+
+	const handleSaveDisabled = Object.values(inputs)
+		.map(({ valid }) => valid)
+		.every(Boolean);
+
+	return (
+		<PageModal show={show} width="600px" zIndex={30} onClose={() => onClose(inputs)}>
+			<div className="flex flex-col justify-center items-center p-16 ">
+				<div className="flex flex-col items-start gap-10 w-full min-h-[500px]">
+					<Typography variant="h3">Add video urls</Typography>
+
+					{Array.from(Object.keys(inputs)).map((key) => (
+						<div key={key} className="flex flex-row items-center w-full gap-2">
+							<div className="inline-flex items-center relative w-full h-full">
+								<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} />
+								{inputs[key].valid && (
+									<div className="absolute right-1 p-1 rounded-full bg-white z-10">
+										<Icon
+											fontSize={20}
+											icon="tabler:check"
+											className="text-green-600 h-full"
+											// bg-gradient-to-l from-transparent to-white
+										/>
+									</div>
+								)}
+							</div>
+
+							<Icon fontSize={20} className="text-gray-500" icon="mi:delete" onClick={() => handleDeleteItem(key)} />
+						</div>
+					))}
+
+					<Button iconBegin={<Icon icon="ic:round-add" />} variant="default" onClick={handleAddNewItem}>
+						Add new url
+					</Button>
+				</div>
+				<div className="flex flex-row justify-end gap-2 w-full">
+					<Button variant="secondary" onClick={() => onClose()}>
+						Cancel
+					</Button>
+					<Button variant="default" className="px-10" disabled={!handleSaveDisabled} onClick={() => onClose(inputs)}>
+						Save
+					</Button>
 				</div>
 			</div>
 		</PageModal>
@@ -125,6 +228,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const [enableDelete, setEnableDelete] = React.useState(false);
 	const [isDragOver, setIsDragOver] = React.useState(false);
 	const [isSharing, setSharing] = React.useState(false);
+	const [isDisplayVideoURLsModalVisible, setDisplayVideoURLsModal] = React.useState(false);
 	const [data, setData] = React.useState({
 		videos: [],
 		name: '',
@@ -324,6 +428,38 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		video360Ref.current.video.play();
 	};
 
+	const handleVideoURLsModal = () => {
+		setDisplayVideoURLsModal(true);
+	};
+
+	const handleVideoURLs = (videosURL) => {
+		setDisplayVideoURLsModal(false);
+
+		const bucketId = documentId;
+
+		Object.values(videosURL).forEach((video) => {
+			const { video: videoURL, image, source, type } = video;
+
+			// uploadVideo(
+			// 	{ id: bucketId, data: { video, image, videoType }, onLoading },
+			// 	{
+			// 		onSuccess: (response) => {
+			// 			// console.log(response, variables, ctx);
+			// 			// const videos = [...data.videos];
+			// 			// videos[index] = { image, videoUrl: video };
+			// 			// setData((prev) => ({ ...prev, videos }));
+			// 			// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
+			// 		},
+			// 		onSettled: () => {
+			// 			setUploading(false);
+			// 			setProgress(0);
+			// 		},
+			// 		onError: console.error
+			// 	}
+			// );
+		});
+	};
+
 	const isValid = [editorState.getCurrentContent().hasText(), data.title.length].every(Boolean);
 	const isCurrentVideo360 = data.videos[currentVideo]?.is360Video;
 
@@ -424,11 +560,23 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									iconBegin={<Icon icon="humbleicons:camera-video" />}
 									variant="secondary"
 									onClick={() => handleCreateBucket({ willRedirect: true })}
-									disabled={!isValid}
+									// disabled={!isValid}
 								>
 									Capture
 								</Button>
-								<VideoUploadButton onUpload={handlePrepareVideosToSave} disabled={!isValid} />
+
+								<VideoUploadButton
+									onUpload={handlePrepareVideosToSave}
+									// disabled={!isValid}
+								/>
+
+								<Button
+									iconBegin={<Icon icon="carbon:url" />}
+									variant="secondary"
+									onClick={() => handleCreateBucket({ willRedirect: true })}
+								>
+									Add video URL
+								</Button>
 							</div>
 
 							<div className="text-center text-black/50 mt-8">
@@ -565,6 +713,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		<PageModal show={show} onClose={handleExit} width="80vw" initialFocus={videoRef}>
 			<QRShareView show={isSharing} onClose={() => setSharing(false)} />
 
+			<VideoAddURLModal show={isDisplayVideoURLsModalVisible} onClose={handleVideoURLs} />
+
 			{/* Video Player */}
 			<div className="aspect-[16/9] shadow bg-black">
 				<div className="w-full h-full backdrop-blur-md">
@@ -612,6 +762,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						setDescription={setEditorState}
 						handlePrepareVideosToSave={handlePrepareVideosToSave}
 						handleCreateBucket={handleCreateBucket}
+						handleVideoURLsModal={handleVideoURLsModal}
 						setCurrentVideo={setCurrentVideo}
 					/>
 				</TabsContent>

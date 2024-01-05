@@ -17,6 +17,7 @@ const Overview = ({
 	setDescription,
 	handleCreateBucket,
 	handlePrepareVideosToSave,
+	handleVideoURLsModal,
 	setEditMode,
 	setSharing,
 	currentVideo,
@@ -48,6 +49,14 @@ const Overview = ({
 								</Button>
 
 								<VideoUploadButton onUpload={handlePrepareVideosToSave} />
+
+								<Button
+									iconBegin={<Icon icon="carbon:url" />}
+									variant="secondary"
+									onClick={() => handleVideoURLsModal(false)}
+								>
+									Add video URL
+								</Button>
 
 								<DropdownMenu>
 									<DropdownMenuTrigger>
