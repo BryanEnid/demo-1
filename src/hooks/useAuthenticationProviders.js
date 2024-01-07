@@ -1,12 +1,6 @@
-import React, { useState } from 'react';
-import {
-	getAuth,
-	onAuthStateChanged,
-	signInWithPopup,
-	GoogleAuthProvider,
-	signOut,
-	signInWithRedirect
-} from 'firebase/auth';
+import React, { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import useLinkedInAuth from './useLinkedInAuth';
 
 import { useUser } from '@/hooks/useUser.js';
 import { app } from '@/config/firebase';
@@ -14,10 +8,20 @@ import { app } from '@/config/firebase';
 export const useAuthenticationProviders = () => {
 	// Initialize Firebase Auth
 	const auth = getAuth(app);
+	const {
+		signInWithPopup: signInWithLinkedIn,
+		onAuthStateChanged: onLIAuthStateChanged,
+		signOut: linkedInSignOut
+	} = useLinkedInAuth();
 	const [authToken, setAuthToken] = useState(null);
 
 	// Function to sign out
-	const signOutUser = async () => signOut(auth).then(() => setUser(null));
+	const signOutUser = async () => {
+		return Promise.all([signOut(auth), linkedInSignOut()]).then(() => {
+			setUser(null);
+			setAuthToken(null);
+		});
+	};
 
 	const {
 		user,
@@ -30,8 +34,29 @@ export const useAuthenticationProviders = () => {
 		logout: signOutUser
 	});
 
-	React.useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+	useEffect(() => {
+		const unsubscribeLinkedIn = onLIAuthStateChanged(async ({ accessToken, user: authUser }) => {
+			const data = {
+				username: authUser?.sub,
+				photoURL: authUser?.picture,
+				name: authUser?.name,
+				displayName: authUser?.name,
+				email: authUser?.email,
+				uid: authUser?.sub
+			};
+
+			if (authUser && !user?.id) {
+				await createUser(data);
+			}
+
+			if (authUser) {
+				setAuthToken(accessToken);
+				setUser((_user) => ({ ..._user, ...data, id: _user?.id }));
+			}
+			setLoading(false);
+		});
+
+		const unsubscribeGoogle = onAuthStateChanged(auth, async (authUser) => {
 			if (authUser && !user?.id) {
 				const data = {
 					username: authUser.uid,
@@ -45,13 +70,16 @@ export const useAuthenticationProviders = () => {
 				await createUser(data);
 			}
 
-			setAuthToken(authUser?.accessToken);
-			setUser((_user) => (authUser ? { ...authUser, id: _user?.id } : null));
+			if (authUser) {
+				setAuthToken(authUser?.accessToken);
+				setUser((_user) => ({ ..._user, ...authUser, id: _user?.id }));
+			}
 			setLoading(false);
 		});
 
 		return () => {
-			unsubscribe();
+			unsubscribeLinkedIn();
+			unsubscribeGoogle();
 			// setLoading(true);
 			setUser(null);
 		};
@@ -70,6 +98,7 @@ export const useAuthenticationProviders = () => {
 		authToken,
 		isLoading: isUserLoading,
 		signInWithGoogle,
+		signInWithLinkedIn,
 		signOutUser,
 		createUser
 	};

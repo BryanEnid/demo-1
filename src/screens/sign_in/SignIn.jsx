@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import _ from 'lodash';
+import { Icon } from '@iconify/react';
+
 import { Button } from '@/chadcn/Button';
 import { Typography } from '@/chadcn/Typography';
 import { Separator } from '@/chadcn/Separator';
@@ -8,11 +10,7 @@ import { ObserveIcon } from '@/components/ObserveIcon';
 import { useAuth } from '@/providers/Authentication';
 
 export function SignIn() {
-	const { user, login, isLoading } = useAuth();
-
-	const handleSignIn = (type) => {
-		login();
-	};
+	const { user, loginWithGoogle, loginWithLinkedIn, isLoading } = useAuth();
 
 	if (isLoading) return <></>;
 	if (user) return <Navigate to={`/${user?.uid}`} />;
@@ -54,23 +52,25 @@ export function SignIn() {
 						<Button
 							className="text-md w-full font-medium text-white bg-blue-600 rounded-full md:max-w-sm"
 							variant="outline"
-							onClick={handleSignIn}
+							iconBegin={<Icon icon="devicon:google" />}
+							onClick={loginWithGoogle}
 						>
-							<Typography variant="large">Sign up</Typography>
+							<Typography variant="large">Sign in with Google</Typography>
 						</Button>
 
-						<div className="flex flex-row justify-center items-center w-full max-w-[300px]">
-							<Separator />
-							<span className="mx-4">or</span>
-							<Separator />
-						</div>
+						{/*<div className="flex flex-row justify-center items-center w-full max-w-[300px]">*/}
+						{/*	<Separator />*/}
+						{/*	<span className="mx-4">or</span>*/}
+						{/*	<Separator />*/}
+						{/*</div>*/}
 
 						<Button
 							className="w-full font-medium text-blue-600 rounded-full md:max-w-sm"
 							variant="outline"
-							onClick={handleSignIn}
+							iconBegin={<Icon icon="devicon:linkedin" />}
+							onClick={loginWithLinkedIn}
 						>
-							<Typography variant="large">Login</Typography>
+							<Typography variant="large">Sign in with LinkedIn</Typography>
 						</Button>
 
 						<div className="text-sm flex items-end text-blue-600 flex-grow flex-1">
