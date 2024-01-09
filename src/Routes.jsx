@@ -62,6 +62,10 @@ export function Routes(props) {
 			]
 		},
 		{
+			path: '/linkedin/redirect',
+			element: null
+		},
+		{
 			path: '/notfound',
 			element: <>not found</>
 		}
