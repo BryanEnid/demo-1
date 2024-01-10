@@ -27,36 +27,41 @@ const groupBy = (array, keyFunc) => {
 };
 
 const CategoryLabel = forwardRef(
-	({ value, categoryEditing, category, onSubmit, onChange, editCategory, cancelEditCategory, onDelete }, ref) => (
+	(
+		{ value, categoryEditing, category, editable, onSubmit, onChange, editCategory, cancelEditCategory, onDelete },
+		ref
+	) => (
 		<>
-			{categoryEditing !== category && (
+			{(!editable || categoryEditing !== category) && (
 				<div className="mb-9 flex gap-2 items-center">
-					<Typography variant="h3" onClick={() => editCategory(category)}>
+					<Typography variant="h3" onClick={() => editable && editCategory(category)}>
 						{category}
 					</Typography>
-					<DropdownMenu>
-						<DropdownMenuTrigger>
-							<Button variant="ghost" className="rounded-full">
-								<Icon icon="mi:options-horizontal" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent>
-							<DropdownMenuItem className="py-3 px-3" onClick={() => editCategory(category)}>
-								<Icon icon="clarity:edit-line" className="pr-1 text-xl" />
-								Rename section
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								className="py-3 px-3 text-red-500 hover:text-red-500 focus:text-red-500"
-								onClick={onDelete}
-							>
-								<Icon icon="fluent:delete-48-regular" className="pr-1 text-xl" />
-								Delete section
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+					{editable && (
+						<DropdownMenu>
+							<DropdownMenuTrigger>
+								<Button variant="ghost" className="rounded-full">
+									<Icon icon="mi:options-horizontal" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent>
+								<DropdownMenuItem className="py-3 px-3" onClick={() => editCategory(category)}>
+									<Icon icon="clarity:edit-line" className="pr-1 text-xl" />
+									Rename section
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									className="py-3 px-3 text-red-500 hover:text-red-500 focus:text-red-500"
+									onClick={onDelete}
+								>
+									<Icon icon="fluent:delete-48-regular" className="pr-1 text-xl" />
+									Delete section
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					)}
 				</div>
 			)}
-			{categoryEditing === category && (
+			{editable && categoryEditing === category && (
 				<form onSubmit={onSubmit}>
 					<div className="mb-9 flex items-center gap-1">
 						<Input
@@ -254,6 +259,7 @@ export function Buckets() {
 								value={newCategoryValue}
 								categoryEditing={categoryEditing}
 								category={category}
+								editable={isUserProfile}
 								editCategory={editCategory}
 								cancelEditCategory={cancelEditCategory}
 								onDelete={() => setConfirmDelete(category)}
@@ -286,6 +292,7 @@ export function Buckets() {
 							ref={categoryInpRef}
 							value={newCategoryValue}
 							category={category}
+							editable={isUserProfile}
 							categoryEditing={categoryEditing}
 							editCategory={editCategory}
 							cancelEditCategory={cancelEditCategory}
