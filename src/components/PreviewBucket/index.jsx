@@ -26,19 +26,29 @@ import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
 
-const getYouTubeEmbedCode = async (videoId) => {
-	try {
-		const response = await fetch(
-			`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
-		);
-		if (!response.ok) throw 'Error getting YouTube embed code: ' + videoId;
+async function getYouTubeVideoDetails(videoId) {
+	const apiKey = import.meta.env.VITE_GOOGLE_CLOUD_CLIENT_ID;
+	const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`;
 
-		return response.json();
+	try {
+		const response = await fetch(apiUrl);
+		const data = await response.json();
+
+		if (data.items && data.items.length > 0) {
+			const videoDetails = data.items[0].snippet;
+			return {
+				title: videoDetails.title,
+				channelTitle: videoDetails.channelTitle,
+				thumbnail: videoDetails.thumbnails.high.url,
+				description: videoDetails.description // You can choose different sizes
+			};
+		}
 	} catch (error) {
-		console.error('Error getting YouTube embed code:', videoId);
-		return null;
+		console.error('Error fetching YouTube video details', error);
 	}
-};
+
+	return null;
+}
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -90,8 +100,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 			// Extract video ID from the URL
 			const videoId = extractVideoId(url);
 
-			// Check if videoId is present before creating thumbnailUrl
-			const embedCode = videoId && (await getYouTubeEmbedCode(videoId));
+			const embedCode = videoId && (await getYouTubeVideoDetails(videoId));
 
 			const body = { [index]: { ...embedCode, valid: !!embedCode, url } };
 
@@ -100,15 +109,20 @@ const VideoAddURLModal = ({ show, onClose }) => {
 			if (!body[index].valid) return;
 
 			const ToasterView = () => (
-				<div className="flex flex-row gap-2">
-					<img src={embedCode.thumbnail_url} className="max-h-24" />
+				<div className="flex flex-col gap-2 ">
+					<img src={embedCode.thumbnail} className="w-full object-cover" />
 
-					<div className="flex flex-col flex-shrink items-start justify-center">
-						<Typography variant="small" className="text-sm font-bold leading-5">
-							{embedCode?.title} - Added
-						</Typography>
-						<Typography className="text-xs">By {embedCode?.author_name}</Typography>
-					</div>
+					<Typography variant="small" className="text-md font-bold leading-5 line-clamp-2">
+						{embedCode?.title}
+					</Typography>
+
+					<Typography variant="small" className="text-sm font-light leading-5 line-clamp-2">
+						{embedCode?.description}
+					</Typography>
+
+					<Typography variant="small" className="text-xs line-clamp-1">
+						By {embedCode?.channelTitle}
+					</Typography>
 				</div>
 			);
 

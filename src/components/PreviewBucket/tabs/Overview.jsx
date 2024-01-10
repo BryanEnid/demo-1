@@ -106,7 +106,7 @@ const Overview = ({
 											)}
 											// alt={image.alt}
 											// height={image.height}
-											// crossOrigin="anonymous"
+											crossOrigin="anonymous"
 											src={image}
 										/>
 									</div>

@@ -8,7 +8,8 @@ import {
 	getBuckets as handleGetBuckets,
 	updateBucket as handleUpdateBucket,
 	deleteBucket as handleDeleteBucket,
-	uploadVideo as handleUploadVideo
+	uploadVideo as handleUploadVideo,
+	uploadVideoURLs as handleUploadVideoURLs
 } from './api/buckets';
 
 const COLLECTION_NAME = 'Buckets';
@@ -69,12 +70,25 @@ export const useBuckets = (owner) => {
 		}
 	});
 
+	const saveVideoURLs = useMutation({
+		mutationFn: ({ id, data }) => handleUploadVideoURLs(auth, id, data),
+		onMutate: ({ onLoading }) => {
+			onLoading && onLoading(); // This is a callback that fires when onMutate fires
+		},
+		onSuccess: () => {
+			// TODO: Optimistic updates
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
 	return {
 		data,
 		createBucket: createBucket.mutate,
 		deleteBucket: deleteBucket.mutate,
 		updateBucket: updateBucket.mutate,
-		uploadVideo: uploadVideo.mutate
+		uploadVideo: uploadVideo.mutate,
+		saveVideoURLs: saveVideoURLs.mutate
 
 		// uploadFile: createBucket.mutate,
 		// uploadResumableFile: createBucket.mutate,
