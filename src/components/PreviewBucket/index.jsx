@@ -7,7 +7,7 @@ import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
-import { cn, generatePreview } from '@/lib/utils';
+import { cn, extractYoutubeVideoId, generatePreview, isYouTubeUrl } from '@/lib/utils';
 import { PageModal } from '@/components/PageModal';
 import TextEditor from '@/components/TextEditor';
 import { VR_3D, Video360 } from '@/components/MediaPlayer';
@@ -76,12 +76,6 @@ const QRShareView = ({ show, onClose }) => {
 	);
 };
 
-const extractVideoId = (url) => {
-	const urlObject = new URL(url);
-	const searchParams = new URLSearchParams(urlObject.search);
-	return searchParams.get('v');
-};
-
 const VideoAddURLModal = ({ show, onClose }) => {
 	// Hooks
 	const { toast } = useToast();
@@ -90,15 +84,10 @@ const VideoAddURLModal = ({ show, onClose }) => {
 		0: { video: null, image: null, source: null, valid: false, type: 'url' }
 	});
 
-	// Function to check if the URL is from YouTube
-	const isYouTubeUrl = (url) => {
-		return url.includes('youtube.com') || url.includes('youtu.be');
-	};
-
 	const handleVideoAdded = async (url, index) => {
 		if (isYouTubeUrl(url)) {
 			// Extract video ID from the URL
-			const videoId = extractVideoId(url);
+			const videoId = extractYoutubeVideoId(url);
 
 			const embedCode = videoId && (await getYouTubeVideoDetails(videoId));
 
@@ -154,9 +143,9 @@ const VideoAddURLModal = ({ show, onClose }) => {
 		setInputs(newState);
 	};
 
-	const handleClose = () => {
+	const handleClose = (inputs) => {
 		setInputs({ 0: { video: null, image: null, source: null, valid: false, type: 'url' } });
-		onClose();
+		onClose(inputs);
 	};
 
 	const handleSaveDisabled = Object.values(inputs)
@@ -200,7 +189,12 @@ const VideoAddURLModal = ({ show, onClose }) => {
 					<Button variant="secondary" onClick={handleClose}>
 						Cancel
 					</Button>
-					<Button variant="default" className="px-10" disabled={!handleSaveDisabled} onClick={() => onClose(inputs)}>
+					<Button
+						variant="default"
+						className="px-10"
+						disabled={!handleSaveDisabled}
+						onClick={() => handleClose(inputs)}
+					>
 						Save
 					</Button>
 				</div>
@@ -271,7 +265,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	// Hooks
 	const navigate = useNavigate();
 	const { data: profile, isUserProfile } = useProfile();
-	const { createBucket, updateBucket, deleteBucket, uploadVideo } = useBuckets(profile);
+	const { createBucket, updateBucket, deleteBucket, uploadVideo, saveVideoURLs } = useBuckets(profile);
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -488,32 +482,29 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	const handleVideoURLs = (videosURL) => {
 		setDisplayVideoURLsModal(false);
-
-		console.log(videosURL);
+		if (!videosURL) return;
 
 		const bucketId = documentId;
 
-		Object.values(videosURL).forEach((video) => {
-			const { video: videoURL, image, source, type } = video;
+		const videos = Object.values(videosURL);
 
-			// uploadVideo(
-			// 	{ id: bucketId, data: { video, image, videoType }, onLoading },
-			// 	{
-			// 		onSuccess: (response) => {
-			// 			// console.log(response, variables, ctx);
-			// 			// const videos = [...data.videos];
-			// 			// videos[index] = { image, videoUrl: video };
-			// 			// setData((prev) => ({ ...prev, videos }));
-			// 			// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
-			// 		},
-			// 		onSettled: () => {
-			// 			setUploading(false);
-			// 			setProgress(0);
-			// 		},
-			// 		onError: console.error
-			// 	}
-			// );
-		});
+		saveVideoURLs(
+			{ id: bucketId, data: { videos } },
+			{
+				onSuccess: (response) => {
+					console.log(response);
+					// const videos = [...data.videos];
+					// videos[index] = { image, videoUrl: video };
+					// setData((prev) => ({ ...prev, videos }));
+					// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
+				},
+				onSettled: () => {
+					setUploading(false);
+					setProgress(0);
+				},
+				onError: console.error
+			}
+		);
 	};
 
 	const isValid = [editorState.getCurrentContent().hasText(), data.title.length].every(Boolean);
