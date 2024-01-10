@@ -26,6 +26,20 @@ import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
 
+const getYouTubeEmbedCode = async (videoId) => {
+	try {
+		const response = await fetch(
+			`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+		);
+		if (!response.ok) throw 'Error getting YouTube embed code: ' + videoId;
+
+		return response.json();
+	} catch (error) {
+		console.error('Error getting YouTube embed code:', videoId);
+		return null;
+	}
+};
+
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
 
@@ -59,6 +73,9 @@ const extractVideoId = (url) => {
 };
 
 const VideoAddURLModal = ({ show, onClose }) => {
+	// Hooks
+	const { toast } = useToast();
+
 	const [inputs, setInputs] = React.useState({
 		0: { video: null, image: null, source: null, valid: false, type: 'url' }
 	});
@@ -68,19 +85,34 @@ const VideoAddURLModal = ({ show, onClose }) => {
 		return url.includes('youtube.com') || url.includes('youtu.be');
 	};
 
-	const handleVideoAdded = (url, index) => {
+	const handleVideoAdded = async (url, index) => {
 		if (isYouTubeUrl(url)) {
 			// Extract video ID from the URL
 			const videoId = extractVideoId(url);
 
 			// Check if videoId is present before creating thumbnailUrl
-			const thumbnailUrl = videoId && `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+			const embedCode = videoId && (await getYouTubeEmbedCode(videoId));
 
-			const body = {
-				[index]: { video: url, image: thumbnailUrl, valid: !!videoId, type: 'url', source: 'youtube.com' }
-			};
+			const body = { [index]: { ...embedCode, valid: !!embedCode, url } };
 
 			setInputs((prev) => ({ ...prev, ...body }));
+
+			if (!body[index].valid) return;
+
+			const ToasterView = () => (
+				<div className="flex flex-row gap-2">
+					<img src={embedCode.thumbnail_url} className="max-h-24" />
+
+					<div className="flex flex-col flex-shrink items-start justify-center">
+						<Typography variant="small" className="text-sm font-bold leading-5">
+							{embedCode?.title} - Added
+						</Typography>
+						<Typography className="text-xs">By {embedCode?.author_name}</Typography>
+					</div>
+				</div>
+			);
+
+			toast({ customView: <ToasterView /> });
 
 			return body;
 		}
@@ -108,6 +140,11 @@ const VideoAddURLModal = ({ show, onClose }) => {
 		setInputs(newState);
 	};
 
+	const handleClose = () => {
+		setInputs({ 0: { video: null, image: null, source: null, valid: false, type: 'url' } });
+		onClose();
+	};
+
 	const handleSaveDisabled = Object.values(inputs)
 		.map(({ valid }) => valid)
 		.every(Boolean);
@@ -119,22 +156,25 @@ const VideoAddURLModal = ({ show, onClose }) => {
 					<Typography variant="h3">Add video urls</Typography>
 
 					{Array.from(Object.keys(inputs)).map((key) => (
-						<div key={key} className="flex flex-row items-center w-full gap-2">
-							<div className="inline-flex items-center relative w-full h-full">
-								<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} />
-								{inputs[key].valid && (
-									<div className="absolute right-1 p-1 rounded-full bg-white z-10">
-										<Icon
-											fontSize={20}
-											icon="tabler:check"
-											className="text-green-600 h-full"
-											// bg-gradient-to-l from-transparent to-white
-										/>
-									</div>
-								)}
+						<div key={key} className="flex flex-col w-full gap-2">
+							<div key={key} className="flex flex-row items-center w-full gap-2">
+								<div className="inline-flex items-center relative w-full h-full">
+									<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} />
+									{inputs[key].valid && (
+										<div className="absolute right-1 p-1 rounded-full bg-white z-10">
+											<Icon fontSize={20} icon="tabler:check" className="text-green-600 h-full" />
+										</div>
+									)}
+								</div>
+
+								<Icon fontSize={20} className="text-gray-500" icon="mi:delete" onClick={() => handleDeleteItem(key)} />
 							</div>
 
-							<Icon fontSize={20} className="text-gray-500" icon="mi:delete" onClick={() => handleDeleteItem(key)} />
+							{inputs[key].title && (
+								<Typography variant="small" className="text-sm font-bold leading-5 inline-flex">
+									{inputs[key].title}
+								</Typography>
+							)}
 						</div>
 					))}
 
@@ -143,7 +183,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 					</Button>
 				</div>
 				<div className="flex flex-row justify-end gap-2 w-full">
-					<Button variant="secondary" onClick={() => onClose()}>
+					<Button variant="secondary" onClick={handleClose}>
 						Cancel
 					</Button>
 					<Button variant="default" className="px-10" disabled={!handleSaveDisabled} onClick={() => onClose(inputs)}>
@@ -434,6 +474,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	const handleVideoURLs = (videosURL) => {
 		setDisplayVideoURLsModal(false);
+
+		console.log(videosURL);
 
 		const bucketId = documentId;
 
