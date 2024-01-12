@@ -89,7 +89,6 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 	const YoutubePlayerRef = React.useRef();
 
 	const handleYoutubeOnReady = (event) => {
-		console.log(event);
 		event.target.mute();
 		event.target.playVideo();
 	};
@@ -99,8 +98,15 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 			<YouTube
 				ref={YoutubePlayerRef}
 				videoId={extractYoutubeVideoId(src)}
-				opts={{ playerVars: { autoplay: 1, controls: 1, loop: 0 } }}
 				onReady={handleYoutubeOnReady}
+				onEnd={props.onEnded}
+				className="w-full h-full"
+				crossOrigin="anonymous"
+				opts={{
+					playerVars: { autoplay: 1, controls: 1, loop: 0, cc_load_policy: 1, origin: window.location.href },
+					height: '100%',
+					width: '100%'
+				}}
 			/>
 		);
 
