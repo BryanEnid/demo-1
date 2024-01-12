@@ -9,7 +9,9 @@ import {
 	updateBucket as handleUpdateBucket,
 	deleteBucket as handleDeleteBucket,
 	uploadVideo as handleUploadVideo,
-	uploadVideoURLs as handleUploadVideoURLs
+	uploadVideoURLs as handleUploadVideoURLs,
+	updateBucketsCategory as handleUpdateBucketsCategory,
+	deleteBucketsCategory as handleDeleteBucketsCategory
 } from './api/buckets';
 
 const COLLECTION_NAME = 'Buckets';
@@ -76,7 +78,23 @@ export const useBuckets = (owner) => {
 			onLoading && onLoading(); // This is a callback that fires when onMutate fires
 		},
 		onSuccess: () => {
-			// TODO: Optimistic updates
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	// TODO: Optimistic updates
+	const updateBucketsCategory = useMutation({
+		mutationFn: ({ data: body, category }) => handleUpdateBucketsCategory(auth, { body, category }),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	const deleteBucketsCategory = useMutation({
+		mutationFn: ({ category, withBuckets }) => handleDeleteBucketsCategory(auth, category, withBuckets),
+		onSuccess: () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });
 		}
@@ -88,10 +106,8 @@ export const useBuckets = (owner) => {
 		deleteBucket: deleteBucket.mutate,
 		updateBucket: updateBucket.mutate,
 		uploadVideo: uploadVideo.mutate,
-		saveVideoURLs: saveVideoURLs.mutate
-
-		// uploadFile: createBucket.mutate,
-		// uploadResumableFile: createBucket.mutate,
-		// appendVideo: createBucket.mutate
+		saveVideoURLs: saveVideoURLs.mutate,
+		updateBucketsCategory: updateBucketsCategory.mutate,
+		deleteBucketsCategory: deleteBucketsCategory.mutate
 	};
 };

@@ -1,5 +1,3 @@
-import { BASE_URL } from '@/config/api.js';
-
 export default {
 	clientId: import.meta.env.VITE_SERVER_LI_CLIENT_ID,
 	redirectUrl: `${window.location.origin}/linkedin/redirect`,
