@@ -55,6 +55,7 @@
 		"react-sortablejs": "^6.1.4",
 		"react-video-editor": "^1.0.2",
 		"react-webcam": "^7.1.1",
+		"react-youtube": "^10.1.0",
 		"recharts": "^2.8.0",
 		"sortablejs": "^1.15.0",
 		"tailwind-merge": "^1.14.0",

@@ -16,6 +16,9 @@ export const updateBucket = (auth, { body, id }) =>
 export const uploadVideo = (auth, id, body) =>
 	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/video`, { method: 'POST', body });
 
+export const uploadVideoURLs = (auth, id, body) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/videoURLs`, { method: 'POST', body });
+
 export const updateBucketsCategory = (auth, { body, category }) =>
 	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'PUT', body });
 

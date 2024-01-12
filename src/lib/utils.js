@@ -5,6 +5,17 @@ export function cn(...inputs) {
 	return twMerge(clsx(inputs));
 }
 
+// Function to check if the URL is from YouTube
+export const isYouTubeUrl = (url = '') => {
+	return url?.includes('youtube.com') || url?.includes('youtu.be');
+};
+
+export const extractYoutubeVideoId = (url) => {
+	const urlObject = new URL(url);
+	const searchParams = new URLSearchParams(urlObject.search);
+	return searchParams.get('v');
+};
+
 function dataURItoBlob(dataURI) {
 	const byteString = atob(dataURI.split(',')[1]);
 	const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];

@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
 import PreviewBucket from '@/components/PreviewBucket';
 import { useSearchParams } from 'react-router-dom';
+import { isYouTubeUrl } from '@/lib/utils';
 
 export const BucketItem = ({
 	name,
@@ -35,6 +36,12 @@ export const BucketItem = ({
 		setOpen(true);
 	};
 
+	const handleSrc = (src) => {
+		if (isYouTubeUrl(src)) return data.videos[0].image;
+
+		return src;
+	};
+
 	return (
 		<>
 			<div className="flex flex-col items-center">
@@ -42,17 +49,21 @@ export const BucketItem = ({
 					onClick={onClick ? () => onClick(data) : handleOpenPreview}
 					className={`${width} transition ease-in-out hover:scale-110`}
 				>
-					<div className="object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary">
-						{preview && (
+					<div className="flex object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary justify-center items-center">
+						{preview && !isYouTubeUrl(preview) && (
 							<video
 								type="video/mp4"
 								autoPlay
 								muted
 								loop
-								src={preview}
-								crossOrigin="anonymous"
+								src={handleSrc(preview)}
+								// crossOrigin="anonymous"
 								className="object-cover aspect-square rounded-full w-full h-full"
 							/>
+						)}
+
+						{handleSrc(preview) && (
+							<img src={handleSrc(preview)} className="aspect-video object-cover rounded-full w-full h-full" />
 						)}
 
 						{!preview && (
