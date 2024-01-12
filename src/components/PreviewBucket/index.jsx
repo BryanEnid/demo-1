@@ -98,14 +98,14 @@ const VideoAddURLModal = ({ show, onClose }) => {
 			if (!body[index].valid) return;
 
 			const ToasterView = () => (
-				<div className="flex flex-col gap-2 ">
-					<img src={embedCode.thumbnail} className="w-full object-cover" />
+				<div className="flex flex-col gap-3 w-full">
+					<img src={embedCode.thumbnail} className="w-full rounded-xl aspect-video object-cover" />
 
-					<Typography variant="small" className="text-md font-bold leading-5 line-clamp-2">
+					<Typography variant="small" className="text-md font-extrabold leading-5 line-clamp-1">
 						{embedCode?.title}
 					</Typography>
 
-					<Typography variant="small" className="text-sm font-light leading-5 line-clamp-2">
+					<Typography variant="small" className="text-sm font-extralight leading-5 line-clamp-3">
 						{embedCode?.description}
 					</Typography>
 
@@ -174,7 +174,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 							</div>
 
 							{inputs[key].title && (
-								<Typography variant="small" className="text-sm font-bold leading-5 inline-flex">
+								<Typography variant="small" className="text-sm font-bold leading-1 inline-flex">
 									{inputs[key].title}
 								</Typography>
 							)}
@@ -668,7 +668,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 													<img
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
-														crossOrigin="anonymous"
+														// crossOrigin="anonymous"
 													/>
 
 													{item.is360Video && (
