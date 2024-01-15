@@ -80,3 +80,14 @@ export function formatTimestamp(timestamp) {
 
 	return formattedTime;
 }
+
+export const getShortNumberLabel = (num, units = ['', 'K', 'M', 'B'], unitStep = 1000) => {
+	let i = 0;
+	let res = num;
+	while (res >= unitStep && i < units.length - 1) {
+		i += 1;
+		res = res / unitStep;
+	}
+
+	return `${Math.round(res)}${units[i]}`;
+};

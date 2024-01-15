@@ -7,11 +7,12 @@ import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
-import { cn, extractYoutubeVideoId, generatePreview, isYouTubeUrl } from '@/lib/utils';
+import { cn, extractYoutubeVideoId, generatePreview, getShortNumberLabel, isYouTubeUrl } from '@/lib/utils';
 import { PageModal } from '@/components/PageModal';
 import TextEditor from '@/components/TextEditor';
 import { VR_3D, Video360 } from '@/components/MediaPlayer';
 import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
+import Views from '@/components/PreviewBucket/tabs/Views';
 import QuestionsList from '@/components/QuestionsList.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useBuckets } from '@/hooks/useBuckets';
@@ -265,7 +266,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	// Hooks
 	const navigate = useNavigate();
 	const { data: profile, isUserProfile } = useProfile();
-	const { createBucket, updateBucket, deleteBucket, uploadVideo, saveVideoURLs } = useBuckets(profile);
+	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs } =
+		useBuckets(profile);
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -301,6 +303,18 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			);
 		}
 	}, [inData]);
+
+	React.useEffect(() => {
+		let timerId;
+		if (documentId && show) {
+			// Mark as viewed after 5 sec
+			timerId = setTimeout(() => {
+				markBucketViewed({ id: documentId });
+			}, 5000);
+		}
+
+		return () => timerId && clearTimeout(timerId);
+	}, [documentId, show]);
 
 	// Function to toggle fullscreen
 	const toggleFullscreen = () => {
@@ -542,7 +556,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
 							{/* TODO: picture */}
 							<img src={profile?.photoURL} className="rounded-full object-cover w-20" crossOrigin="anonymous" />
-							<Typography variant="small">215k</Typography>
+							{!!data.viewers && (
+								<Typography variant="small">{getShortNumberLabel(data.viewers?.length || 0)}</Typography>
+							)}
 						</div>
 
 						<div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
@@ -796,6 +812,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 				<TabsList>
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="q&a">Q&A</TabsTrigger>
+					<TabsTrigger value="views">Views</TabsTrigger>
 				</TabsList>
 				<TabsContent value="overview">
 					<Overview
@@ -817,6 +834,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					<div className="py-10">
 						<QuestionsList profile={profile} scope={{ bucketId: documentId }} />
 					</div>
+				</TabsContent>
+				<TabsContent value="views">
+					<Views bucketId={documentId} profile={profile} />
 				</TabsContent>
 			</Tabs>
 		</PageModal>
