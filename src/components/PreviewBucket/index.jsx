@@ -556,9 +556,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
 							{/* TODO: picture */}
 							<img src={profile?.photoURL} className="rounded-full object-cover w-20" crossOrigin="anonymous" />
-							{!!data.viewers && (
-								<Typography variant="small">{getShortNumberLabel(data.viewers?.length || 0)}</Typography>
-							)}
+							<Typography variant="small">215k</Typography>
 						</div>
 
 						<div className="flex basis-10/12 flex-col w-full gap-8 pl-4 pb-4">
@@ -809,10 +807,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			</div>
 
 			<Tabs defaultValue="overview" className="w-full">
-				<TabsList>
+				<TabsList className="flex items-center">
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="q&a">Q&A</TabsTrigger>
-					<TabsTrigger value="views">Views</TabsTrigger>
+					{isUserProfile && <TabsTrigger value="views">Views</TabsTrigger>}
+					<div className="flex flex-1 gap-1 items-center justify-end px-4 text-[#484848]">
+						<Icon icon="ph:binoculars-fill" className="text-3xl" />
+						{getShortNumberLabel(data.viewers?.length || 0)}
+					</div>
 				</TabsList>
 				<TabsContent value="overview">
 					<Overview
@@ -835,9 +837,11 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						<QuestionsList profile={profile} scope={{ bucketId: documentId }} />
 					</div>
 				</TabsContent>
-				<TabsContent value="views">
-					<Views bucketId={documentId} profile={profile} />
-				</TabsContent>
+				{isUserProfile && (
+					<TabsContent value="views">
+						<Views bucketId={documentId} profile={profile} />
+					</TabsContent>
+				)}
 			</Tabs>
 		</PageModal>
 	);

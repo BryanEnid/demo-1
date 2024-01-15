@@ -7,7 +7,7 @@ import { Button } from '@/chadcn/Button.jsx';
 import { VideoUploadButton } from '@/components/VideoUploadButton.jsx';
 import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';
-import { cn, getShortNumberLabel } from '@/lib/utils.js';
+import { cn } from '@/lib/utils.js';
 
 const Overview = ({
 	data,
@@ -28,7 +28,7 @@ const Overview = ({
 			<div className="flex flex-row px-8 my-6 outline-none">
 				<div className="flex basis-2/12 flex-col items-center gap-2 mt-2">
 					<img src={profile?.photoURL} className="rounded-full object-cover w-20" crossOrigin="anonymous" />
-					<Typography variant="small">{getShortNumberLabel(data.viewers?.length || 0)}</Typography>
+					<Typography variant="small">215k</Typography>
 					<Button variant="secondary">Anchor</Button>
 				</div>
 
