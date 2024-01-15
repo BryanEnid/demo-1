@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, Outlet, useLocation, useMatches } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 // Components
 import { Icon } from '@iconify/react';
@@ -14,6 +15,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { useAuth } from '@/providers/Authentication.jsx';
 import PreviewBucket from '@/components/PreviewBucket';
+import BucketInfo from '@/components/BucketInfo.jsx';
 
 // TODO: dynamic url
 import orgBgImg from '@/assets/image-org-bg.png';
@@ -74,12 +76,18 @@ export function Profile() {
 	const [orgSubButtons, setOrgSubButtons] = React.useState(
 		organizationMenu.find(({ label, href }) => pathParts.includes(href || label.toLowerCase()))?.subLinks || []
 	);
+	const [bucketInfoOpen, setBucketInfoOpen] = React.useState(false);
 	const [show, setShow] = React.useState(false);
 	const [bucketData, setBucketData] = React.useState(null);
+
 	const [username] = pathParts;
 
 	// TODO: check if this is Organization
 	const isOrganization = false;
+
+	React.useEffect(() => {
+		setBucketInfoOpen(null);
+	}, [profile?.id]);
 
 	React.useEffect(() => {
 		(() => {
@@ -110,104 +118,132 @@ export function Profile() {
 			<div>
 				<NavBar createBucket={handleCreateBucket} />
 
-				{isOrganization ? (
-					/* TODO: dynamic background image */
-					<div
-						className={`pt-[50px] mb-12 bg-center bg-top bg-no-repeat bg-[length:auto_400px]`}
-						style={{ backgroundImage: `url('${orgBgImg}')` }}
-					>
-						<div className="container">
-							<div className="rounded-[74px] p-11 pb-2 bg-gradient-to-b from-[#000C1EAA] from-0% via-[#000C1EDD] via-60% to-[#000C1EFF] to-100% backdrop-blur-[115px]">
-								<div className="flex flex-col items-center">
-									<img
-										src={profile?.photoURL}
-										className="rounded-full object-cover aspect-square w-48 mb-8"
-										crossOrigin="anonymous"
-									/>
-									<Typography variant="h2" className="text-white/[.96]">
-										NASA
-									</Typography>
-									<Typography variant="h3" className="text-white/[.96] font-normal leading-normal mb-1">
-										National Aeronautics and Space Administration
-									</Typography>
-									<Typography variant="blockquote" className="text-white leading-snug !border-l-0 !pl-0">
-										“For the Benefit of All. We make Air and Space available for everyone.”
-									</Typography>
-								</div>
-
-								<div className="flex mt-8 mb-10 gap-4 justify-center">
-									{organizationMenu.map((item) => (
-										<NavOption
-											key={item.label}
-											title={item.label}
-											href={item.href}
-											buttonProps={{
-												variant: 'outline',
-												activeClassName: 'bg-[#0066ff]/[.7]',
-												className:
-													'rounded-[10px] text-white/[.96] border-2 border-white bg-gradient-to-b from-[#4b93ff]/[0] from-0% to-[#005de8]/[0] to-100% hover:from-[#4b93ff]/[.7] hover:to-[#005de8]/[.7]'
-											}}
-											onClick={() => setOrgSubButtons(item.subLinks || [])}
-										/>
-									))}
-								</div>
-								{!!orgSubButtons?.length && (
-									<>
-										<div className="w-[60%] mx-auto">
-											<Separator />
+				<div className="flex">
+					<div className="w-full">
+						{isOrganization ? (
+							/* TODO: dynamic background image */
+							<div
+								className={`pt-[50px] mb-12 bg-center bg-top bg-no-repeat bg-[length:auto_400px]`}
+								style={{ backgroundImage: `url('${orgBgImg}')` }}
+							>
+								<div className="container">
+									<div className="rounded-[74px] p-11 pb-2 bg-gradient-to-b from-[#000C1EAA] from-0% via-[#000C1EDD] via-60% to-[#000C1EFF] to-100% backdrop-blur-[115px]">
+										<div className="flex flex-col items-center">
+											<img
+												src={profile?.photoURL}
+												className="rounded-full object-cover aspect-square w-48 mb-8"
+												crossOrigin="anonymous"
+											/>
+											<Typography variant="h2" className="text-white/[.96]">
+												NASA
+											</Typography>
+											<Typography variant="h3" className="text-white/[.96] font-normal leading-normal mb-1">
+												National Aeronautics and Space Administration
+											</Typography>
+											<Typography variant="blockquote" className="text-white leading-snug !border-l-0 !pl-0">
+												“For the Benefit of All. We make Air and Space available for everyone.”
+											</Typography>
 										</div>
+
 										<div className="flex mt-8 mb-10 gap-4 justify-center">
-											{orgSubButtons.map((subLink) => (
+											{organizationMenu.map((item) => (
 												<NavOption
-													key={subLink.label}
-													title={subLink.label}
-													href={subLink.href}
+													key={item.label}
+													title={item.label}
+													href={item.href}
 													buttonProps={{
-														activeClassName: 'font-bold underline',
-														variant: 'link',
-														className: 'text-[#FCFCFC]'
+														variant: 'outline',
+														activeClassName: 'bg-[#0066ff]/[.7]',
+														className:
+															'rounded-[10px] text-white/[.96] border-2 border-white bg-gradient-to-b from-[#4b93ff]/[0] from-0% to-[#005de8]/[0] to-100% hover:from-[#4b93ff]/[.7] hover:to-[#005de8]/[.7]'
 													}}
+													onClick={() => setOrgSubButtons(item.subLinks || [])}
 												/>
 											))}
 										</div>
-									</>
-								)}
+										{!!orgSubButtons?.length && (
+											<>
+												<div className="w-[60%] mx-auto">
+													<Separator />
+												</div>
+												<div className="flex mt-8 mb-10 gap-4 justify-center">
+													{orgSubButtons.map((subLink) => (
+														<NavOption
+															key={subLink.label}
+															title={subLink.label}
+															href={subLink.href}
+															buttonProps={{
+																activeClassName: 'font-bold underline',
+																variant: 'link',
+																className: 'text-[#FCFCFC]'
+															}}
+														/>
+													))}
+												</div>
+											</>
+										)}
+									</div>
+								</div>
 							</div>
+						) : (
+							<div className="container">
+								<div>
+									{/* Header */}
+									<div className="flex flex-col items-center gap-8">
+										<img
+											src={profile?.photoURL}
+											className="rounded-full object-cover aspect-square w-48"
+											crossOrigin="anonymous"
+										/>
+										<Typography variant="h2">{profile?.name}</Typography>
+										<Typography variant="blockquote" className="border-0">
+											“If you want to find the secrets of the universe, think in terms of energy, frequency and
+											vibration.”
+										</Typography>
+									</div>
+
+									<div className="flex mt-8 mb-20 gap-4 justify-center">
+										<NavOption title="Audio" />
+										<NavOption title="Buckets" />
+										<NavOption title="Experience" />
+										<NavOption title="Recommends" />
+										<NavOption title="Quests" />
+										<NavOption title="Website" />
+									</div>
+								</div>
+							</div>
+						)}
+
+						<div className="container">
+							{/* Screens */}
+							<Outlet
+								context={[
+									{
+										isUserProfile,
+										createBucket: handleCreateBucket,
+										bucketInfoOpen,
+										showBucketInfo: setBucketInfoOpen
+									}
+								]}
+							/>
+
+							<PreviewBucket editMode show={show} data={bucketData} onClose={handleCancel} />
 						</div>
 					</div>
-				) : (
-					<div className="container">
-						<div>
-							{/* Header */}
-							<div className="flex flex-col items-center gap-8">
-								<img
-									src={profile?.photoURL}
-									className="rounded-full object-cover aspect-square w-48"
-									crossOrigin="anonymous"
+
+					{!!bucketInfoOpen && (
+						<motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 300, opacity: 1 }} className="shrink-0">
+							<div className="fixed top-[80px] bottom-0 right-0 overflow-auto w-[300px]">
+								<BucketInfo
+									bucket={bucketInfoOpen}
+									profile={profile}
+									canEdit={isUserProfile}
+									isUserProfile={isUserProfile}
+									onClose={() => setBucketInfoOpen(null)}
 								/>
-								<Typography variant="h2">{profile?.name}</Typography>
-								<Typography variant="blockquote" className="border-0">
-									“If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.”
-								</Typography>
 							</div>
-
-							<div className="flex mt-8 mb-20 gap-4 justify-center">
-								<NavOption title="Audio" />
-								<NavOption title="Buckets" />
-								<NavOption title="Experience" />
-								<NavOption title="Recommends" />
-								<NavOption title="Quests" />
-								<NavOption title="Website" />
-							</div>
-						</div>
-					</div>
-				)}
-
-				<div className="container">
-					{/* Screens */}
-					<Outlet context={[{ isUserProfile, createBucket: handleCreateBucket }]} />
-
-					<PreviewBucket editMode show={show} data={bucketData} onClose={handleCancel} />
+						</motion.div>
+					)}
 				</div>
 			</div>
 		</div>
