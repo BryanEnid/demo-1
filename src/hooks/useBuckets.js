@@ -7,6 +7,7 @@ import {
 	getBucket as handleGetBucket,
 	getBuckets as handleGetBuckets,
 	updateBucket as handleUpdateBucket,
+	markBucketViewed as handleMarkBucketViewed,
 	deleteBucket as handleDeleteBucket,
 	uploadVideo as handleUploadVideo,
 	uploadVideoURLs as handleUploadVideoURLs,
@@ -21,7 +22,7 @@ export const useBuckets = (owner) => {
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
-	const queryKey = [COLLECTION_NAME, owner?.id];
+	const queryKey = [COLLECTION_NAME, owner?.id, auth.authToken];
 
 	const { data } = useQuery({
 		gcTime: Infinity,
@@ -42,6 +43,14 @@ export const useBuckets = (owner) => {
 		mutationFn: ({ data: body, documentId: id }) => handleUpdateBucket(auth, { body, id }),
 		onSuccess: () => {
 			// TODO: Optimistic updates
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	const markBucketViewed = useMutation({
+		mutationFn: ({ id }) => handleMarkBucketViewed(auth, id),
+		onSuccess: () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });
 		}
@@ -105,6 +114,7 @@ export const useBuckets = (owner) => {
 		createBucket: createBucket.mutate,
 		deleteBucket: deleteBucket.mutate,
 		updateBucket: updateBucket.mutate,
+		markBucketViewed: markBucketViewed.mutate,
 		uploadVideo: uploadVideo.mutate,
 		saveVideoURLs: saveVideoURLs.mutate,
 		updateBucketsCategory: updateBucketsCategory.mutate,

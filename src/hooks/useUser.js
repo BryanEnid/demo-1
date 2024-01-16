@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { createUser as handleCreateUser, getUser } from '@/hooks/api/users.js';
+import { getUser, createUser as handleCreateUser, findUsers as handleFindUsers } from '@/hooks/api/users.js';
 
 export const useUser = (auth, id) => {
 	const [user, setUser] = React.useState(null);
 	const [isLoading, setLoading] = React.useState(true);
+	const [usersSearch, setUsersSearch] = React.useState('');
 
 	const enabled = id && auth.authToken && id != 'profile';
 
@@ -22,6 +23,13 @@ export const useUser = (auth, id) => {
 		}
 	}, [data]);
 
+	const { data: users, isLoading: isUsersLoading } = useQuery({
+		gcTime: Infinity,
+		queryKey: ['Users', usersSearch, auth?.authToken],
+		enabled: !!usersSearch.length,
+		queryFn: () => (usersSearch.length ? handleFindUsers(usersSearch) : null)
+	});
+
 	const { mutateAsync } = useMutation({
 		mutationFn: async (data) => handleCreateUser(data)
 	});
@@ -37,9 +45,12 @@ export const useUser = (auth, id) => {
 
 	return {
 		user,
-		isLoading: isLoading || isUserLoading,
+		users: users || [],
+		isLoading: isLoading || isUserLoading || isUsersLoading,
+		isUsersLoading,
 		setUser,
 		setLoading,
-		createUser
+		createUser,
+		findUsers: setUsersSearch
 	};
 };

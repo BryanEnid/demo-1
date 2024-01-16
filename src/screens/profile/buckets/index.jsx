@@ -14,6 +14,7 @@ import { Separator } from '@/chadcn/Separator.jsx';
 import { PageModal } from '@/components/PageModal.jsx';
 
 import { BucketItem } from './BucketItem';
+import ConfirmDialog from '@/components/ConfirmDialog.jsx';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
 
@@ -94,8 +95,8 @@ CategoryLabel.displayName = 'CategoryLabel';
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
-	const { data: buckets, updateBucketsCategory, deleteBucketsCategory } = useBuckets(profile);
-	const [{ isUserProfile, createBucket }] = useOutletContext();
+	const { data: buckets, updateBucket, updateBucketsCategory, deleteBucketsCategory } = useBuckets(profile);
+	const [{ isUserProfile, createBucket, bucketInfoOpen, showBucketInfo }] = useOutletContext();
 
 	// State
 	const [confirmDelete, setConfirmDelete] = useState(null);
@@ -114,6 +115,13 @@ export function Buckets() {
 		() => groupBy(buckets || [], ({ category }) => category || UNCATEGORIZED_BUCKETS_LABEL),
 		[buckets]
 	);
+
+	useEffect(() => {
+		if (bucketInfoOpen) {
+			const bucket = buckets.find(({ id }) => id === bucketInfoOpen.id);
+			showBucketInfo(bucket);
+		}
+	}, [buckets]);
 
 	useEffect(() => {
 		if (showNewCategory) {
@@ -313,6 +321,9 @@ export function Buckets() {
 										name={bucket.name}
 										preview={bucket.videos[0]?.videoUrl}
 										documentId={bucket.id}
+										isUserProfile={isUserProfile}
+										updateBucket={updateBucket}
+										showBucketInfo={showBucketInfo}
 									/>
 								</motion.div>
 							))}
@@ -352,52 +363,40 @@ export function Buckets() {
 					</motion.div>
 				)}
 			</div>
-			<PageModal show={!!confirmDelete} onClose={() => setConfirmDelete(null)} width="600px">
-				<div className="flex flex-col justify-center p-16 gap-5">
+			<ConfirmDialog
+				show={!!confirmDelete}
+				title="Are you sure you want to delete this section?"
+				subTitle={`This section ${confirmDelete} includes ${groupedBucket[confirmDelete]?.length || 0} buckets`}
+				submitLabel="Delete section"
+				onClose={() => setConfirmDelete(null)}
+				onCancel={() => setConfirmDelete(null)}
+				onConfirm={() => deleteCategory(deleteWithBuckets)}
+			>
+				{groupedBucket[confirmDelete]?.length && (
 					<div>
-						<Typography variant="h3" className="pb-2">
-							Are you sure you want to delete this section?
-						</Typography>
-						<Typography>
-							This section {confirmDelete} includes {groupedBucket[confirmDelete]?.length || 0} buckets
-						</Typography>
+						<label className="flex items-center gap-1">
+							<Input
+								checked={!deleteWithBuckets}
+								type="radio"
+								name="deleteCategoryOption"
+								className="w-auto"
+								onChange={(e) => setDeleteWithBuckets(!e.target.checked)}
+							/>
+							Delete this section and keep these {groupedBucket[confirmDelete]?.length || 0} buckets
+						</label>
+						<label className="flex items-center gap-1">
+							<Input
+								checked={deleteWithBuckets}
+								type="radio"
+								name="deleteCategoryOption"
+								className="w-auto"
+								onChange={(e) => setDeleteWithBuckets(e.target.checked)}
+							/>
+							Delete this section and delete these {groupedBucket[confirmDelete]?.length || 0} buckets
+						</label>
 					</div>
-					{groupedBucket[confirmDelete]?.length && (
-						<div>
-							<label className="flex items-center gap-1">
-								<Input
-									checked={!deleteWithBuckets}
-									type="radio"
-									name="deleteCategoryOption"
-									className="w-auto"
-									onChange={(e) => setDeleteWithBuckets(!e.target.checked)}
-								/>
-								Delete this section and keep these {groupedBucket[confirmDelete]?.length || 0} buckets
-							</label>
-							<label className="flex items-center gap-1">
-								<Input
-									checked={deleteWithBuckets}
-									type="radio"
-									name="deleteCategoryOption"
-									className="w-auto"
-									onChange={(e) => setDeleteWithBuckets(e.target.checked)}
-								/>
-								Delete this section and delete these {groupedBucket[confirmDelete]?.length || 0} buckets
-							</label>
-						</div>
-					)}
-					<div className="w-full">
-						<div className="pt-5 flex gap-2 justify-end">
-							<Button variant="secondary" className="rounded-full" onClick={() => setConfirmDelete(null)}>
-								Cancel
-							</Button>
-							<Button variant="destructive" className="rounded-full" onClick={() => deleteCategory(deleteWithBuckets)}>
-								Delete section
-							</Button>
-						</div>
-					</div>
-				</div>
-			</PageModal>
+				)}
+			</ConfirmDialog>
 		</div>
 	);
 }

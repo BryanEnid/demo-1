@@ -7,11 +7,12 @@ import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
-import { cn, extractYoutubeVideoId, generatePreview, isYouTubeUrl } from '@/lib/utils';
+import { cn, extractYoutubeVideoId, generatePreview, getShortNumberLabel, isYouTubeUrl } from '@/lib/utils';
 import { PageModal } from '@/components/PageModal';
 import TextEditor from '@/components/TextEditor';
 import { VR_3D, Video360 } from '@/components/MediaPlayer';
 import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
+import Views from '@/components/PreviewBucket/tabs/Views';
 import QuestionsList from '@/components/QuestionsList.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useBuckets } from '@/hooks/useBuckets';
@@ -265,7 +266,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	// Hooks
 	const navigate = useNavigate();
 	const { data: profile, isUserProfile } = useProfile();
-	const { createBucket, updateBucket, deleteBucket, uploadVideo, saveVideoURLs } = useBuckets(profile);
+	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs } =
+		useBuckets(profile);
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -301,6 +303,18 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			);
 		}
 	}, [inData]);
+
+	React.useEffect(() => {
+		let timerId;
+		if (documentId && show) {
+			// Mark as viewed after 5 sec
+			timerId = setTimeout(() => {
+				markBucketViewed({ id: documentId });
+			}, 5000);
+		}
+
+		return () => timerId && clearTimeout(timerId);
+	}, [documentId, show]);
 
 	// Function to toggle fullscreen
 	const toggleFullscreen = () => {
@@ -793,9 +807,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			</div>
 
 			<Tabs defaultValue="overview" className="w-full">
-				<TabsList>
+				<TabsList className="flex items-center">
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="q&a">Q&A</TabsTrigger>
+					{isUserProfile && <TabsTrigger value="views">Views</TabsTrigger>}
+					<div className="flex flex-1 gap-1 items-center justify-end px-4 text-[#484848]">
+						<Icon icon="ph:binoculars-fill" className="text-3xl" />
+						{getShortNumberLabel(data.viewers?.length || 0)}
+					</div>
 				</TabsList>
 				<TabsContent value="overview">
 					<Overview
@@ -818,6 +837,11 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						<QuestionsList profile={profile} scope={{ bucketId: documentId }} />
 					</div>
 				</TabsContent>
+				{isUserProfile && (
+					<TabsContent value="views">
+						<Views bucketId={documentId} profile={profile} />
+					</TabsContent>
+				)}
 			</Tabs>
 		</PageModal>
 	);
