@@ -22,7 +22,7 @@ export const useBuckets = (owner) => {
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
-	const queryKey = [COLLECTION_NAME, owner?.id];
+	const queryKey = [COLLECTION_NAME, owner?.id, auth.authToken];
 
 	const { data } = useQuery({
 		gcTime: Infinity,
