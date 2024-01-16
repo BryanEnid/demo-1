@@ -15,7 +15,6 @@ import {
 	DropdownMenuSeparator
 } from '@/chadcn/DropDown.jsx';
 
-
 export const BucketItem = ({
 	name,
 	preview,
@@ -76,8 +75,8 @@ export const BucketItem = ({
 		const left = e.clientX - wrapperPosition.left;
 
 		e.preventDefault();
-		setContextMenu({open: true, y: top, x: left});
-	}
+		setContextMenu({ open: true, y: top, x: left });
+	};
 
 	return (
 		<>
