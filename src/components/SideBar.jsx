@@ -12,8 +12,6 @@ export function SideBar() {
 	const { pathname } = useLocation();
 	const { user, isLoading } = useAuthenticationProviders();
 
-	// if (isLoading) return <></>;
-
 	return (
 		<aside className="inline-flex items-center flex-col h-screen p-4 text-gray-400 fixed top-0 left-0 border-r-[1px] shadow-md">
 			<button onClick={() => navigate('/')}>
@@ -31,7 +29,10 @@ export function SideBar() {
 					<Icon width={30} icon="iconamoon:profile" />
 				</button>
 
-				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
+				<button
+					onClick={() => navigate('/users')}
+					className="transition ease-in-out hover:text-primary hover:scale-105"
+				>
 					<Icon width={35} icon="ion:compass-outline" />
 				</button>
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
