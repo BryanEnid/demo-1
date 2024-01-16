@@ -11,6 +11,7 @@ import { Experience } from './screens/profile/experience/Experience';
 import { Preview } from './screens/video_preview/Preview';
 import { SignIn } from './screens/sign_in/SignIn';
 import Quests from './screens/profile/quests/index';
+import { UsersScreen } from './screens/users/Users';
 
 export function Routes(props) {
 	// TODO: Preload all icons
@@ -19,6 +20,12 @@ export function Routes(props) {
 		{
 			path: '/',
 			element: <SignIn />
+		},
+
+		{
+			// ! This is temporally - Only for DEV
+			path: '/users/*',
+			element: <UsersScreen />
 		},
 
 		{
