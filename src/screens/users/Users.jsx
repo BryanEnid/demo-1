@@ -9,28 +9,12 @@ import { Link } from 'react-router-dom';
 
 import { NavBar } from '@/components/NavBar';
 import { SideBar } from '@/components/SideBar';
-
-const useUsers = () => {
-	const [data, setData] = React.useState();
-
-	React.useEffect(() => {
-		const getUsers = async () => {
-			const res = await fetch(`${BASE_URL}/api/users`);
-			const data = await res.json();
-
-			return data.sort((a, b) => a.name.localeCompare(b.name));
-		};
-
-		getUsers().then(setData);
-	}, []);
-
-	return { data };
-};
+import { useUsers } from '@/hooks/useUsers';
 
 export const UsersScreen = () => {
-	const { data } = useUsers();
+	const { users, isLoading } = useUsers();
 
-	if (!data) return <>loading</>;
+	if (isLoading) return <>loading</>;
 
 	return (
 		<>
@@ -73,7 +57,7 @@ export const UsersScreen = () => {
 							header: 'Username'
 						}
 					]}
-					data={data}
+					data={users}
 				/>
 			</div>
 		</>
