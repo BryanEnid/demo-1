@@ -4,14 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 export function PageModal({ children, show, onClose, width, initialFocus, zIndex }) {
 	return (
 		<Transition.Root show={show} as={Fragment}>
-			<Dialog
-				className="relative"
-				style={{ zIndex: zIndex ?? 10 }}
-				initialFocus={initialFocus}
-				onClose={(...props) => {
-					onClose(...props);
-				}}
-			>
+			<Dialog className="relative" style={{ zIndex: zIndex ?? 10 }} initialFocus={initialFocus} onClose={onClose}>
 				<Transition.Child
 					as={Fragment}
 					enter="ease-out duration-300"

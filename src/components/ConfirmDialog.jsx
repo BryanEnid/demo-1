@@ -6,18 +6,19 @@ import { PageModal } from '@/components/PageModal.jsx';
 
 const ConfirmDialog = ({
 	show,
-	title,
+	title = 'Title',
 	subTitle,
 	cancelLabel = 'Cancel',
 	submitLabel = 'Ok',
-	submitBtnVariant = 'destructive',
-	children,
-	onClose,
+	submitBtnVariant = 'default',
+	children = 'content',
+	disabledSubmit = false,
+	onClose = () => {},
 	onCancel,
-	onConfirm
+	onConfirm = () => {}
 }) => {
 	return (
-		<PageModal show={show} onClose={onClose} width="600px">
+		<PageModal show={show} onClose={() => onClose('escape')} width="600px">
 			<div className="flex flex-col justify-center p-16 gap-5">
 				<div>
 					<Typography variant="h3" className="pb-2">
@@ -30,18 +31,23 @@ const ConfirmDialog = ({
 					<div className="pt-5 flex gap-2 justify-end">
 						<Button
 							variant="secondary"
-							className="rounded-full"
+							className="rounded-full min-w-[100px]"
 							onClick={() => {
 								if (typeof onCancel === 'function') {
 									return onCancel();
 								}
 
-								onClose();
+								onClose('cancel');
 							}}
 						>
 							{cancelLabel}
 						</Button>
-						<Button variant={submitBtnVariant} className="rounded-full" onClick={onConfirm}>
+						<Button
+							disabled={disabledSubmit}
+							variant={submitBtnVariant}
+							className="rounded-full min-w-[100px]"
+							onClick={onConfirm}
+						>
 							{submitLabel}
 						</Button>
 					</div>

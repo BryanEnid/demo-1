@@ -23,6 +23,7 @@ export const useUser = (auth, id) => {
 		}
 	}, [data]);
 
+	// ? "users" could be called (selectedUsers || filteredUsers || foundUsers) or this can live in another hook "useUsers"?
 	const { data: users, isLoading: isUsersLoading } = useQuery({
 		gcTime: Infinity,
 		queryKey: ['Users', usersSearch, auth?.authToken],

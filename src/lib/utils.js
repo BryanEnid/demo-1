@@ -91,3 +91,71 @@ export const getShortNumberLabel = (num, units = ['', 'k', 'm', 'b'], unitStep =
 
 	return `${Math.round(res * 10) / 10}${units[i]}`.replace('.', ',');
 };
+
+export const getFirstPixelColor = async (imageUrl) => {
+	const img = new Image();
+
+	return new Promise((resolve, reject) => {
+		img.crossOrigin = 'Anonymous'; // Enable cross-origin request
+		img.src = imageUrl;
+
+		img.onload = function () {
+			try {
+				const createImageBitmap = window.createImageBitmap || img.createImageBitmap;
+				createImageBitmap(img).then((imageBitmap) => {
+					const canvas = document.createElement('canvas');
+					const ctx = canvas.getContext('2d');
+
+					canvas.width = imageBitmap.width;
+					canvas.height = imageBitmap.height;
+
+					ctx.drawImage(imageBitmap, 0, 0);
+
+					const pixelData = ctx.getImageData(2, 2, 1, 1).data;
+
+					// Check if the pixel is fully transparent (alpha channel is 0)
+					if (pixelData[3] === 0) {
+						resolve('#FFFFFF'); // Return white for fully transparent pixel
+					} else {
+						const hexColor = rgbToHex(pixelData[0], pixelData[1], pixelData[2]);
+						resolve(hexColor);
+					}
+				});
+			} catch (error) {
+				console.error('Error loading image:', error);
+				reject(error);
+			}
+		};
+
+		img.onerror = function (error) {
+			console.error('Error loading image:', error);
+			reject(error);
+		};
+	});
+};
+
+export function rgbToHex(r, g, b) {
+	var hex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+	return hex.toUpperCase(); // Convert to uppercase for consistency
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex) {
+	const bigint = parseInt(hex.slice(1), 16);
+	const r = (bigint >> 16) & 255;
+	const g = (bigint >> 8) & 255;
+	const b = bigint & 255;
+	const a = (bigint >> 24) & 255; // Extract alpha channel
+	return { r, g, b, a };
+}
+
+export async function getContrastColorAsync(hexColor) {
+	// Convert hex to RGB
+	const rgb = hexToRgb(hexColor);
+
+	// Calculate relative luminance
+	const luminance = (0.299 * rgb.r) / 255 + (0.587 * rgb.g) / 255 + (0.114 * rgb.b) / 255;
+
+	// Use a threshold to determine if the text should be black or white
+	return luminance > 0.5 ? 'black' : 'white';
+}
