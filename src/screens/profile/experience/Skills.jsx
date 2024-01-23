@@ -1,5 +1,5 @@
 import { Button } from '@/chadcn/Button';
-import { Card, CardHeader, CardDescription, CardTitle } from '@/chadcn/Card';
+import { Card, CardHeader, CardTitle } from '@/chadcn/Card';
 import { Input } from '@/chadcn/Input';
 import { Typography } from '@/chadcn/Typography';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { useExperience } from './useExperience';
 import { useProfile } from '@/hooks/useProfile';
+import { ClearBitAttribution } from '@/components/ClearBitAttribution';
 
 const example = {
 	label: 'React',
@@ -21,9 +22,9 @@ export const SkillsSection = ({ data }) => {
 	const { updateProfile } = useExperience();
 
 	// State
-	const [searchText, setSearch] = React.useState('');
-	const [show, setShow] = React.useState(false);
 	const [skills, setSkills] = React.useState([]);
+	const [show, setShow] = React.useState(false);
+	const [searchText, setSearch] = React.useState('');
 	const [logos, setLogos] = React.useState([]);
 
 	// Refs
@@ -79,8 +80,6 @@ export const SkillsSection = ({ data }) => {
 		setLogos([]);
 	};
 
-	// if (!data.length) return <></>;
-
 	if (!isUserProfile && !skills.length) return;
 
 	return (
@@ -96,37 +95,43 @@ export const SkillsSection = ({ data }) => {
 			</div>
 
 			<ConfirmDialog show={show} onClose={handleClose} onConfirm={handleSave} title="Add your skills">
-				<Input value={searchText} ref={searchRef} placeholder="Type your skill" onChange={handleLogoSearch} />
-				<div className="relative w-full z-10">
-					{!!logos.length && (
-						<div className="border rounded-xl flex flex-col gap-1 p-2  w-full ">
-							{logos.map((item) => {
-								if (!item.logo) return;
-								return (
-									<Button
-										key={item.name}
-										variant="ghost"
-										className="h-[50px] px-8 justify-start"
-										onClick={() => handleAddSkill(searchText, item)}
-									>
-										<img src={item.logo} className="aspect-square w-10 object-contain inline" />
-										<Typography variant="p" className="px-3 inline">
-											add "{item.name}" logo for {searchText} skill
-										</Typography>
-									</Button>
-								);
-							})}
-							<Button
-								variant="ghost"
-								className="h-[50px] px-8 justify-start"
-								onClick={() => handleAddSkill(searchText)}
+				<div className="flex flex-col">
+					<Input value={searchText} ref={searchRef} placeholder="Type your skill" onChange={handleLogoSearch} />
+					<div className="relative w-full z-10">
+						{!!logos.length && (
+							<div
+								className="border rounded-xl flex flex-col gap-1 p-2 w-full border-t-0 z-10"
+								style={{ borderRadius: '0px 0px 0.75rem 0.75rem' }}
 							>
-								<Typography variant="p" className="px-3 inline">
-									Add "{searchText}" without logo as skill
-								</Typography>
-							</Button>
-						</div>
-					)}
+								{logos.map((item) => {
+									if (!item.logo) return;
+									return (
+										<Button
+											key={item.name}
+											variant="ghost"
+											className="h-[50px] px-8 justify-start"
+											onClick={() => handleAddSkill(searchText, item)}
+										>
+											<img src={item.logo} className="aspect-square w-10 object-contain inline" />
+											<Typography variant="p" className="px-3 inline">
+												add "{item.name}" logo for {searchText} skill
+											</Typography>
+										</Button>
+									);
+								})}
+								<Button
+									variant="ghost"
+									className="h-auto px-8 justify-start "
+									onClick={() => handleAddSkill(searchText)}
+								>
+									<Typography variant="p" className="px-3 inline self-start text-start ">
+										Add "{searchText}" without logo as skill
+									</Typography>
+								</Button>
+							</div>
+						)}
+					</div>
+					<ClearBitAttribution />
 				</div>
 
 				<div className="w-full flex flex-wrap gap-2">

@@ -21,7 +21,7 @@ export const useExperience = () => {
 
 	const enabled = id && id != 'profile';
 
-	const queryKey = ['Profile', 'Experience', 'About', id];
+	const queryKey = ['Profile', 'Experience', id];
 
 	const { data: Experience, ...rest } = useQuery({
 		gcTime: Infinity,

@@ -9,7 +9,7 @@ import { Button } from '@/chadcn/Button';
 export const AboutSection = ({ data }) => {
 	// Hooks
 	const { isUserProfile, data: profile } = useProfile();
-	const { updateProfile, isLoading } = useExperience();
+	const { updateProfile } = useExperience();
 
 	// State
 	const [value, setValue] = React.useState();

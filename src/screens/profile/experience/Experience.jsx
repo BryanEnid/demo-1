@@ -1,7 +1,7 @@
 import { AboutSection } from './About';
 import { AttachmentsSection } from './Attachments';
 import { SkillsSection } from './Skills';
-import { CareerHistorySection } from './History';
+import { History } from './History';
 import React from 'react';
 import { useExperience } from './useExperience';
 
@@ -10,7 +10,8 @@ export function Experience() {
 	const { data, isLoading } = useExperience();
 
 	// State
-	const { about, skills, careerHistory, attachments } = React.useMemo(() => data || {}, [data]);
+
+	const { about, skills, careerHistory, attachments, certifications } = React.useMemo(() => data || {}, [data]);
 
 	if (isLoading) return <>Loading ...</>;
 
@@ -20,7 +21,9 @@ export function Experience() {
 
 			<SkillsSection data={skills} />
 
-			<CareerHistorySection data={careerHistory} />
+			<History title="Career History" data={careerHistory} />
+
+			<History title="Certifications" data={certifications} />
 
 			<AttachmentsSection data={attachments} />
 		</div>
