@@ -119,7 +119,7 @@ export function Profile() {
 				<NavBar createBucket={handleCreateBucket} />
 
 				<div className="flex">
-					<div className="w-full">
+					<div className="w-full overflow-x-hidden">
 						{isOrganization ? (
 							/* TODO: dynamic background image */
 							<div
@@ -129,11 +129,7 @@ export function Profile() {
 								<div className="container">
 									<div className="rounded-[74px] p-11 pb-2 bg-gradient-to-b from-[#000C1EAA] from-0% via-[#000C1EDD] via-60% to-[#000C1EFF] to-100% backdrop-blur-[115px]">
 										<div className="flex flex-col items-center">
-											<img
-												src={profile?.photoURL}
-												className="rounded-full object-cover aspect-square w-48 mb-8"
-												crossOrigin="anonymous"
-											/>
+											<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48 mb-8" />
 											<Typography variant="h2" className="text-white/[.96]">
 												NASA
 											</Typography>
@@ -190,11 +186,7 @@ export function Profile() {
 								<div>
 									{/* Header */}
 									<div className="flex flex-col items-center gap-8">
-										<img
-											src={profile?.photoURL}
-											className="rounded-full object-cover aspect-square w-48"
-											crossOrigin="anonymous"
-										/>
+										<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48" />
 										<Typography variant="h2">{profile?.name}</Typography>
 										<Typography variant="blockquote" className="border-0">
 											“If you want to find the secrets of the universe, think in terms of energy, frequency and

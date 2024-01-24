@@ -120,11 +120,7 @@ const BucketInfo = ({ bucket, profile, canEdit, isUserProfile, onClose }) => {
 					<Typography className="font-bold">Owner</Typography>
 					<div className="flex items-center gap-2">
 						<div className="w-[40px] h-[40px]">
-							<img
-								src={bucket.creator?.photoURL}
-								className="rounded-full object-cover aspect-square w-48"
-								crossOrigin="anonymous"
-							/>
+							<img src={bucket.creator?.photoURL} className="rounded-full object-cover aspect-square w-48" />
 						</div>
 						<Typography className="!mt-0">
 							{bucket.creator.name} {isUserProfile && '(you)'}
@@ -165,11 +161,7 @@ const BucketInfo = ({ bucket, profile, canEdit, isUserProfile, onClose }) => {
 								<div className="flex flex-wrap gap-1">
 									{bucket.contributors.slice(0, 5).map((item) => (
 										<div key={item.id} className="w-[30px] h-[30px]" onClick={() => openContributor(item.user)}>
-											<img
-												src={item.user?.photoURL}
-												className="rounded-full object-cover aspect-square w-48"
-												crossOrigin="anonymous"
-											/>
+											<img src={item.user?.photoURL} className="rounded-full object-cover aspect-square w-48" />
 										</div>
 									))}
 								</div>
