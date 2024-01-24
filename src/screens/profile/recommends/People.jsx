@@ -121,7 +121,7 @@ const People = ({ data = [], isUserProfile }) => {
 								<CardHeader className="px-4 py-4">
 									<div className="w-full">
 										<div className="aspect-square flex justify-center items-center">
-											<img src={people.picture} className="rounded-md max-w-full max-h-full " crossOrigin="anonymous" />
+											<img src={people.picture} className="rounded-md max-w-full max-h-full " />
 										</div>
 									</div>
 								</CardHeader>
@@ -184,11 +184,7 @@ const People = ({ data = [], isUserProfile }) => {
 								<div className="flex flex-col justify-center items-center w-full pt-4">
 									{peopleCreate.picture?.url && (
 										<div className="flex justify-center items-center rounded-lg w-[60px] h-[60px]">
-											<img
-												src={peopleCreate.picture.url}
-												className="rounded-md max-w-full max-h-full"
-												crossOrigin="anonymous"
-											/>
+											<img src={peopleCreate.picture.url} className="rounded-md max-w-full max-h-full" />
 										</div>
 									)}
 									<Typography variant="muted">Choose Person picture</Typography>

@@ -173,11 +173,7 @@ const Books = ({ data = [], isUserProfile }) => {
 								<CardHeader className="px-4 py-4">
 									<div className="w-full">
 										<div className="aspect-square flex justify-center items-center">
-											<img
-												src={book.photos[0]?.imgUrl}
-												className="rounded-md max-w-full max-h-full "
-												crossOrigin="anonymous"
-											/>
+											<img src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full " />
 										</div>
 									</div>
 								</CardHeader>
@@ -291,11 +287,7 @@ const Books = ({ data = [], isUserProfile }) => {
 												}}
 											>
 												<div className="flex justify-center items-center aspect-square rounded-lg object-cover border-dashed border border-black/10">
-													<img
-														src={photo.url || photo.imgUrl}
-														className="rounded-md max-w-full max-h-full"
-														crossOrigin="anonymous"
-													/>
+													<img src={photo.url || photo.imgUrl} className="rounded-md max-w-full max-h-full" />
 												</div>
 												<Button
 													variant="destructive"
@@ -320,7 +312,6 @@ const Books = ({ data = [], isUserProfile }) => {
 											<img
 												src={bookCreate.photos[activePicture]?.imgUrl}
 												className="rounded-md max-w-full max-h-full "
-												crossOrigin="anonymous"
 											/>
 										</div>
 									</div>
@@ -331,11 +322,7 @@ const Books = ({ data = [], isUserProfile }) => {
 												className="w-[50px] aspect-square flex justify-center items-center"
 												onClick={() => setActivePicture(i)}
 											>
-												<img
-													src={bookCreate.photos[i]?.imgUrl}
-													className="rounded-md max-w-full max-h-full "
-													crossOrigin="anonymous"
-												/>
+												<img src={bookCreate.photos[i]?.imgUrl} className="rounded-md max-w-full max-h-full " />
 											</div>
 										))}
 									</div>

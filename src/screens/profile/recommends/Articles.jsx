@@ -86,11 +86,7 @@ const Articles = ({ data = [], isUserProfile }) => {
 							<Card className="h-full flex flex-col">
 								<CardHeader className="px-4 py-4">
 									<a href={article.url} target="_blank" rel="noreferrer">
-										<img
-											src={article.picture}
-											className="rounded-md object-cover aspect-square w-full"
-											crossOrigin="anonymous"
-										/>
+										<img src={article.picture} className="rounded-md object-cover aspect-square w-full" />
 									</a>
 								</CardHeader>
 								<CardContent className="px-4 pb-4">
@@ -165,11 +161,7 @@ const Articles = ({ data = [], isUserProfile }) => {
 						{!isLoading && articlePreview && (
 							<div className="flex gap-4">
 								<div className="w-[80px] h-[80px]">
-									<img
-										src={articlePreview.picture}
-										className="rounded-md object-cover aspect-square w-full"
-										crossOrigin="anonymous"
-									/>
+									<img src={articlePreview.picture} className="rounded-md object-cover aspect-square w-full" />
 								</div>
 								<div>
 									<Typography className="font-bold leading-none">{articlePreview.title}</Typography>

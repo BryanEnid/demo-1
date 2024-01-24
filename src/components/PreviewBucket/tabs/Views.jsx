@@ -18,7 +18,7 @@ const Views = ({ bucketId }) => {
 				data.map((user) => (
 					<div key={user.id} className="flex items-center gap-2">
 						<div className="w-[46px] h-[46px]">
-							<img src={user.photoURL} className="rounded-full object-cover" crossOrigin="anonymous" />
+							<img src={user.photoURL} className="rounded-full object-cover" />
 						</div>
 						<div>
 							<Typography className="font-bold leading-none">{user.name}</Typography>

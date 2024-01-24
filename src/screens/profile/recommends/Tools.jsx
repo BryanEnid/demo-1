@@ -401,11 +401,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 								<div className="flex flex-col justify-center items-center w-full pt-4">
 									{toolCreate.picture?.url && (
 										<div className="flex justify-center items-center rounded-lg w-[60px] h-[60px]">
-											<img
-												src={toolCreate.picture.url}
-												className="rounded-md max-w-full max-h-full"
-												crossOrigin="anonymous"
-											/>
+											<img src={toolCreate.picture.url} className="rounded-md max-w-full max-h-full" />
 										</div>
 									)}
 									<Typography variant="muted">Choose Tool picture</Typography>
@@ -421,11 +417,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 												className="cursor-pointer border border-1 w-1/5 p-2 relative"
 												onClick={() => selectImage(iconUrl)}
 											>
-												<img
-													src={`${BASE_URL}/static/external?url=${iconUrl}`}
-													className="max-w-full max-h-full "
-													crossOrigin="anonymous"
-												/>
+												<img src={`${BASE_URL}/static/external?url=${iconUrl}`} className="max-w-full max-h-full " />
 												{typeof toolCreate.picture === 'string' && toolCreate?.picture === iconUrl && (
 													<Icon icon="ci:check-big" className="text-2xl text-green-500 absolute top-0 right-0" />
 												)}
