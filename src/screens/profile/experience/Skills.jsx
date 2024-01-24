@@ -151,7 +151,7 @@ export const SkillsSection = ({ data }) => {
 				</div>
 			</ConfirmDialog>
 
-			{!data.length && isUserProfile && (
+			{!data?.length && isUserProfile && (
 				<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
 					Customize your profile by listing the talents and expertise that define you. A modal will pop up, allowing you
 					to effortlessly manage and showcase your skills. Let your strengths shine!
@@ -162,7 +162,7 @@ export const SkillsSection = ({ data }) => {
 			)}
 
 			<div className="grid grid-cols-5 gap-5 text-center">
-				{data.map(({ id, label, iconUrl }) => (
+				{data?.map(({ id, label, iconUrl }) => (
 					<Card key={id} className="flex flex-col justify-center items-center">
 						<CardHeader>
 							{iconUrl && <img src={iconUrl} className=" rounded-lg aspect-square h-20 object-contain inline" />}

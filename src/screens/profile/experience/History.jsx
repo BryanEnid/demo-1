@@ -13,6 +13,7 @@ import { Calendar } from '@/chadcn/Calendar';
 import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '@/chadcn/Popover';
 import { Checkbox } from '@/chadcn/Checkbox';
 import { useBuckets } from '@/hooks/useBuckets';
+import { useNavigate } from 'react-router-dom';
 
 const FormatDate = ({ date: dateString }) => {
 	const [output, setOutput] = React.useState();
@@ -35,13 +36,16 @@ export const History = ({ title, data }) => {
 	const { isUserProfile, data: profile } = useProfile();
 	const { updateProfile } = useExperience();
 	const { data: buckets } = useBuckets(profile);
+	const navigate = useNavigate();
 
 	// State
 	const [history, setHistory] = React.useState([]);
 	const [show, setShow] = React.useState(false);
+	const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 	const [logos, setLogos] = React.useState([]);
 
 	// Form
+	const [loadedEditHistoryItem, setLoadedEditHistoryItem] = React.useState();
 	const [jobTitle, setJobTitle] = React.useState();
 	const [company, setCompany] = React.useState('');
 	const [startDate, setStartDate] = React.useState();
@@ -51,14 +55,15 @@ export const History = ({ title, data }) => {
 
 	// Refs
 	const companySearchRef = React.useRef();
-	const bucketsSearchRef = React.useRef();
+	// const bucketsSearchRef = React.useRef();
 
 	// Root level variables
 	const section = React.useMemo(() => String(title).toLowerCase().replace(' ', '-'), [title]);
+	const thisYear = React.useMemo(() => new Date().getFullYear(), []);
 
 	React.useEffect(() => {
 		const fetchImageColors = async () => {
-			const colorPromises = data.map(async (item) => {
+			const colorPromises = data?.map(async (item) => {
 				const hexColor = await getFirstPixelColor(item.companyLogoUrl);
 				const textColor = await getContrastColorAsync(hexColor);
 				return { ...item, bgColor: hexColor, textColor };
@@ -78,13 +83,12 @@ export const History = ({ title, data }) => {
 		setShow(false);
 	};
 
-	const handleRemoveSkill = (label) => {
-		const filteredItems = history.filter((item) => item.label !== label);
-		setHistory(filteredItems);
-	};
-
 	// TODO: Handle form instead
 	const handleSave = () => {
+		const payload = [...data];
+		let index = payload.findIndex(({ id }) => id === loadedEditHistoryItem?.id);
+		if (index === -1) index = payload.length;
+
 		const newItem = {
 			title: jobTitle,
 			company: company.name,
@@ -94,12 +98,13 @@ export const History = ({ title, data }) => {
 			currentCompany: presentJob,
 			bucketId: linkedBucket?.id
 		};
-		const payload = [...data, newItem];
 
 		if (section === 'certifications') {
 			newItem.provider = company.name;
 			newItem.providerLogoUrl = company.logo;
 		}
+
+		payload[index] = newItem;
 
 		updateProfile({ body: payload, id: profile.uid, section });
 
@@ -134,7 +139,19 @@ export const History = ({ title, data }) => {
 
 	const handleBucketSearch = ({ target }) => {};
 
+	const redirectToBucket = (bucket) => {
+		// console.log(bucket)
+		// profile.uid
+		navigate(`/${profile.uid}/buckets?bucketid=${bucket.id}`);
+	};
+
 	const clear = () => {
+		setLoadedEditHistoryItem(null);
+		setJobTitle('');
+		setCompany('');
+		setStartDate(null);
+		setEndDate(null);
+		setPresentJob(false);
 		setLinkedBucket(null);
 		setLogos([]);
 	};
@@ -145,11 +162,50 @@ export const History = ({ title, data }) => {
 		return src;
 	};
 
+	const handleEditHistoryItem = (item) => {
+		if (isUserProfile) {
+			setLoadedEditHistoryItem(item);
+			setJobTitle(item.title);
+			setCompany({ name: item.company, logo: item.companyLogoUrl });
+			setStartDate(new Date(item.startDate));
+			setEndDate(new Date(item.endDate));
+			setPresentJob(item.currentCompany);
+			setLinkedBucket(item.bucket);
+			setShow(true);
+		}
+	};
+
+	const handleDeleteItem = () => {
+		const filteredItems = data.filter((item) => item.id !== loadedEditHistoryItem.id);
+		updateProfile({ body: filteredItems, id: profile.uid, section });
+
+		clear();
+		setShow(false);
+	};
+
 	if (!isUserProfile && !history) return;
 
 	return (
 		<>
-			<ConfirmDialog show={show} onClose={handleClose} onConfirm={handleSave} title="Add your experience">
+			{/* Delete confirmation */}
+			<ConfirmDialog
+				show={showDeleteConfirmation}
+				onClose={() => setShowDeleteConfirmation(false)}
+				onConfirm={handleDeleteItem}
+				title="Attention"
+				submitBtnVariant="destructive"
+			>
+				Are you sure you want to delete this item
+			</ConfirmDialog>
+
+			{/* Edit and Add new item modal confirmation */}
+			<ConfirmDialog
+				show={show}
+				onClose={handleClose}
+				onConfirm={handleSave}
+				onDelete={loadedEditHistoryItem && handleDeleteItem}
+				title="Add your experience"
+			>
 				<div className="flex flex-col">
 					<div className="flex flex-col gap-3">
 						<Input placeholder="Title" value={jobTitle} onChange={({ target }) => setJobTitle(target.value)} />
@@ -198,30 +254,40 @@ export const History = ({ title, data }) => {
 
 						<div className="grid grid-cols-2 gap-3 w-full">
 							{/* Calendar - Start Date */}
-							<Popover className="w-full">
-								<PopoverTrigger>
-									<Input placeholder="Start Date" value={startDate} />
-								</PopoverTrigger>
+							{section !== 'certifications' && (
+								<Popover className="w-full">
+									<PopoverTrigger>
+										<Input placeholder="Start Date" value={startDate} />
+									</PopoverTrigger>
 
-								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar
-										captionLayout="dropdown"
-										mode="single"
-										selected={startDate}
-										onSelect={setStartDate}
-										className="rounded-md border"
-									/>
-								</PopoverContent>
-							</Popover>
+									<PopoverContent className="w-auto p-0" align="start">
+										<Calendar
+											fromYear={1960}
+											toYear={thisYear}
+											captionLayout="dropdown"
+											mode="single"
+											selected={startDate}
+											onSelect={setStartDate}
+											className="rounded-md border"
+										/>
+									</PopoverContent>
+								</Popover>
+							)}
 
 							{/* Calendar - End Date */}
 							<Popover>
 								<PopoverTrigger>
-									<Input placeholder="End Date" value={presentJob ? 'Present' : endDate} disabled={presentJob} />
+									<Input
+										placeholder={section !== 'certifications' ? 'End Date' : 'Completion Date'}
+										value={presentJob ? 'Present' : endDate}
+										disabled={presentJob}
+									/>
 								</PopoverTrigger>
 
 								<PopoverContent className="w-auto p-0" align="start">
 									<Calendar
+										fromYear={1901}
+										toYear={thisYear}
 										captionLayout="dropdown"
 										mode="single"
 										selected={endDate}
@@ -233,13 +299,14 @@ export const History = ({ title, data }) => {
 						</div>
 
 						{/* Checkbox */}
-						{/* Currently working here? */}
-						<div className="flex flex-row items-center gap-2">
-							<Checkbox value={presentJob} onChange={setPresentJob} />
-							<Typography variant="p" className="inline">
-								Present job
-							</Typography>
-						</div>
+						{section !== 'certifications' && (
+							<div className="flex flex-row items-center gap-2">
+								<Checkbox value={presentJob} onChange={setPresentJob} />
+								<Typography variant="p" className="inline">
+									Present job
+								</Typography>
+							</div>
+						)}
 
 						{/* Link to bucket */}
 						<Popover>
@@ -250,7 +317,7 @@ export const History = ({ title, data }) => {
 								</PopoverTrigger>
 							)}
 
-							<PopoverContent className="w-full p-2" align="start">
+							<PopoverContent className="w-full p-2 max-h-[300px] overflow-y-auto" align="start">
 								<div className="w-[454px] flex flex-col gap-2">
 									{/* <Input ref={bucketsSearchRef} placeholder="Bucket name" onChange={handleBucketSearch} /> */}
 
@@ -316,46 +383,50 @@ export const History = ({ title, data }) => {
 
 					{isUserProfile && (
 						<button onClick={() => setShow(true)}>
-							<Icon icon="clarity:edit-line" fontSize={30} className="mb-1 p-2" />
+							<Icon icon="gravity-ui:plus" fontSize={30} className="mb-1 p-2" />
 						</button>
 					)}
 				</div>
 
 				<div className="flex flex-col gap-5">
-					{history.map(
-						(
-							{ title, company, companyLogoUrl, bgColor, textColor, startDate, endDate, currentCompany, bucketId },
-							index
-						) => {
-							const bucket = buckets?.find(({ id }) => id === bucketId);
-							const previewSrc = bucket?.videos?.[0]?.videoUrl;
+					{history.map((props, index) => {
+						const { title, company, companyLogoUrl, bgColor, textColor, startDate, endDate, currentCompany, bucketId } =
+							props;
+						const bucket = buckets?.find(({ id }) => id === bucketId);
+						const previewSrc = bucket?.videos?.[0]?.videoUrl;
 
-							return (
-								<div key={index}>
-									<Card className={`grid grid-cols-5 py-5 `} style={{ background: bgColor, color: textColor }}>
-										<CardHeader className="flex justify-center items-center">
-											<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
-										</CardHeader>
+						return (
+							<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
+								<Card className={`grid grid-cols-5 py-5 `} style={{ background: bgColor, color: textColor }}>
+									<CardHeader className="flex justify-center items-center">
+										<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
+									</CardHeader>
 
-										<CardContent className={`flex flex-col justify-center p-0 col-span-3`}>
-											<Typography variant="p" className="font-bold">
-												{title}
-											</Typography>
+									<CardContent className={`flex flex-col justify-center p-0 col-span-3`}>
+										<Typography variant="p" className="font-bold">
+											{title}
+										</Typography>
 
-											<Typography variant="p">{company}</Typography>
-											<Typography variant="p">
-												<FormatDate date={startDate} /> - {currentCompany ? 'Present' : <FormatDate date={endDate} />}
-											</Typography>
-										</CardContent>
+										<Typography variant="p">{company}</Typography>
+										<Typography variant="p">
+											{section !== 'certifications' && (
+												<>
+													<FormatDate date={startDate} /> -{' '}
+												</>
+											)}
+											{currentCompany ? 'Present' : <FormatDate date={endDate} />}
+										</Typography>
+									</CardContent>
 
-										{section !== 'certifications' && (
-											<div className="flex justify-center items-center p-0">
-												{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
-
-												<div className="px-7">
+									{section !== 'certifications' && (
+										<div className="flex justify-center items-center p-0">
+											{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
+											{/* aspect-square object-cover rounded-2xl */}
+											<div className="px-7">
+												<div className="relative rounded-2xl overflow-hidden">
 													{isYouTubeUrl(previewSrc) ? (
 														<img
-															className="aspect-square object-cover rounded-2xl h-full "
+															className="aspect-square object-cover h-full rounded-2xl"
 															src={handleSrc(previewSrc, bucket)}
 														/>
 													) : (
@@ -364,18 +435,24 @@ export const History = ({ title, data }) => {
 															autoPlay
 															muted
 															loop
-															className="aspect-square object-cover rounded-2xl h-full "
+															className="aspect-square object-cover h-full "
 															src={handleSrc(previewSrc, bucket)}
 														/>
 													)}
+													<button
+														onClick={() => redirectToBucket(bucket)}
+														className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "
+													>
+														<Icon icon="fluent:window-new-16-filled" className="text-white" fontSize={30} />
+													</button>
 												</div>
 											</div>
-										)}
-									</Card>
-								</div>
-							);
-						}
-					)}
+										</div>
+									)}
+								</Card>
+							</div>
+						);
+					})}
 
 					{!history.length && isUserProfile && (
 						<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
