@@ -7,6 +7,7 @@ import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
+import { getYouTubeVideoDetails } from '@/hooks/api/youtube.js';
 import { cn, extractYoutubeVideoId, generatePreview, getShortNumberLabel, isYouTubeUrl } from '@/lib/utils';
 import { PageModal } from '@/components/PageModal';
 import TextEditor from '@/components/TextEditor';
@@ -14,6 +15,7 @@ import { VR_3D, Video360 } from '@/components/MediaPlayer';
 import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
 import Views from '@/components/PreviewBucket/tabs/Views';
 import QuestionsList from '@/components/QuestionsList.jsx';
+import VideoAddURLModal from '@/components/VideoAddURLModal.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useBuckets } from '@/hooks/useBuckets';
 import { useToast } from '@/hooks/useToast';
@@ -26,30 +28,6 @@ import { VideoUploadButton } from '../VideoUploadButton.jsx';
 import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
-
-async function getYouTubeVideoDetails(videoId) {
-	const apiKey = import.meta.env.VITE_GOOGLE_CLOUD_CLIENT_ID;
-	const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`;
-
-	try {
-		const response = await fetch(apiUrl);
-		const data = await response.json();
-
-		if (data.items && data.items.length > 0) {
-			const videoDetails = data.items[0].snippet;
-			return {
-				title: videoDetails.title,
-				channelTitle: videoDetails.channelTitle,
-				thumbnail: videoDetails.thumbnails.high.url,
-				description: videoDetails.description // You can choose different sizes
-			};
-		}
-	} catch (error) {
-		console.error('Error fetching YouTube video details', error);
-	}
-
-	return null;
-}
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -71,133 +49,6 @@ const QRShareView = ({ show, onClose }) => {
 							toast({ title: 'Copied to clipboard !' });
 						}}
 					/>
-				</div>
-			</div>
-		</PageModal>
-	);
-};
-
-const VideoAddURLModal = ({ show, onClose }) => {
-	// Hooks
-	const { toast } = useToast();
-
-	const [inputs, setInputs] = React.useState({
-		0: { video: null, image: null, source: null, valid: false, type: 'url' }
-	});
-
-	const handleVideoAdded = async (url, index) => {
-		if (isYouTubeUrl(url)) {
-			// Extract video ID from the URL
-			const videoId = extractYoutubeVideoId(url);
-
-			const embedCode = videoId && (await getYouTubeVideoDetails(videoId));
-
-			const body = { [index]: { ...embedCode, valid: !!embedCode, url } };
-
-			setInputs((prev) => ({ ...prev, ...body }));
-
-			if (!body[index].valid) return;
-
-			const ToasterView = () => (
-				<div className="flex flex-col gap-3 w-full">
-					<img src={embedCode.thumbnail} className="w-full rounded-xl aspect-video object-cover" />
-
-					<Typography variant="small" className="text-md font-extrabold leading-5 line-clamp-1">
-						{embedCode?.title}
-					</Typography>
-
-					<Typography variant="small" className="text-sm font-extralight leading-5 line-clamp-3">
-						{embedCode?.description}
-					</Typography>
-
-					<Typography variant="small" className="text-xs line-clamp-1">
-						By {embedCode?.channelTitle}
-					</Typography>
-				</div>
-			);
-
-			toast({ customView: <ToasterView /> });
-
-			return body;
-		}
-
-		// Default
-		const { video, image } = inputs[index];
-		if (video === null || image === null) return;
-
-		const body = { [index]: { video: null, image: null } };
-		setInputs((prev) => ({ ...prev, ...body }));
-	};
-
-	const handleAddNewItem = () => {
-		const maxLength = 10;
-		const currentLength = Object.values(inputs).length;
-		if (currentLength >= maxLength) return;
-
-		const newItem = { [currentLength]: { video: null, image: null } };
-		setInputs((prev) => ({ ...prev, ...newItem }));
-	};
-
-	const handleDeleteItem = (propertyName) => {
-		const byDifferentKey = ([key]) => key !== propertyName;
-		const newState = Object.fromEntries(Object.entries(inputs).filter(byDifferentKey));
-		setInputs(newState);
-	};
-
-	const handleClose = (inputs) => {
-		setInputs({ 0: { video: null, image: null, source: null, valid: false, type: 'url' } });
-		onClose(inputs);
-	};
-
-	const handleSaveDisabled = Object.values(inputs)
-		.map(({ valid }) => valid)
-		.every(Boolean);
-
-	return (
-		<PageModal show={show} width="600px" zIndex={30} onClose={() => onClose(inputs)}>
-			<div className="flex flex-col justify-center items-center p-16 ">
-				<div className="flex flex-col items-start gap-10 w-full min-h-[500px]">
-					<Typography variant="h3">Add video urls</Typography>
-
-					{Array.from(Object.keys(inputs)).map((key) => (
-						<div key={key} className="flex flex-col w-full gap-2">
-							<div key={key} className="flex flex-row items-center w-full gap-2">
-								<div className="inline-flex items-center relative w-full h-full">
-									<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} />
-									{inputs[key].valid && (
-										<div className="absolute right-1 p-1 rounded-full bg-white z-10">
-											<Icon fontSize={20} icon="tabler:check" className="text-green-600 h-full" />
-										</div>
-									)}
-								</div>
-
-								<Icon fontSize={20} className="text-gray-500" icon="mi:delete" onClick={() => handleDeleteItem(key)} />
-							</div>
-
-							{inputs[key].title && (
-								<Typography variant="small" className="text-sm font-bold leading-1 inline-flex">
-									{inputs[key].title}
-								</Typography>
-							)}
-						</div>
-					))}
-
-					<Button iconBegin={<Icon icon="ic:round-add" />} variant="default" onClick={handleAddNewItem}>
-						Add new url
-					</Button>
-				</div>
-				<div className="flex flex-row justify-end gap-2 w-full">
-					<Button variant="secondary" onClick={handleClose}>
-						Cancel
-					</Button>
-					<Button
-						variant="default"
-						className="px-10"
-						disabled={!handleSaveDisabled}
-						onClick={() => handleClose(inputs)}
-					>
-						Save
-					</Button>
 				</div>
 			</div>
 		</PageModal>

@@ -12,20 +12,11 @@ import { Button } from '@/chadcn/Button.jsx';
 import { Input } from '@/chadcn/Input.jsx';
 import { Separator } from '@/chadcn/Separator.jsx';
 import { PageModal } from '@/components/PageModal.jsx';
-
-import { BucketItem } from './BucketItem';
 import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import { groupBy } from '@/lib/utils.js';
+import { BucketItem } from './BucketItem';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
-
-// ! Remove this when ios supports Array.groupBy
-const groupBy = (array, keyFunc) => {
-	return array.reduce((result, item) => {
-		const key = keyFunc(item);
-		(result[key] = result[key] || []).push(item);
-		return result;
-	}, {});
-};
 
 const CategoryLabel = forwardRef(
 	(

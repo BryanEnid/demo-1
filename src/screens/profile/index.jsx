@@ -119,7 +119,7 @@ export function Profile() {
 				<NavBar createBucket={handleCreateBucket} />
 
 				<div className="flex">
-					<div className="w-full">
+					<div className="w-full overflow-x-hidden">
 						{isOrganization ? (
 							/* TODO: dynamic background image */
 							<div

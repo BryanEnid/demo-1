@@ -159,3 +159,30 @@ export async function getContrastColorAsync(hexColor) {
 	// Use a threshold to determine if the text should be black or white
 	return luminance > 0.5 ? 'black' : 'white';
 }
+
+// ! Remove this when ios supports Array.groupBy
+export const groupBy = (array, keyFunc) => {
+	return array.reduce((result, item) => {
+		const key = keyFunc(item);
+		(result[key] = result[key] || []).push(item);
+		return result;
+	}, {});
+};
+
+const iso8601DurationRegex =
+	/(-)?P(?:([.,\d]+)Y)?(?:([.,\d]+)M)?(?:([.,\d]+)W)?(?:([.,\d]+)D)?T(?:([.,\d]+)H)?(?:([.,\d]+)M)?(?:([.,\d]+)S)?/;
+
+export const parseDuration = (str) => {
+	const matches = str.match(iso8601DurationRegex);
+
+	return {
+		sign: matches[1] === undefined ? '+' : '-',
+		years: matches[2] === undefined ? 0 : matches[2],
+		months: matches[3] === undefined ? 0 : matches[3],
+		weeks: matches[4] === undefined ? 0 : matches[4],
+		days: matches[5] === undefined ? 0 : matches[5],
+		hours: matches[6] === undefined ? 0 : matches[6],
+		minutes: matches[7] === undefined ? 0 : matches[7],
+		seconds: matches[8] === undefined ? 0 : matches[8]
+	};
+};
