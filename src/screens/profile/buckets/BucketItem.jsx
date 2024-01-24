@@ -93,7 +93,7 @@ export const BucketItem = ({
 								muted
 								loop
 								src={handleSrc(preview)}
-								// crossOrigin="anonymous"
+								//
 								className="object-cover aspect-square rounded-full w-full h-full"
 							/>
 						)}

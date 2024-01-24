@@ -101,7 +101,6 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 				onReady={handleYoutubeOnReady}
 				onEnd={props.onEnded}
 				className="w-full h-full"
-				crossOrigin="anonymous"
 				opts={{
 					playerVars: { autoplay: 1, controls: 1, loop: 0, cc_load_policy: 1, origin: window.location.href },
 					height: '100%',
@@ -111,11 +110,7 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 		);
 
 	return (
-		<video
-			{...props}
-			ref={ref}
-			// crossOrigin="anonymous"
-		>
+		<video {...props} ref={ref}>
 			<source src={src} type="video/mp4" />
 			Your browser does not support the video tag.
 		</video>
