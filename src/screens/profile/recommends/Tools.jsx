@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Typography } from '@/chadcn/Typography.jsx';
 import { Button } from '@/chadcn/Button.jsx';
 import { Input } from '@/chadcn/Input.jsx';
-import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/carousel';
+import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
 import { PageModal } from '@/components/PageModal.jsx';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
