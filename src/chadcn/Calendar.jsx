@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/chadcn/Button';
 import { Icon } from '@iconify/react';
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }) {
+function Calendar({ fromYear, toYear, className, classNames, showOutsideDays = true, ...props }) {
 	return (
 		<DayPicker
-			fromYear={2015}
-			toYear={2025}
+			fromYear={fromYear}
+			toYear={toYear}
 			showOutsideDays={showOutsideDays}
 			className={cn('p-3', className)}
 			classNames={{

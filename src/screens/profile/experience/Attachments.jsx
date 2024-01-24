@@ -20,7 +20,7 @@ const example = [
 ];
 
 export const AttachmentsSection = ({ data }) => {
-	if (!data.length) return <></>;
+	if (!data?.length) return <></>;
 
 	return (
 		<div>

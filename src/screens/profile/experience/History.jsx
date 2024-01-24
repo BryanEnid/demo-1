@@ -13,6 +13,7 @@ import { Calendar } from '@/chadcn/Calendar';
 import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '@/chadcn/Popover';
 import { Checkbox } from '@/chadcn/Checkbox';
 import { useBuckets } from '@/hooks/useBuckets';
+import { useNavigate } from 'react-router-dom';
 
 const FormatDate = ({ date: dateString }) => {
 	const [output, setOutput] = React.useState();
@@ -35,6 +36,7 @@ export const History = ({ title, data }) => {
 	const { isUserProfile, data: profile } = useProfile();
 	const { updateProfile } = useExperience();
 	const { data: buckets } = useBuckets(profile);
+	const navigate = useNavigate();
 
 	// State
 	const [history, setHistory] = React.useState([]);
@@ -51,14 +53,15 @@ export const History = ({ title, data }) => {
 
 	// Refs
 	const companySearchRef = React.useRef();
-	const bucketsSearchRef = React.useRef();
+	// const bucketsSearchRef = React.useRef();
 
 	// Root level variables
 	const section = React.useMemo(() => String(title).toLowerCase().replace(' ', '-'), [title]);
+	const thisYear = React.useMemo(() => new Date().getFullYear(), []);
 
 	React.useEffect(() => {
 		const fetchImageColors = async () => {
-			const colorPromises = data.map(async (item) => {
+			const colorPromises = data?.map(async (item) => {
 				const hexColor = await getFirstPixelColor(item.companyLogoUrl);
 				const textColor = await getContrastColorAsync(hexColor);
 				return { ...item, bgColor: hexColor, textColor };
@@ -134,7 +137,18 @@ export const History = ({ title, data }) => {
 
 	const handleBucketSearch = ({ target }) => {};
 
+	const redirectToBucket = (bucket) => {
+		// console.log(bucket)
+		// profile.uid
+		navigate(`/${profile.uid}/buckets?bucketid=${bucket.id}`);
+	};
+
 	const clear = () => {
+		setJobTitle('');
+		setCompany('');
+		setStartDate(null);
+		setEndDate(null);
+		setPresentJob(false);
 		setLinkedBucket(null);
 		setLogos([]);
 	};
@@ -143,6 +157,11 @@ export const History = ({ title, data }) => {
 		if (isYouTubeUrl(src)) return item.videos[0].image;
 
 		return src;
+	};
+
+	const handleEditHistoryItem = () => {
+		if (isUserProfile) {
+		}
 	};
 
 	if (!isUserProfile && !history) return;
@@ -205,6 +224,8 @@ export const History = ({ title, data }) => {
 
 								<PopoverContent className="w-auto p-0" align="start">
 									<Calendar
+										fromYear={1960}
+										toYear={thisYear}
 										captionLayout="dropdown"
 										mode="single"
 										selected={startDate}
@@ -222,6 +243,8 @@ export const History = ({ title, data }) => {
 
 								<PopoverContent className="w-auto p-0" align="start">
 									<Calendar
+										fromYear={1901}
+										toYear={thisYear}
 										captionLayout="dropdown"
 										mode="single"
 										selected={endDate}
@@ -233,13 +256,14 @@ export const History = ({ title, data }) => {
 						</div>
 
 						{/* Checkbox */}
-						{/* Currently working here? */}
-						<div className="flex flex-row items-center gap-2">
-							<Checkbox value={presentJob} onChange={setPresentJob} />
-							<Typography variant="p" className="inline">
-								Present job
-							</Typography>
-						</div>
+						{section !== 'certifications' && (
+							<div className="flex flex-row items-center gap-2">
+								<Checkbox value={presentJob} onChange={setPresentJob} />
+								<Typography variant="p" className="inline">
+									Present job
+								</Typography>
+							</div>
+						)}
 
 						{/* Link to bucket */}
 						<Popover>
@@ -250,7 +274,7 @@ export const History = ({ title, data }) => {
 								</PopoverTrigger>
 							)}
 
-							<PopoverContent className="w-full p-2" align="start">
+							<PopoverContent className="w-full p-2 max-h-[300px] overflow-y-auto" align="start">
 								<div className="w-[454px] flex flex-col gap-2">
 									{/* <Input ref={bucketsSearchRef} placeholder="Bucket name" onChange={handleBucketSearch} /> */}
 
@@ -331,7 +355,7 @@ export const History = ({ title, data }) => {
 							const previewSrc = bucket?.videos?.[0]?.videoUrl;
 
 							return (
-								<div key={index}>
+								<div key={index} onClick={handleEditHistoryItem}>
 									<Card className={`grid grid-cols-5 py-5 `} style={{ background: bgColor, color: textColor }}>
 										<CardHeader className="flex justify-center items-center">
 											<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
@@ -351,22 +375,32 @@ export const History = ({ title, data }) => {
 										{section !== 'certifications' && (
 											<div className="flex justify-center items-center p-0">
 												{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
-
+												{/* aspect-square object-cover rounded-2xl */}
 												<div className="px-7">
 													{isYouTubeUrl(previewSrc) ? (
-														<img
-															className="aspect-square object-cover rounded-2xl h-full "
-															src={handleSrc(previewSrc, bucket)}
-														/>
+														<div className="relative rounded-2xl overflow-hidden">
+															<img
+																className="aspect-square object-cover h-full rounded-2xl"
+																src={handleSrc(previewSrc, bucket)}
+															/>
+														</div>
 													) : (
-														<video
-															type="video/mp4"
-															autoPlay
-															muted
-															loop
-															className="aspect-square object-cover rounded-2xl h-full "
-															src={handleSrc(previewSrc, bucket)}
-														/>
+														<div className="relative rounded-2xl overflow-hidden">
+															<video
+																type="video/mp4"
+																autoPlay
+																muted
+																loop
+																className="aspect-square object-cover h-full "
+																src={handleSrc(previewSrc, bucket)}
+															/>
+															<button
+																onClick={() => redirectToBucket(bucket)}
+																className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "
+															>
+																<Icon icon="fluent:window-new-16-filled" className="text-white" fontSize={30} />
+															</button>
+														</div>
 													)}
 												</div>
 											</div>
