@@ -15,7 +15,8 @@ const ConfirmDialog = ({
 	disabledSubmit = false,
 	onClose = () => {},
 	onCancel,
-	onConfirm = () => {}
+	onConfirm = () => {},
+	onDelete
 }) => {
 	return (
 		<PageModal show={show} onClose={() => onClose('escape')} width="600px">
@@ -28,28 +29,36 @@ const ConfirmDialog = ({
 				</div>
 				{children}
 				<div className="w-full">
-					<div className="pt-5 flex gap-2 justify-end">
-						<Button
-							variant="secondary"
-							className="rounded-full min-w-[100px]"
-							onClick={() => {
-								if (typeof onCancel === 'function') {
-									return onCancel();
-								}
+					<div className="flex flex-row justify-center items-center  mt-5">
+						{onDelete && (
+							<Button variant="destructive" className="min-w-[100px] self-start" onClick={onDelete}>
+								Delete
+							</Button>
+						)}
+						<div className=" flex justify-end gap-2 w-full ">
+							<Button
+								variant="secondary"
+								className="rounded-full min-w-[100px]"
+								onClick={() => {
+									if (typeof onCancel === 'function') {
+										return onCancel();
+									}
 
-								onClose('cancel');
-							}}
-						>
-							{cancelLabel}
-						</Button>
-						<Button
-							disabled={disabledSubmit}
-							variant={submitBtnVariant}
-							className="rounded-full min-w-[100px]"
-							onClick={onConfirm}
-						>
-							{submitLabel}
-						</Button>
+									onClose('cancel');
+								}}
+							>
+								{cancelLabel}
+							</Button>
+
+							<Button
+								disabled={disabledSubmit}
+								variant={submitBtnVariant}
+								className="rounded-full min-w-[100px]"
+								onClick={onConfirm}
+							>
+								{submitLabel}
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>
