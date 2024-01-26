@@ -28,6 +28,8 @@ import { VideoUploadButton } from '../VideoUploadButton.jsx';
 import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
+import { Listbox } from '@headlessui/react';
+import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -133,7 +135,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const [data, setData] = React.useState({
 		videos: [],
 		name: '',
-		title: ''
+		title: '',
+		private: 'false'
 	});
 	const [editorState, setEditorState] = React.useState(EditorState.createEmpty());
 
@@ -144,7 +147,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	React.useEffect(() => {
 		if (inData) {
-			setData((val) => ({ ...val, ...inData }));
+			setData((val) => ({ ...val, ...inData, private: inData.private?.toString() }));
 
 			const { description = '' } = inData;
 			setEditorState(
@@ -211,7 +214,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 				setData({
 					videos: [],
 					name: '',
-					title: ''
+					title: '',
+					private: 'false'
 				});
 				setEditorState(EditorState.createEmpty());
 				setEditMode(true);
@@ -228,7 +232,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			setData({
 				videos: [],
 				name: '',
-				title: ''
+				title: '',
+				private: 'false'
 			});
 			setEditorState(EditorState.createEmpty());
 		}
@@ -242,7 +247,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		const crudFunction = documentId ? updateBucket : createBucket;
 
 		crudFunction(
-			{ data: { ...data, description: convertToRaw(editorState.getCurrentContent()) }, documentId },
+			{
+				data: {
+					...data,
+					private: data.private === 'true',
+					description: convertToRaw(editorState.getCurrentContent())
+				},
+				documentId
+			},
 			{
 				onSuccess: (dbid) => {
 					if (willRedirect) handleToCaptureScreen(documentId);
@@ -436,6 +448,48 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 										className="bg-white/10"
 									/>
 								)}
+								<div className="relative">
+									<Listbox value={data.private} onChange={(val) => setData((state) => ({ ...state, private: val }))}>
+										<Listbox.Button className="relative flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+											<div className="truncate">{data.private === 'true' ? 'Private' : 'Public'}</div>
+											<span>
+												<CaretSortIcon className="h-4 w-4 opacity-50" />
+											</span>
+										</Listbox.Button>
+										<Listbox.Options className="absolute z-50 w-full min-w-[8rem] p-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[headlessui-state=open]:animate-in data-[headlessui-state=closed]:animate-out data-[headlessui-state=closed]:fade-out-0 data-[headlessui-state=open]:fade-in-0 data-[headlessui-state=closed]:zoom-out-95 data-[headlessui-state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
+											<Listbox.Option
+												value="false"
+												className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+											>
+												{({ selected }) => (
+													<>
+														<span>Public</span>
+														{selected && (
+															<span className="absolute  right-2 h-3.5 w-3.5 flex items-center justify-center">
+																<CheckIcon className="h-4 w-4" aria-hidden="true" />
+															</span>
+														)}
+													</>
+												)}
+											</Listbox.Option>
+											<Listbox.Option
+												value="true"
+												className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+											>
+												{({ selected }) => (
+													<>
+														<span>Private</span>
+														{selected && (
+															<span className="absolute  right-2 h-3.5 w-3.5 flex items-center justify-center">
+																<CheckIcon className="h-4 w-4" aria-hidden="true" />
+															</span>
+														)}
+													</>
+												)}
+											</Listbox.Option>
+										</Listbox.Options>
+									</Listbox>
+								</div>
 
 								{/* <Input
 									value={data.title}

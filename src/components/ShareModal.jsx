@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react/dist/iconify.js';
 
 import { useAuth } from '@/providers/Authentication.jsx';
@@ -16,7 +16,7 @@ import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
 const ROLES = [
 	{ value: 'VIEWER', label: 'Viewer' },
-	{ value: 'COLLABORATOR', label: 'Collaborator' }
+	{ value: 'COLLABORATOR', label: 'Collaborator', disabled: true }
 ];
 
 const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
@@ -28,6 +28,8 @@ const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
 	const [searchValue, setSearchValue] = useState('');
 	const [selectedUsers, setSelectedUsers] = useState([]);
 	const [isPrivate, setIsPrivate] = useState(bucket.private.toString());
+
+	const searchElRef = useRef();
 
 	const isDirty = bucket.contributors !== contributors || bucket.private.toString() !== isPrivate;
 
@@ -153,9 +155,12 @@ const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
 						</Typography>
 					</div>
 					<div className="flex justify-between items-center gap-5">
-						<Popover>
+						<Popover onOpenChange={(open) => !open && addSelected()}>
 							<PopoverTrigger asChild>
-								<div className="w-full h-[36px] px-3 py-1 flex items-center rounded-md border border-input cursor-text">
+								<div
+									ref={searchElRef}
+									className="w-full h-[36px] px-3 py-1 flex items-center rounded-md border border-input cursor-text"
+								>
 									{selectedUsers.length ? (
 										<div className="flex gap-1">
 											{selectedUsers.map(({ id, name }) => (
@@ -173,7 +178,10 @@ const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
 									)}
 								</div>
 							</PopoverTrigger>
-							<PopoverContent className="w-[600px] p-0">
+							<PopoverContent
+								className="max-w-[90vw] p-0"
+								style={{ width: searchElRef.current?.getBoundingClientRect()?.width }}
+							>
 								<Command shouldFilter={false}>
 									<CommandInput
 										value={searchValue}
@@ -206,9 +214,9 @@ const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
 								</Command>
 							</PopoverContent>
 						</Popover>
-						<Button iconBegin={<Icon icon="mdi:user-plus-outline" className="text-xl" />} onClick={addSelected}>
-							Add
-						</Button>
+						{/*<Button iconBegin={<Icon icon="mdi:user-plus-outline" className="text-xl" />} onClick={addSelected}>*/}
+						{/*	Add*/}
+						{/*</Button>*/}
 					</div>
 					<Typography variant="h5">Current Users with Access</Typography>
 					<div className="pt-5 pr-16">
@@ -242,11 +250,12 @@ const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
 												</span>
 											</Listbox.Button>
 											<Listbox.Options className="absolute z-50 w-full min-w-[8rem] p-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[headlessui-state=open]:animate-in data-[headlessui-state=closed]:animate-out data-[headlessui-state=closed]:fade-out-0 data-[headlessui-state=open]:fade-in-0 data-[headlessui-state=closed]:zoom-out-95 data-[headlessui-state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
-												{ROLES.map(({ value, label }) => (
+												{ROLES.map(({ value, label, disabled }) => (
 													<Listbox.Option
 														key={value}
 														value={value}
-														className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+														disabled={disabled}
+														className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[headlessui-state=disabled]:pointer-events-none data-[headlessui-state=disabled]:opacity-50"
 													>
 														{({ selected }) => (
 															<>
@@ -296,9 +305,12 @@ const ShareModal = ({ open, onClose, bucket, saveBucketSettings }) => {
 				show={!!confirmDelete}
 				title={`Are you sure you want to delete access for ${confirmDelete?.user?.name}?`}
 				submitLabel="Delete"
+				submitBtnVariant="destructive"
 				onClose={() => setConfirmDelete(null)}
 				onConfirm={removeContributor}
-			/>
+			>
+				{null}
+			</ConfirmDialog>
 		</PageModal>
 	);
 };

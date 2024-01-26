@@ -40,6 +40,7 @@ export function PageModal({ children, show, onClose, width, initialFocus, zIndex
 											className="text-center sm:text-left "
 											style={{
 												width,
+												maxWidth: '100%',
 												maxHeight: '95vh', // Set a max height for the modal content
 												overflowY: 'auto' // Allow content to scroll if it exceeds the max height
 											}}

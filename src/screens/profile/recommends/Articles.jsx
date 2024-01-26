@@ -73,64 +73,70 @@ const Articles = ({ data = [], isUserProfile }) => {
 					</Button>
 				)}
 			</div>
-			<Carousel
-				opts={{
-					align: 'start',
-					dragFree: true
-				}}
-				className="w-full"
-			>
-				<CarouselContent>
-					{data.map((article) => (
-						<CarouselItem key={article.id} className="basis-1/2 lg:basis-1/4">
-							<Card className="h-full flex flex-col">
-								<CardHeader className="px-4 py-4">
-									<a href={article.url} target="_blank" rel="noreferrer">
-										<img src={article.picture} className="rounded-md object-cover aspect-square w-full" />
-									</a>
-								</CardHeader>
-								<CardContent className="px-4 pb-4">
-									<CardTitle className="text-lg leading-snug font-bold text-wrap">
+			{!data.length && !isUserProfile ? (
+				<div>
+					<Typography variant="muted">There are no articles added.</Typography>
+				</div>
+			) : (
+				<Carousel
+					opts={{
+						align: 'start',
+						dragFree: true
+					}}
+					className="w-full"
+				>
+					<CarouselContent>
+						{data.map((article) => (
+							<CarouselItem key={article.id} className="basis-1/2 lg:basis-1/4">
+								<Card className="h-full flex flex-col">
+									<CardHeader className="px-4 py-4">
 										<a href={article.url} target="_blank" rel="noreferrer">
-											{article.title}
+											<img src={article.picture} className="rounded-md object-cover aspect-square w-full" />
 										</a>
-									</CardTitle>
-									<Typography className="text-xs !mt-0 text-wrap">
-										<span className="mr-2">Reading Time</span>
-										<span>{article.readingTime ? `${parseDuration(article.readingTime)?.minutes} mins` : 'N/A'}</span>
-									</Typography>
-									<CardDescription className="text-black pt-2 line-clamp-6 ">{article.description}</CardDescription>
-								</CardContent>
-								{isUserProfile && (
-									<CardFooter className="mt-auto px-4 pb-4">
-										<div className="w-full flex justify-center">
-											<Button
-												variant="ghost"
-												className="rounded-full w-[40px] h-[40px] p-1"
-												onClick={() => setConfirmDelete(article)}
-											>
-												<Icon className="text-gray-500 text-xl" icon="mi:delete" />
-											</Button>
-										</div>
-									</CardFooter>
-								)}
-							</Card>
-						</CarouselItem>
-					))}
-					{isUserProfile && (
-						<CarouselItem className="basis-1/2 lg:basis-1/4">
-							<Card
-								className="flex justify-center items-center cursor-pointer"
-								onClick={() => setShowCreateModal(true)}
-							>
-								<div className="flex justify-center items-center object-cover aspect-square w-full">
-									<Icon icon="ph:plus-bold" className=" text-7xl text-primary"></Icon>
-								</div>
-							</Card>
-						</CarouselItem>
-					)}
-				</CarouselContent>
-			</Carousel>
+									</CardHeader>
+									<CardContent className="px-4 pb-4">
+										<CardTitle className="text-lg leading-snug font-bold text-wrap">
+											<a href={article.url} target="_blank" rel="noreferrer">
+												{article.title}
+											</a>
+										</CardTitle>
+										<Typography className="text-xs !mt-0 text-wrap">
+											<span className="mr-2">Reading Time</span>
+											<span>{article.readingTime ? `${parseDuration(article.readingTime)?.minutes} mins` : 'N/A'}</span>
+										</Typography>
+										<CardDescription className="text-black pt-2 line-clamp-6 ">{article.description}</CardDescription>
+									</CardContent>
+									{isUserProfile && (
+										<CardFooter className="mt-auto px-4 pb-4">
+											<div className="w-full flex justify-center">
+												<Button
+													variant="ghost"
+													className="rounded-full w-[40px] h-[40px] p-1"
+													onClick={() => setConfirmDelete(article)}
+												>
+													<Icon className="text-gray-500 text-xl" icon="mi:delete" />
+												</Button>
+											</div>
+										</CardFooter>
+									)}
+								</Card>
+							</CarouselItem>
+						))}
+						{isUserProfile && (
+							<CarouselItem className="basis-1/2 lg:basis-1/4">
+								<Card
+									className="flex justify-center items-center cursor-pointer"
+									onClick={() => setShowCreateModal(true)}
+								>
+									<div className="flex justify-center items-center object-cover aspect-square w-full">
+										<Icon icon="ph:plus-bold" className=" text-7xl text-primary"></Icon>
+									</div>
+								</Card>
+							</CarouselItem>
+						)}
+					</CarouselContent>
+				</Carousel>
+			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px">
 				<div className="flex flex-col justify-center p-8 gap-5">
 					<div className="flex justify-between items-center pb-2">

@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react';
 import { isYouTubeUrl } from '@/lib/utils';
 import PreviewBucket from '@/components/PreviewBucket';
 import ShareModal from '@/components/ShareModal.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog.jsx';
 import { Typography } from '@/chadcn/Typography';
 import {
 	DropdownMenu,
@@ -25,13 +26,16 @@ export const BucketItem = ({
 	iconProps,
 	defaultIcon = 'solar:gallery-circle-broken',
 	isUserProfile,
+	defaultContextMenu,
 	updateBucket,
+	deleteBucket,
 	showBucketInfo
 }) => {
 	// State
 	const [open, setOpen] = useState(false);
 	const [contextMenu, setContextMenu] = useState(null);
 	const [shareModalOpen, setShareModalOpen] = useState(false);
+	const [confirmDelete, setConfirmDelete] = useState(false);
 
 	const [searchParams, setSearchParams] = useSearchParams();
 
@@ -70,12 +74,22 @@ export const BucketItem = ({
 	};
 
 	const openContextMenu = (e) => {
-		const wrapperPosition = wrapperElRef?.current?.getBoundingClientRect();
-		const top = e.clientY - wrapperPosition.top;
-		const left = e.clientX - wrapperPosition.left;
+		if (!defaultContextMenu) {
+			const wrapperPosition = wrapperElRef?.current?.getBoundingClientRect();
+			const top = e.clientY - wrapperPosition.top;
+			const left = e.clientX - wrapperPosition.left;
 
-		e.preventDefault();
-		setContextMenu({ open: true, y: top, x: left });
+			e.preventDefault();
+			setContextMenu({ open: true, y: top, x: left });
+		}
+	};
+
+	const openNewWindow = () => {
+		window.open(
+			`${window.location.href}?bucketid=${documentId}`,
+			'_blank',
+			`popup=1, fullscreen=1, menubar=1, status=1, toolbar=1, menubar=1, noopener noreferrer, width=${window.screen.width}, height=${window.screen.height}`
+		);
 	};
 
 	return (
@@ -118,8 +132,19 @@ export const BucketItem = ({
 					/>
 					<DropdownMenuContent>
 						<DropdownMenuGroup>
-							<DropdownMenuItem className="text-md">Open in New Tab</DropdownMenuItem>
-							<DropdownMenuItem className="text-md">Open in New Window</DropdownMenuItem>
+							<DropdownMenuItem className="text-md px-0 py-0">
+								<a
+									href={`${window.location.href}?bucketid=${documentId}`}
+									target="_blank"
+									rel="noreferrer"
+									className="w-full px-2 py-1.5"
+								>
+									Open in New Tab
+								</a>
+							</DropdownMenuItem>
+							<DropdownMenuItem className="text-md" onClick={openNewWindow}>
+								Open in New Window
+							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
@@ -133,11 +158,32 @@ export const BucketItem = ({
 								<Icon icon="ci:info" className="pr-1 text-2xl" />
 								Info
 							</DropdownMenuItem>
+							{isUserProfile && (
+								<DropdownMenuItem
+									className="text-md text-destructive focus:text-destructive"
+									onClick={() => setConfirmDelete(true)}
+								>
+									<Icon icon="mi:delete" className="pr-1 text-2xl" />
+									Delete
+								</DropdownMenuItem>
+							)}
 						</DropdownMenuGroup>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
 
+			<ConfirmDialog
+				show={confirmDelete}
+				title={`Are you sure you want to delete this bucket: ${name}?`}
+				subTitle={`This bucket ${name} includes ${data?.videos?.length} videos`}
+				submitLabel="Delete"
+				submitBtnVariant="destructive"
+				onClose={() => setConfirmDelete(false)}
+				onCancel={() => setConfirmDelete(false)}
+				onConfirm={() => deleteBucket({ documentId })}
+			>
+				{null}
+			</ConfirmDialog>
 			{data && shareModalOpen && (
 				<ShareModal
 					open={shareModalOpen}
