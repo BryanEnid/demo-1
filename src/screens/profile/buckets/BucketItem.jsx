@@ -83,9 +83,9 @@ export const BucketItem = ({
 			<div ref={wrapperElRef} className="flex flex-col items-center relative" onContextMenu={openContextMenu}>
 				<button
 					onClick={onClick ? () => onClick(data) : handleOpenPreview}
-					className={`${width} transition ease-in-out hover:scale-110`}
+					className={`${width} transition ease-in-out hover:scale-105`}
 				>
-					<div className="flex object-cover aspect-square shadow drop-shadow-xl p-1 bg-white rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary justify-center items-center">
+					<div className="flex object-cover aspect-square shadow drop-shadow-xl rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary justify-center items-center">
 						{preview && !isYouTubeUrl(preview) && (
 							<video
 								type="video/mp4"
@@ -93,12 +93,11 @@ export const BucketItem = ({
 								muted
 								loop
 								src={handleSrc(preview)}
-								//
 								className="object-cover aspect-square rounded-full w-full h-full"
 							/>
 						)}
 
-						{handleSrc(preview) && (
+						{handleSrc(preview) && isYouTubeUrl(preview) && (
 							<img src={handleSrc(preview)} className="aspect-video object-cover rounded-full w-full h-full" />
 						)}
 

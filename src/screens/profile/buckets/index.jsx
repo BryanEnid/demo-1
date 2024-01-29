@@ -265,7 +265,7 @@ export function Buckets() {
 								onChange={setNewCategoryValue}
 								onSubmit={submitEditTmpCategory}
 							/>
-							<div className="grid grid-cols-5 gap-16">
+							<div className="grid gap-16 grid-cols-3">
 								{isUserProfile && (
 									<motion.div
 										initial={{ opacity: 0, y: -20 }}
@@ -299,7 +299,8 @@ export function Buckets() {
 							onChange={setNewCategoryValue}
 							onSubmit={submitEditCategory}
 						/>
-						<div className="grid grid-cols-5 gap-16">
+						{/* <div className="grid gap-16 grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"> */}
+						<div className="grid gap-16 grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
 							{groupedBucket[category].map((bucket, index) => (
 								<motion.div
 									key={bucket.id}

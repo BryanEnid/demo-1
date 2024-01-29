@@ -388,81 +388,92 @@ export const History = ({ title, data }) => {
 					)}
 				</div>
 
-				<div className="flex flex-col gap-5">
-					{history.map((props, index) => {
-						const { title, company, companyLogoUrl, bgColor, textColor, startDate, endDate, currentCompany, bucketId } =
-							props;
-						const bucket = buckets?.find(({ id }) => id === bucketId);
-						const previewSrc = bucket?.videos?.[0]?.videoUrl;
+				<div className="flex flex-col items-center ">
+					<div className="flex flex-col gap-3 w-full max-w-[700px]">
+						{history.map((props, index) => {
+							const {
+								title,
+								company,
+								companyLogoUrl,
+								bgColor,
+								textColor,
+								startDate,
+								endDate,
+								currentCompany,
+								bucketId
+							} = props;
+							const bucket = buckets?.find(({ id }) => id === bucketId);
+							const previewSrc = bucket?.videos?.[0]?.videoUrl;
 
-						return (
-							<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
-								<Card className={`grid grid-cols-5 py-5 `} style={{ background: bgColor, color: textColor }}>
-									<CardHeader className="flex justify-center items-center">
-										<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
-									</CardHeader>
+							return (
+								<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
+									<Card className={`grid grid-cols-5 py-2`} style={{ background: bgColor, color: textColor }}>
+										<CardHeader className="flex justify-center items-center">
+											<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
+										</CardHeader>
 
-									<CardContent className={`flex flex-col justify-center p-0 col-span-3`}>
-										<Typography variant="p" className="font-bold">
-											{title}
-										</Typography>
+										<CardContent className={`flex flex-col justify-center p-0 col-span-3`}>
+											<Typography variant="p" className="font-bold">
+												{title}
+											</Typography>
 
-										<Typography variant="p">{company}</Typography>
-										<Typography variant="p">
-											{section !== 'certifications' && (
-												<>
-													<FormatDate date={startDate} /> -{' '}
-												</>
-											)}
-											{currentCompany ? 'Present' : <FormatDate date={endDate} />}
-										</Typography>
-									</CardContent>
+											<Typography variant="p">{company}</Typography>
+											<Typography variant="p">
+												{section !== 'certifications' && (
+													<>
+														<FormatDate date={startDate} /> -{' '}
+													</>
+												)}
+												{currentCompany ? 'Present' : <FormatDate date={endDate} />}
+											</Typography>
+										</CardContent>
 
-									{section !== 'certifications' && (
-										<div className="flex justify-center items-center p-0">
-											{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
-											{/* aspect-square object-cover rounded-2xl */}
-											<div className="px-7">
-												<div className="relative rounded-2xl overflow-hidden">
-													{isYouTubeUrl(previewSrc) ? (
-														<img
-															className="aspect-square object-cover h-full rounded-2xl"
-															src={handleSrc(previewSrc, bucket)}
-														/>
-													) : (
-														<video
-															type="video/mp4"
-															autoPlay
-															muted
-															loop
-															className="aspect-square object-cover h-full "
-															src={handleSrc(previewSrc, bucket)}
-														/>
-													)}
-													<button
-														onClick={() => redirectToBucket(bucket)}
-														className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "
-													>
-														<Icon icon="fluent:window-new-16-filled" className="text-white" fontSize={30} />
-													</button>
+										{section !== 'certifications' && (
+											<div className="flex justify-center items-center p-0">
+												{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
+												{/* aspect-square object-cover rounded-2xl */}
+												<div className="px-3">
+													<div className="relative rounded-2xl overflow-hidden">
+														{isYouTubeUrl(previewSrc) ? (
+															<img
+																className="aspect-square object-cover w-full rounded-2xl"
+																src={handleSrc(previewSrc, bucket)}
+															/>
+														) : (
+															<video
+																type="video/mp4"
+																autoPlay
+																muted
+																loop
+																className="aspect-square object-cover h-full "
+																src={handleSrc(previewSrc, bucket)}
+															/>
+														)}
+														<button
+															onClick={() => redirectToBucket(bucket)}
+															className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "
+														>
+															<Icon icon="fluent:window-new-16-filled" className="text-white" fontSize={30} />
+														</button>
+													</div>
 												</div>
 											</div>
-										</div>
-									)}
-								</Card>
-							</div>
-						);
-					})}
+										)}
+									</Card>
+								</div>
+							);
+						})}
 
-					{!history.length && isUserProfile && (
-						<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
-							Customize your profile by listing the talents and expertise that define you. A modal will pop up, allowing
-							you to effortlessly manage and showcase your skills. Let your strengths shine!
-							<Button variant="link" onClick={() => setShow(true)}>
-								🌟 Click on this link to add your skills.
-							</Button>
-						</div>
-					)}
+						{!history.length && isUserProfile && (
+							<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
+								Customize your profile by listing the talents and expertise that define you. A modal will pop up,
+								allowing you to effortlessly manage and showcase your skills. Let your strengths shine!
+								<Button variant="link" onClick={() => setShow(true)}>
+									🌟 Click on this link to add your skills.
+								</Button>
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 		</>

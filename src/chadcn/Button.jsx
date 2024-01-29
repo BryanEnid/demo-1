@@ -18,7 +18,11 @@ const buttonVariants = cva(
 				link: 'text-primary underline-offset-4 hover:underline'
 			},
 			size: {
-				default: 'h-10 px-4 py-2',
+				default: `
+				xl:h-10 xl:px-4 xl:py-2 
+
+				md:py-4 md:px-3 md:h-5 
+				`,
 				sm: 'h-9 rounded-md px-3',
 				lg: 'h-11 rounded-md px-8',
 				icon: 'h-10 w-10'
@@ -102,7 +106,7 @@ function Button({
 	const Comp = asChild ? Slot : 'button';
 
 	return (
-		<Comp className={cn(buttonVariants({ variant, size }), className)} {...props}>
+		<Comp className={cn(buttonVariants({ variant, size }), 'flex flex-col items-center', className)} {...props}>
 			<div className="flex gap-3 justify-between items-center">
 				{(iconBegin || iconEnd) && <Typography variant="large">{iconBegin}</Typography>}
 				<Typography variant="small">{children}</Typography>

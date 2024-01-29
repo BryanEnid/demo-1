@@ -185,9 +185,12 @@ export function Profile() {
 							<div className="container">
 								<div>
 									{/* Header */}
-									<div className="flex flex-col items-center gap-8">
-										<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48" />
-										<Typography variant="h2">{profile?.name}</Typography>
+									<div className="flex flex-col items-center gap-3">
+										{/* <img src={profile?.photoURL} className="rounded-full object-cover aspect-square xl:w-48 md:w-32" /> */}
+										<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
+										<Typography variant="h3" className="mt-6">
+											{profile?.name}
+										</Typography>
 										<Typography variant="blockquote" className="border-0">
 											“If you want to find the secrets of the universe, think in terms of energy, frequency and
 											vibration.”
