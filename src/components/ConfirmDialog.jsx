@@ -6,12 +6,12 @@ import { PageModal } from '@/components/PageModal.jsx';
 
 const ConfirmDialog = ({
 	show,
-	title = 'Title',
+	title,
 	subTitle,
 	cancelLabel = 'Cancel',
 	submitLabel = 'Ok',
 	submitBtnVariant = 'default',
-	children = 'content',
+	children,
 	disabledSubmit = false,
 	onClose = () => {},
 	onCancel,
@@ -19,7 +19,7 @@ const ConfirmDialog = ({
 	onDelete
 }) => {
 	return (
-		<PageModal show={show} onClose={() => onClose('escape')} width="600px">
+		<PageModal show={show} onClose={() => onClose('escape')} width="600px" maxWidth="100vw">
 			<div className="flex flex-col justify-center p-16 gap-5 ">
 				<div>
 					<Typography variant="h3" className="pb-2">

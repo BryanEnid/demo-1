@@ -1,7 +1,7 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-export function PageModal({ children, show, onClose, width, initialFocus, zIndex }) {
+export function PageModal({ children, show, onClose, width, maxWidth = '100vw', initialFocus, zIndex }) {
 	return (
 		<Transition.Root show={show} as={Fragment}>
 			<Dialog className="relative" style={{ zIndex: zIndex ?? 10 }} initialFocus={initialFocus} onClose={onClose}>
@@ -39,8 +39,9 @@ export function PageModal({ children, show, onClose, width, initialFocus, zIndex
 										<div
 											className="text-center sm:text-left"
 											style={{
-												width: '100%',
-												maxWidth: width,
+												// width: '100%',
+												width,
+												maxWidth,
 												maxHeight: '95vh', // Set a max height for the modal content
 												overflowY: 'auto' // Allow content to scroll if it exceeds the max height
 											}}

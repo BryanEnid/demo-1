@@ -264,7 +264,7 @@ export function Profile() {
 
 					{!!bucketInfoOpen && (
 						<motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 300, opacity: 1 }} className="shrink-0">
-							<div className="fixed top-[80px] bottom-0 right-0 overflow-auto w-[300px]">
+							<div className="fixed top-0 sm:top-[80px] right-0 overflow-auto w-[300px] h-dvh">
 								<BucketInfo
 									bucket={bucketInfoOpen}
 									profile={profile}

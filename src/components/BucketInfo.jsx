@@ -61,7 +61,7 @@ const BucketInfo = ({ bucket, profile, canEdit, isUserProfile, onClose }) => {
 	};
 
 	return (
-		<div className="bg-[#FCFCFC] min-h-full px-5 px-7 py-7">
+		<div className="bg-[#FCFCFC] px-5 py-7 h-full">
 			<div>
 				<div className="flex items-center justify-between mb-10">
 					<Typography variant="h3" className="flex items-center gap-2">

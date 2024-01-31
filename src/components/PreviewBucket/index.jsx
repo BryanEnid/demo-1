@@ -28,6 +28,7 @@ import { VideoUploadButton } from '../VideoUploadButton.jsx';
 import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
+import { useMobile } from '@/hooks/useMobile.js';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -117,6 +118,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	// Hooks
 	const navigate = useNavigate();
 	const { data: profile, isUserProfile } = useProfile();
+	const { isMobile } = useMobile();
 	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs } =
 		useBuckets(profile);
 
@@ -377,7 +379,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	if (isEditMode) {
 		return (
-			<PageModal show={show} onClose={handleExit} width="80vw">
+			<PageModal show={show} onClose={handleExit} width="1560px" maxWidth="100vw">
 				<div>
 					{/* Video Player */}
 					<div className="aspect-[16/9] shadow bg-black">
@@ -622,7 +624,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	}
 
 	return (
-		<PageModal show={show} onClose={handleExit} width="80vw" initialFocus={videoRef}>
+		<PageModal show={show} onClose={handleExit} width="1560px" maxWidth="100vw" initialFocus={videoRef}>
 			<QRShareView show={isSharing} onClose={() => setSharing(false)} />
 
 			<VideoAddURLModal show={isDisplayVideoURLsModalVisible} onClose={handleVideoURLs} />
@@ -667,6 +669,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						{getShortNumberLabel(data.viewers?.length || 0)}
 					</div>
 				</TabsList>
+
 				<TabsContent value="overview">
 					<Overview
 						data={data}
@@ -683,11 +686,13 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						setCurrentVideo={setCurrentVideo}
 					/>
 				</TabsContent>
+
 				<TabsContent value="q&a" disabled={isEditMode}>
 					<div className="py-10">
 						<QuestionsList profile={profile} scope={{ bucketId: documentId }} />
 					</div>
 				</TabsContent>
+
 				{isUserProfile && (
 					<TabsContent value="views">
 						<Views bucketId={documentId} profile={profile} />
