@@ -15,6 +15,7 @@ import { PageModal } from '@/components/PageModal.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog.jsx';
 import { groupBy } from '@/lib/utils.js';
 import { BucketItem } from './BucketItem';
+import { useMobile } from '@/hooks/useMobile';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
 
@@ -88,6 +89,7 @@ export function Buckets() {
 	const { data: profile } = useProfile();
 	const { data: buckets, updateBucket, updateBucketsCategory, deleteBucketsCategory } = useBuckets(profile);
 	const [{ isUserProfile, createBucket, bucketInfoOpen, showBucketInfo }] = useOutletContext();
+	const { isMobile } = useMobile();
 
 	// State
 	const [confirmDelete, setConfirmDelete] = useState(null);
@@ -201,10 +203,10 @@ export function Buckets() {
 	return (
 		<div>
 			{isUserProfile && (
-				<div className="flex mb-8 min-h-[40px]">
+				<div className="justify-center flex mb-8 min-h-[40px] md:justify-start w-full">
 					<Button
 						variant="ghost"
-						className="rounded-full border"
+						className="rounded-full border w-full md:w-auto"
 						disabled={showNewCategory}
 						iconBegin={<Icon icon="ic:round-plus" />}
 						onClick={() => {
@@ -265,6 +267,7 @@ export function Buckets() {
 								onChange={setNewCategoryValue}
 								onSubmit={submitEditTmpCategory}
 							/>
+
 							<div className="grid gap-16 grid-cols-3">
 								{isUserProfile && (
 									<motion.div
@@ -275,7 +278,7 @@ export function Buckets() {
 									>
 										<BucketItem
 											defaultIcon="ic:round-plus"
-											width="w-[64px]"
+											width="size-[64px]"
 											iconProps={{ color: '#06f', fontSize: '42px' }}
 											onClick={() => createBucket({ category })}
 										/>
@@ -300,7 +303,7 @@ export function Buckets() {
 							onSubmit={submitEditCategory}
 						/>
 						{/* <div className="grid gap-16 grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"> */}
-						<div className="grid gap-16 grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+						<div className="relative grid gap-1 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ">
 							{groupedBucket[category].map((bucket, index) => (
 								<motion.div
 									key={bucket.id}
@@ -316,28 +319,46 @@ export function Buckets() {
 										isUserProfile={isUserProfile}
 										updateBucket={updateBucket}
 										showBucketInfo={showBucketInfo}
+										width="size-36 md:size-[190px]"
 									/>
 								</motion.div>
 							))}
+
 							{isUserProfile && (
 								<motion.div
 									key="ADD NEW"
 									initial={{ opacity: 0, y: -20 }}
 									animate={{ opacity: 1, y: 0 }}
 									transition={{ duration: 0.5, delay: groupedBucket[category].length * 0.05 }}
-									className="flex items-center"
+									className="flex items-center justify-center"
 								>
-									<BucketItem
-										defaultIcon="ic:round-plus"
-										width="w-[64px]"
-										iconProps={{ color: '#06f', fontSize: '42px' }}
-										onClick={() => createBucket({ category })}
-									/>
+									{!isMobile && (
+										<BucketItem
+											defaultIcon="ic:round-plus"
+											width="size-[64px]"
+											iconProps={{ color: '#06f', fontSize: '42px' }}
+											onClick={() => createBucket({ category })}
+										/>
+									)}
 								</motion.div>
 							)}
 						</div>
+
+						{isMobile && (
+							<div className="mt-10">
+								<Button
+									className="w-full"
+									variant="secondary"
+									iconBegin={<Icon name="ic:round-plus" />}
+									onClick={() => createBucket({ category })}
+								>
+									Add bucket
+								</Button>
+							</div>
+						)}
 					</div>
 				))}
+
 				{!Object.keys(groupedBucket).length && isUserProfile && !tmpCategories.length && (
 					<motion.div
 						key="ADD NEW"
@@ -348,7 +369,7 @@ export function Buckets() {
 					>
 						<BucketItem
 							defaultIcon="ic:round-plus"
-							width="w-[64px]"
+							width="size-[64px]"
 							iconProps={{ color: '#06f', fontSize: '42px' }}
 							onClick={() => createBucket({ category: 'Unlisted' })}
 						/>

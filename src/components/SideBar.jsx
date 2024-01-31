@@ -6,14 +6,18 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Separator } from '@/chadcn/Separator';
 import { cn } from '@/lib/utils';
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
+import { useMobile } from '@/hooks/useMobile';
 
 export function SideBar() {
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { user, isLoading } = useAuthenticationProviders();
+	const { isMobile } = useMobile();
+
+	if (isMobile) return <></>;
 
 	return (
-		<aside className="z-20 inline-flex items-center flex-col h-screen p-4 text-gray-400 fixed top-0 left-0 border-r-[1px] bg-white shadow-md">
+		<aside className="z-20 inline-flex items-center flex-col h-dvh p-4 text-gray-400 fixed top-0 left-0 border-r-[1px] bg-white shadow-md">
 			<button onClick={() => navigate('/')}>
 				<ObserveIcon size={45} rounded />
 			</button>

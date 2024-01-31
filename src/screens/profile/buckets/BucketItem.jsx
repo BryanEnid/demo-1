@@ -2,18 +2,26 @@ import React, { useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
-import { isYouTubeUrl } from '@/lib/utils';
+import { cn, isYouTubeUrl } from '@/lib/utils';
 import PreviewBucket from '@/components/PreviewBucket';
 import ShareModal from '@/components/ShareModal.jsx';
 import { Typography } from '@/chadcn/Typography';
 import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuGroup,
-	DropdownMenuSeparator
+	// DropdownMenu,
+	// DropdownMenuTrigger,
+	// DropdownMenuContent,
+	// DropdownMenuItem,
+	DropdownMenuGroup
+	// DropdownMenuSeparator
 } from '@/chadcn/DropDown.jsx';
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger
+} from '@/chadcn/ContextMenu';
+import { useMobile } from '@/hooks/useMobile';
 
 export const BucketItem = ({
 	name,
@@ -21,19 +29,22 @@ export const BucketItem = ({
 	data,
 	documentId,
 	onClick,
-	width = 'w-[200px]',
+	width = 'size-[200px]',
 	iconProps,
 	defaultIcon = 'solar:gallery-circle-broken',
 	isUserProfile,
 	updateBucket,
-	showBucketInfo
+	showBucketInfo,
+	className
 }) => {
+	// Hooks
+	const [searchParams, setSearchParams] = useSearchParams();
+	const { isMobile } = useMobile();
+
 	// State
 	const [open, setOpen] = useState(false);
 	const [contextMenu, setContextMenu] = useState(null);
 	const [shareModalOpen, setShareModalOpen] = useState(false);
-
-	const [searchParams, setSearchParams] = useSearchParams();
 
 	const wrapperElRef = useRef();
 
@@ -58,9 +69,12 @@ export const BucketItem = ({
 		setSearchParams('');
 	};
 
-	const handleOpenPreview = () => {
+	const handleOnClick = (openedThroughContextMenu) => {
+		if (openedThroughContextMenu) return;
+
 		setSearchParams('bucketid=' + documentId);
 		setOpen(true);
+		onClick && onClick(data);
 	};
 
 	const handleSrc = (src) => {
@@ -69,72 +83,67 @@ export const BucketItem = ({
 		return src;
 	};
 
-	const openContextMenu = (e) => {
-		const wrapperPosition = wrapperElRef?.current?.getBoundingClientRect();
-		const top = e.clientY - wrapperPosition.top;
-		const left = e.clientX - wrapperPosition.left;
-
-		e.preventDefault();
-		setContextMenu({ open: true, y: top, x: left });
-	};
-
 	return (
 		<>
-			<div ref={wrapperElRef} className="flex flex-col items-center relative" onContextMenu={openContextMenu}>
+			<div ref={wrapperElRef} className={cn('flex flex-col  items-center relative select-none', className)}>
 				<button
-					onClick={onClick ? () => onClick(data) : handleOpenPreview}
-					className={`${width} transition ease-in-out hover:scale-105`}
+					onClick={() => handleOnClick(contextMenu)}
+					className={`${width} transition ease-in-out hover:scale-105 select-none`}
 				>
-					<div className="flex object-cover aspect-square shadow drop-shadow-xl rounded-full transition ease-in-out hover:shadow-md hover:shadow-primary justify-center items-center">
-						{preview && !isYouTubeUrl(preview) && (
-							<video
-								type="video/mp4"
-								autoPlay
-								muted
-								loop
-								src={handleSrc(preview)}
-								className="object-cover aspect-square rounded-full w-full h-full"
-							/>
-						)}
+					<ContextMenu open={!!contextMenu} onOpenChange={setContextMenu}>
+						<ContextMenuTrigger>
+							<div
+								className={`${width} flex object-cover aspect-square shadow drop-shadow-xl rounded-full p-1 bg-white transition ease-in-out hover:shadow-md hover:shadow-primary justify-center items-center`}
+							>
+								{preview && !isYouTubeUrl(preview) && (
+									<video
+										type="video/mp4"
+										autoPlay
+										muted
+										loop
+										draggable={false}
+										src={handleSrc(preview)}
+										className="object-cover aspect-square rounded-full w-full h-full"
+									/>
+								)}
 
-						{handleSrc(preview) && isYouTubeUrl(preview) && (
-							<img src={handleSrc(preview)} className="aspect-video object-cover rounded-full w-full h-full" />
-						)}
+								{handleSrc(preview) && isYouTubeUrl(preview) && (
+									<img
+										draggable={false}
+										src={handleSrc(preview)}
+										className="aspect-video object-cover rounded-full w-full h-full"
+									/>
+								)}
 
-						{!preview && (
-							<div className="flex h-full w-full justify-center items-center text-gray-300">
-								<Icon fontSize="130" icon={defaultIcon} {...iconProps} />
+								{!preview && (
+									<div className="flex h-full w-full justify-center items-center text-gray-300 p-3">
+										<Icon fontSize="130" icon={defaultIcon} {...iconProps} />
+									</div>
+								)}
+
+								<ContextMenuContent>
+									<ContextMenuItem className="text-md">Open in New Tab</ContextMenuItem>
+									<ContextMenuItem className="text-md">Open in New Window</ContextMenuItem>
+
+									<ContextMenuSeparator />
+
+									{isUserProfile && (
+										<ContextMenuItem className="text-md" onClick={() => setShareModalOpen(true)}>
+											<Icon icon="mdi:user-plus-outline" className="pr-1 text-2xl" />
+											Share
+										</ContextMenuItem>
+									)}
+									<ContextMenuItem className="text-md" onClick={() => showBucketInfo(data)}>
+										<Icon icon="ci:info" className="pr-1 text-2xl" />
+										Info
+									</ContextMenuItem>
+								</ContextMenuContent>
 							</div>
-						)}
-					</div>
+						</ContextMenuTrigger>
+					</ContextMenu>
 				</button>
 
-				<Typography>{name}</Typography>
-				<DropdownMenu open={!!contextMenu} onOpenChange={setContextMenu}>
-					<DropdownMenuTrigger
-						className={`absolute`}
-						style={{ top: `${contextMenu?.y || 0}px`, left: `${contextMenu?.x || 0}px` }}
-					/>
-					<DropdownMenuContent>
-						<DropdownMenuGroup>
-							<DropdownMenuItem className="text-md">Open in New Tab</DropdownMenuItem>
-							<DropdownMenuItem className="text-md">Open in New Window</DropdownMenuItem>
-						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
-						<DropdownMenuGroup>
-							{isUserProfile && (
-								<DropdownMenuItem className="text-md" onClick={() => setShareModalOpen(true)}>
-									<Icon icon="mdi:user-plus-outline" className="pr-1 text-2xl" />
-									Share
-								</DropdownMenuItem>
-							)}
-							<DropdownMenuItem className="text-md" onClick={() => showBucketInfo(data)}>
-								<Icon icon="ci:info" className="pr-1 text-2xl" />
-								Info
-							</DropdownMenuItem>
-						</DropdownMenuGroup>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				{name && <Typography className="text-center">{name}</Typography>}
 			</div>
 
 			{data && shareModalOpen && (

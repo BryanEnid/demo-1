@@ -20,25 +20,32 @@ const ConfirmDialog = ({
 }) => {
 	return (
 		<PageModal show={show} onClose={() => onClose('escape')} width="600px">
-			<div className="flex flex-col justify-center p-16 gap-5">
+			<div className="flex flex-col justify-center p-16 gap-5 ">
 				<div>
 					<Typography variant="h3" className="pb-2">
 						{title}
 					</Typography>
 					{subTitle && <Typography>{subTitle}</Typography>}
 				</div>
+
 				{children}
+
 				<div className="w-full">
-					<div className="flex flex-row justify-center items-center  mt-5">
-						{onDelete && (
-							<Button variant="destructive" className="min-w-[100px] self-start" onClick={onDelete}>
-								Delete
-							</Button>
-						)}
-						<div className=" flex justify-end gap-2 w-full ">
+					{onDelete && (
+						<Button
+							variant="destructive"
+							className="w-full mb-10 min-w-[150px] py-6 md:min-w-[100px] self-start"
+							onClick={onDelete}
+						>
+							Delete
+						</Button>
+					)}
+
+					<div className="flex flex-row justify-center items-center mt-5 ">
+						<div className="flex justify-end gap-2 w-full">
 							<Button
 								variant="secondary"
-								className="rounded-full min-w-[100px]"
+								className="rounded-full min-w-[150px] py-6 md:min-w-[100px]"
 								onClick={() => {
 									if (typeof onCancel === 'function') {
 										return onCancel();
@@ -53,7 +60,7 @@ const ConfirmDialog = ({
 							<Button
 								disabled={disabledSubmit}
 								variant={submitBtnVariant}
-								className="rounded-full min-w-[100px]"
+								className="rounded-full min-w-[150px] py-6 md:min-w-[100px]"
 								onClick={onConfirm}
 							>
 								{submitLabel}

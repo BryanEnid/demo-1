@@ -463,17 +463,17 @@ export const History = ({ title, data }) => {
 								</div>
 							);
 						})}
-
-						{!history.length && isUserProfile && (
-							<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
-								Customize your profile by listing the talents and expertise that define you. A modal will pop up,
-								allowing you to effortlessly manage and showcase your skills. Let your strengths shine!
-								<Button variant="link" onClick={() => setShow(true)}>
-									🌟 Click on this link to add your skills.
-								</Button>
-							</div>
-						)}
 					</div>
+
+					{!history.length && isUserProfile && (
+						<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
+							Customize your profile by listing the talents and expertise that define you. A modal will pop up, allowing
+							you to effortlessly manage and showcase your skills. Let your strengths shine!
+							<Button variant="link" onClick={() => setShow(true)}>
+								🌟 Click on this link to add your skills.
+							</Button>
+						</div>
+					)}
 				</div>
 			</div>
 		</>

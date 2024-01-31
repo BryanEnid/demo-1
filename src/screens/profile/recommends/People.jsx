@@ -158,8 +158,9 @@ const People = ({ data = [], isUserProfile }) => {
 					)}
 				</CarouselContent>
 			</Carousel>
+
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px">
-				<div className="flex flex-col justify-center p-8 gap-5">
+				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">Add Person</Typography>
 						<Button variant="ghost" className="rounded-full w-[40px] h-[40px]" onClick={closeCreateModal}>

@@ -35,11 +35,12 @@ export function PageModal({ children, show, onClose, width, initialFocus, zIndex
 										backdropFilter: 'blur(10px)'
 									}}
 								>
-									<div className="sm:flex sm:items-start ">
+									<div className="sm:flex sm:items-start">
 										<div
-											className="text-center sm:text-left "
+											className="text-center sm:text-left"
 											style={{
-												width,
+												width: '100%',
+												maxWidth: width,
 												maxHeight: '95vh', // Set a max height for the modal content
 												overflowY: 'auto' // Allow content to scroll if it exceeds the max height
 											}}

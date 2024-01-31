@@ -24,11 +24,13 @@ import { Textarea } from '@/chadcn/Textarea';
 import { PageModal } from './PageModal';
 import { MediaSelector } from './MediaSelector';
 import { useAuth } from '@/providers/Authentication';
+import { useMobile } from '@/hooks/useMobile';
 
 export function NavBar({ createBucket }) {
 	// Hooks
 	const navigate = useNavigate();
 	const { user, logout } = useAuth();
+	const { isMobile } = useMobile();
 
 	// Refs
 	const inputRef = React.useRef();
@@ -36,6 +38,8 @@ export function NavBar({ createBucket }) {
 	const handleLogOut = () => {
 		logout().then(() => navigate('/'));
 	};
+
+	if (isMobile) return <></>;
 
 	return (
 		<>
