@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/chadcn/Button';
-import { Modal } from './Modal';
+import { Modal } from '../Modal';
 
 import {
 	DropdownMenu,
@@ -19,12 +19,9 @@ import {
 	DropdownMenuTrigger
 } from '@/chadcn/DropDown';
 import { Typography } from '@/chadcn/Typography';
-import { Input } from '@/chadcn/Input';
-import { Textarea } from '@/chadcn/Textarea';
-import { PageModal } from './PageModal';
-import { MediaSelector } from './MediaSelector';
 import { useAuth } from '@/providers/Authentication';
 import { useMobile } from '@/hooks/useMobile';
+import { MobileNavBar } from './MobileNavBar';
 
 export function NavBar({ createBucket }) {
 	// Hooks
@@ -39,7 +36,7 @@ export function NavBar({ createBucket }) {
 		logout().then(() => navigate('/'));
 	};
 
-	if (isMobile) return <></>;
+	if (isMobile) return <MobileNavBar createBucket={createBucket} />;
 
 	return (
 		<>

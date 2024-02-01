@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 
 // Components
 import { Icon } from '@iconify/react';
-import { SideBar } from '@/components/SideBar';
-import { NavBar } from '@/components/NavBar';
+import { SideBar } from '@/components/NavigationBar/SideBar';
+import { NavBar } from '@/components/NavigationBar/NavBar';
 
 // Screens
 import { Typography } from '@/chadcn/Typography';
@@ -245,7 +245,7 @@ export function Profile() {
 							</div>
 						)}
 
-						<div className="container">
+						<div className="container pb-28 sm:pb-0">
 							{/* Screens */}
 							<Outlet
 								context={[

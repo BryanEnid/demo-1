@@ -39,9 +39,11 @@ export function SideBar() {
 				>
 					<Icon width={35} icon="ion:compass-outline" />
 				</button>
+
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={30} icon="ion:briefcase-outline" />
 				</button>
+
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={30} icon="ion:analytics" />
 				</button>
@@ -52,12 +54,6 @@ export function SideBar() {
 					<Icon width={23} icon="ion:add" />
 				</button>
 			</div>
-
-			{/* <div>
-        <button>
-          <Icon width={40} icon="iconamoon:trash" />
-        </button>
-      </div> */}
 		</aside>
 	);
 }

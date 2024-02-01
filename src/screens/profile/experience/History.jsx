@@ -315,7 +315,7 @@ export const History = ({ title, data }) => {
 							{section !== 'certifications' && (
 								<PopoverTrigger className="flex flex-row mt-5 items-center gap-2 w-full">
 									<Button className="w-full p-10 md:p-10 xl:p-10" variant="secondary">
-										<div className="p-10">
+										<div className="py-10">
 											{linkedBucket?.videos?.[0]?.image && (
 												<img
 													src={linkedBucket?.videos?.[0]?.image}
