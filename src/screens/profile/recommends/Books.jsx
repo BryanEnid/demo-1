@@ -158,74 +158,78 @@ const Books = ({ data = [], isUserProfile }) => {
 					</Button>
 				)}
 			</div>
-
-			<Carousel
-				opts={{
-					align: 'start',
-					dragFree: true
-				}}
-				className="w-full"
-			>
-				<CarouselContent>
-					{data.map((book) => (
-						<CarouselItem key={book.id} className="basis-1/2 lg:basis-1/4">
-							<Card className="h-full flex flex-col cursor-pointer" onClick={() => showBookDetails(book)}>
-								<CardHeader className="px-4 py-4">
-									<div className="w-full">
-										<div className="aspect-square flex justify-center items-center">
-											<img src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full " />
+			{!data.length && !isUserProfile ? (
+				<div>
+					<Typography variant="muted">There are no books added.</Typography>
+				</div>
+			) : (
+				<Carousel
+					opts={{
+						align: 'start',
+						dragFree: true
+					}}
+					className="w-full"
+				>
+					<CarouselContent>
+						{data.map((book) => (
+							<CarouselItem key={book.id} className="basis-1/2 lg:basis-1/4">
+								<Card className="h-full flex flex-col cursor-pointer" onClick={() => showBookDetails(book)}>
+									<CardHeader className="px-4 py-4">
+										<div className="w-full">
+											<div className="aspect-square flex justify-center items-center">
+												<img src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full " />
+											</div>
 										</div>
+									</CardHeader>
+									<CardContent className="px-4 pb-4">
+										<CardTitle className="text-lg leading-snug font-bold">{book.title}</CardTitle>
+										<Typography className="text-xs !mt-0">{book.author}</Typography>
+										<CardDescription className="text-black pt-2 line-clamp-6">{book.description}</CardDescription>
+									</CardContent>
+									{isUserProfile && (
+										<CardFooter className="mt-auto px-4 pb-4">
+											<div className="w-full flex justify-center gap-2">
+												<Button
+													variant="ghost"
+													className="rounded-full w-[40px] h-[40px] p-1"
+													onClick={(e) => {
+														e.stopPropagation();
+														e.preventDefault();
+														showBookDetails(book);
+														setEditMode(true);
+													}}
+												>
+													<Icon className="text-gray-500 text-xl" icon="material-symbols:edit" />
+												</Button>
+												<Button
+													variant="ghost"
+													className="rounded-full w-[40px] h-[40px] p-1"
+													onClick={(e) => {
+														e.stopPropagation();
+														e.preventDefault();
+														setConfirmDelete(book);
+													}}
+												>
+													<Icon className="text-gray-500 text-xl" icon="mi:delete" />
+												</Button>
+											</div>
+										</CardFooter>
+									)}
+								</Card>
+							</CarouselItem>
+						))}
+						{isUserProfile && (
+							<CarouselItem className="basis-1/2 lg:basis-1/4">
+								<Card className="flex justify-center items-center cursor-pointer" onClick={() => openCreateModal()}>
+									<div className="flex justify-center items-center object-cover aspect-square w-full">
+										<Icon icon="ph:plus-bold" className=" text-7xl text-primary"></Icon>
 									</div>
-								</CardHeader>
-								<CardContent className="px-4 pb-4">
-									<CardTitle className="text-lg leading-snug font-bold">{book.title}</CardTitle>
-									<Typography className="text-xs !mt-0">{book.author}</Typography>
-									<CardDescription className="text-black pt-2 line-clamp-6">{book.description}</CardDescription>
-								</CardContent>
-								{isUserProfile && (
-									<CardFooter className="mt-auto px-4 pb-4">
-										<div className="w-full flex justify-center gap-2">
-											<Button
-												variant="ghost"
-												className="rounded-full w-[40px] h-[40px] p-1"
-												onClick={(e) => {
-													e.stopPropagation();
-													e.preventDefault();
-													showBookDetails(book);
-													setEditMode(true);
-												}}
-											>
-												<Icon className="text-gray-500 text-xl" icon="material-symbols:edit" />
-											</Button>
-											<Button
-												variant="ghost"
-												className="rounded-full w-[40px] h-[40px] p-1"
-												onClick={(e) => {
-													e.stopPropagation();
-													e.preventDefault();
-													setConfirmDelete(book);
-												}}
-											>
-												<Icon className="text-gray-500 text-xl" icon="mi:delete" />
-											</Button>
-										</div>
-									</CardFooter>
-								)}
-							</Card>
-						</CarouselItem>
-					))}
-					{isUserProfile && (
-						<CarouselItem className="basis-1/2 lg:basis-1/4">
-							<Card className="flex justify-center items-center cursor-pointer" onClick={() => openCreateModal()}>
-								<div className="flex justify-center items-center object-cover aspect-square w-full">
-									<Icon icon="ph:plus-bold" className=" text-7xl text-primary"></Icon>
-								</div>
-							</Card>
-						</CarouselItem>
-					)}
-				</CarouselContent>
-			</Carousel>
-
+								</Card>
+							</CarouselItem>
+						)}
+					</CarouselContent>
+				</Carousel>
+			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
 				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
 					<div className="flex justify-between items-center pb-2">
@@ -243,7 +247,7 @@ const Books = ({ data = [], isUserProfile }) => {
 									name="description"
 									value={bookCreate.description}
 									placeholder="Description"
-									className="min-h-[200px]"
+									className="min-h-[200px] border-input"
 									onChange={handleChange}
 								/>
 								<input

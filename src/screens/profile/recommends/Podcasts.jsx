@@ -74,60 +74,65 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 					</Button>
 				)}
 			</div>
-			<Carousel
-				opts={{
-					align: 'start',
-					dragFree: true
-				}}
-				className="w-full"
-			>
-				<CarouselContent>
-					{data.map((podcast) => (
-						<CarouselItem key={podcast.id} className="basis-1/2 lg:basis-1/4">
-							<Card className="h-full flex flex-col">
-								<CardHeader className="px-4 py-4">
-									<a href={podcast.url} target="_blank" rel="noreferrer">
-										<img src={podcast.picture} className="rounded-md object-cover aspect-square w-full" />
-									</a>
-								</CardHeader>
-								<CardContent className="px-4 pb-4">
-									<CardTitle className="text-lg leading-snug font-bold text-wrap">
+			{!data.length && !isUserProfile ? (
+				<div>
+					<Typography variant="muted">There are no podcasts added.</Typography>
+				</div>
+			) : (
+				<Carousel
+					opts={{
+						align: 'start',
+						dragFree: true
+					}}
+					className="w-full"
+				>
+					<CarouselContent>
+						{data.map((podcast) => (
+							<CarouselItem key={podcast.id} className="basis-1/2 lg:basis-1/4">
+								<Card className="h-full flex flex-col">
+									<CardHeader className="px-4 py-4">
 										<a href={podcast.url} target="_blank" rel="noreferrer">
-											{podcast.name}
+											<img src={podcast.picture} className="rounded-md object-cover aspect-square w-full" />
 										</a>
-									</CardTitle>
-								</CardContent>
-								{isUserProfile && (
-									<CardFooter className="mt-auto px-4 pb-4">
-										<div className="w-full flex justify-center">
-											<Button
-												variant="ghost"
-												className="rounded-full w-[40px] h-[40px] p-1"
-												onClick={() => setConfirmDelete(podcast)}
-											>
-												<Icon className="text-gray-500 text-xl" icon="mi:delete" />
-											</Button>
-										</div>
-									</CardFooter>
-								)}
-							</Card>
-						</CarouselItem>
-					))}
-					{isUserProfile && (
-						<CarouselItem className="basis-1/2 lg:basis-1/4">
-							<Card
-								className="flex justify-center items-center cursor-pointer"
-								onClick={() => setShowCreateModal(true)}
-							>
-								<div className="flex justify-center items-center object-cover aspect-square w-full">
-									<Icon icon="ph:plus-bold" className=" text-7xl text-primary"></Icon>
-								</div>
-							</Card>
-						</CarouselItem>
-					)}
-				</CarouselContent>
-			</Carousel>
-
+									</CardHeader>
+									<CardContent className="px-4 pb-4">
+										<CardTitle className="text-lg leading-snug font-bold text-wrap">
+											<a href={podcast.url} target="_blank" rel="noreferrer">
+												{podcast.name}
+											</a>
+										</CardTitle>
+									</CardContent>
+									{isUserProfile && (
+										<CardFooter className="mt-auto px-4 pb-4">
+											<div className="w-full flex justify-center">
+												<Button
+													variant="ghost"
+													className="rounded-full w-[40px] h-[40px] p-1"
+													onClick={() => setConfirmDelete(podcast)}
+												>
+													<Icon className="text-gray-500 text-xl" icon="mi:delete" />
+												</Button>
+											</div>
+										</CardFooter>
+									)}
+								</Card>
+							</CarouselItem>
+						))}
+						{isUserProfile && (
+							<CarouselItem className="basis-1/2 lg:basis-1/4">
+								<Card
+									className="flex justify-center items-center cursor-pointer"
+									onClick={() => setShowCreateModal(true)}
+								>
+									<div className="flex justify-center items-center object-cover aspect-square w-full">
+										<Icon icon="ph:plus-bold" className=" text-7xl text-primary"></Icon>
+									</div>
+								</Card>
+							</CarouselItem>
+						)}
+					</CarouselContent>
+				</Carousel>
+			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
 				<div className="flex flex-col justify-center px-8 gap-5 relative w-screen">
 					<div className="flex flex-col justify-center pt-8 pb-4 gap-5 sticky top-0 bg-white z-10">

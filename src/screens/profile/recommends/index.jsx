@@ -23,24 +23,12 @@ const Recommends = () => {
 	}
 	return (
 		<div className="flex flex-col gap-24 mb-24">
-			{!recommends?.articles.length && !isUserProfile ? null : (
-				<Articles data={recommends?.articles} isUserProfile={isUserProfile} />
-			)}
-			{!recommends?.books.length && !isUserProfile ? null : (
-				<Books data={recommends?.books} isUserProfile={isUserProfile} />
-			)}
-			{!recommends?.tools.length && !isUserProfile ? null : (
-				<Tools data={recommends?.tools} isUserProfile={isUserProfile} />
-			)}
-			{!recommends?.people.length && !isUserProfile ? null : (
-				<People data={recommends?.people} isUserProfile={isUserProfile} />
-			)}
-			{!recommends?.podcasts?.length && !isUserProfile ? null : (
-				<Podcasts data={recommends.podcasts} isUserProfile={isUserProfile} />
-			)}
-			{!recommends?.videos.length && !isUserProfile ? null : (
-				<Videos data={recommends.videos} isUserProfile={isUserProfile} />
-			)}
+			<Articles data={recommends?.articles} isUserProfile={isUserProfile} />
+			<Books data={recommends?.books} isUserProfile={isUserProfile} />
+			<Tools data={recommends?.tools} isUserProfile={isUserProfile} />
+			<People data={recommends?.people} isUserProfile={isUserProfile} />
+			<Podcasts data={recommends.podcasts} isUserProfile={isUserProfile} />
+			<Videos data={recommends.videos} isUserProfile={isUserProfile} />
 		</div>
 	);
 };

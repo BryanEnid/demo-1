@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 
-import { cn, groupBy } from '@/lib/utils.js';
-import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
+import { groupBy } from '@/lib/utils.js';
+import { BASE_URL } from '@/config/api.js';
+import { Card } from '@/chadcn/Card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
 import { Typography } from '@/chadcn/Typography.jsx';
 import { Button } from '@/chadcn/Button.jsx';
@@ -10,79 +11,10 @@ import { Input } from '@/chadcn/Input.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
 import { PageModal } from '@/components/PageModal.jsx';
 import { Spinner } from '@/components/Spinner.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import EditableLabel from '@/components/EditableLabel.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import useEmoji from '@/hooks/useEmoji.js';
-import { BASE_URL } from '@/config/api.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
-
-// TODO:... move to components dir
-const EditableLabel = ({
-	controls,
-	value,
-	className,
-	onSave: handleSave = () => {},
-	onCancel: handleCancel = () => {}
-}) => {
-	const [inputVal, setInputVal] = useState(value);
-	const [editing, setEditing] = useState(false);
-
-	const onSave = () => {
-		if (!inputVal) {
-			setInputVal(value);
-			return handleCancel();
-		}
-
-		if (value !== inputVal) {
-			handleSave(inputVal);
-		}
-	};
-
-	const onCancel = () => {
-		setEditing(false);
-		setInputVal(value);
-		handleCancel();
-	};
-
-	const onFocus = () => {
-		setEditing(true);
-	};
-
-	const onBlur = () => {
-		if (!controls) {
-			setEditing(false);
-			onSave();
-		}
-	};
-
-	return (
-		<div className="flex items-center gap-1 max-w-full">
-			<div className="flex relative h-[44px] overflow-hidden">
-				<div className={cn('px-3 mr-3 bar border-l border-r border-transparent invisible', className)}>{inputVal}</div>
-				<Input
-					value={inputVal}
-					className={cn(
-						!controls || !editing ? 'border-transparent shadow-none focus:border-input focus:shadow-sm' : '',
-						'absolute top-[1px] left-[1px] right-[1px] w-auto',
-						className
-					)}
-					onChange={(e) => setInputVal(e.target.value)}
-					onFocus={onFocus}
-					onBlur={onBlur}
-				/>
-			</div>
-			{controls && editing && (
-				<>
-					<Button className="w-[36px] h-[36px] p-1 shrink-0" onClick={() => onSave(inputVal)}>
-						<Icon icon="ci:check-big" className="text-2xl" />
-					</Button>
-					<Button variant="secondary" className="rounded-full shrink-0 w-[36px] h-[36px] p-1" onClick={onCancel}>
-						<Icon icon="mingcute:close-fill" className="text-2xl" />
-					</Button>
-				</>
-			)}
-		</div>
-	);
-};
 
 const initialToolState = {
 	title: '',
@@ -247,38 +179,77 @@ const Tools = ({ data = [], isUserProfile }) => {
 					</DropdownMenu>
 				)}
 			</div>
-			<Carousel
-				opts={{
-					align: 'start',
-					dragFree: true
-				}}
-				className="w-full"
-			>
-				<CarouselContent>
-					{showNewCategory && (
-						<CarouselItem className="basis-1/2 lg:basis-1/3">
-							<div>
-								<div className="mb-5 max-w-full">
-									<Input
-										autofocus
-										ref={newCategoryInpRef}
-										value={newCategoryValue}
-										className="font-bold text-2xl tracking-tight h-[40px]"
-										onChange={(e) => setNewCategoryValue(e.target.value)}
-										onBlur={() => {
-											if (newCategoryValue) {
-												addCategory(newCategoryValue);
-											}
-											setNewCategoryValue('');
-											setShowNewCategory(false);
-										}}
-									/>
+			{!tmpCategories.length && !data.length && !isUserProfile ? (
+				<div>
+					<Typography variant="muted">There are no tools added.</Typography>
+				</div>
+			) : (
+				<Carousel
+					opts={{
+						align: 'start',
+						dragFree: true
+					}}
+					className="w-full"
+				>
+					<CarouselContent>
+						{showNewCategory && (
+							<CarouselItem className="basis-1/2 lg:basis-1/3">
+								<div>
+									<div className="mb-5 max-w-full">
+										<Input
+											autofocus
+											ref={newCategoryInpRef}
+											value={newCategoryValue}
+											className="font-bold text-2xl tracking-tight h-[40px]"
+											onChange={(e) => setNewCategoryValue(e.target.value)}
+											onBlur={() => {
+												if (newCategoryValue) {
+													addCategory(newCategoryValue);
+												}
+												setNewCategoryValue('');
+												setShowNewCategory(false);
+											}}
+										/>
+									</div>
 								</div>
-							</div>
-						</CarouselItem>
-					)}
-					{!!tmpCategories.length &&
-						tmpCategories.map((category) => (
+							</CarouselItem>
+						)}
+						{!!tmpCategories.length &&
+							tmpCategories.map((category) => (
+								<CarouselItem key={category} className="basis-1/2 lg:basis-1/3">
+									<div>
+										<div className="mb-5 max-w-full">
+											{isUserProfile ? (
+												<div className="flex items-center gap-1 max-w-full">
+													<EditableLabel
+														value={category}
+														className="font-bold text-2xl tracking-tight h-[40px]"
+														onSave={(newVal) => submitNewCategory(category, newVal)}
+													/>
+													{!!category.length && (
+														<Button
+															variant="outline"
+															className="text-primary rounded-full w-[30px] h-[30px] p-1"
+															onClick={() => {
+																setShowCreateModal(true);
+																setToolCreate((val) => ({ ...val, category }));
+															}}
+														>
+															<Icon icon="ic:round-plus" className="text-2xl" />
+														</Button>
+													)}
+												</div>
+											) : (
+												<Typography variant="h3" className="!font-bold px-3 !py-1 bar border-l border-transparent">
+													{category}
+												</Typography>
+											)}
+										</div>
+										<div></div>
+									</div>
+								</CarouselItem>
+							))}
+						{Object.keys(toolsGrouped).map((category) => (
 							<CarouselItem key={category} className="basis-1/2 lg:basis-1/3">
 								<div>
 									<div className="mb-5 max-w-full">
@@ -287,20 +258,18 @@ const Tools = ({ data = [], isUserProfile }) => {
 												<EditableLabel
 													value={category}
 													className="font-bold text-2xl tracking-tight h-[40px]"
-													onSave={(newVal) => submitNewCategory(category, newVal)}
+													onSave={(newVal) => submitEditCategory(category, newVal)}
 												/>
-												{!!category.length && (
-													<Button
-														variant="outline"
-														className="text-primary rounded-full w-[30px] h-[30px] p-1"
-														onClick={() => {
-															setShowCreateModal(true);
-															setToolCreate((val) => ({ ...val, category }));
-														}}
-													>
-														<Icon icon="ic:round-plus" className="text-2xl" />
-													</Button>
-												)}
+												<Button
+													variant="outline"
+													className="text-primary rounded-full w-[30px] h-[30px] p-1"
+													onClick={() => {
+														setShowCreateModal(true);
+														setToolCreate((val) => ({ ...val, category }));
+													}}
+												>
+													<Icon icon="ic:round-plus" className="text-2xl" />
+												</Button>
 											</div>
 										) : (
 											<Typography variant="h3" className="!font-bold px-3 !py-1 bar border-l border-transparent">
@@ -308,72 +277,42 @@ const Tools = ({ data = [], isUserProfile }) => {
 											</Typography>
 										)}
 									</div>
-									<div></div>
+									<div>
+										{toolsGrouped[category].map((tool) => (
+											<Card key={tool.id} className="h-[130px] w-full flex items-center gap-5 mb-4 px-10">
+												{!!tool.picture && (
+													<div className="w-[100px] h-[80px] flex items-center justify-center">
+														<img
+															src={tool.picture}
+															className="max-w-full max-h-full "
+															onError={(e) => {
+																e.target.onerror = null;
+																e.target.src = `${BASE_URL}/static/external?url=${tool.picture}`;
+															}}
+														/>
+													</div>
+												)}
+												<div>
+													<Typography className="text-xl">{tool.title}</Typography>
+												</div>
+												{isUserProfile && (
+													<Button
+														variant="ghost"
+														className="rounded-full w-[40px] h-[40px] p-1 ml-auto"
+														onClick={() => setConfirmDelete(tool)}
+													>
+														<Icon className="text-gray-500 text-xl" icon="mi:delete" />
+													</Button>
+												)}
+											</Card>
+										))}
+									</div>
 								</div>
 							</CarouselItem>
 						))}
-					{Object.keys(toolsGrouped).map((category) => (
-						<CarouselItem key={category} className="basis-1/2 lg:basis-1/3">
-							<div>
-								<div className="mb-5 max-w-full">
-									{isUserProfile ? (
-										<div className="flex items-center gap-1 max-w-full">
-											<EditableLabel
-												value={category}
-												className="font-bold text-2xl tracking-tight h-[40px]"
-												onSave={(newVal) => submitEditCategory(category, newVal)}
-											/>
-											<Button
-												variant="outline"
-												className="text-primary rounded-full w-[30px] h-[30px] p-1"
-												onClick={() => {
-													setShowCreateModal(true);
-													setToolCreate((val) => ({ ...val, category }));
-												}}
-											>
-												<Icon icon="ic:round-plus" className="text-2xl" />
-											</Button>
-										</div>
-									) : (
-										<Typography variant="h3" className="!font-bold px-3 !py-1 bar border-l border-transparent">
-											{category}
-										</Typography>
-									)}
-								</div>
-								<div>
-									{toolsGrouped[category].map((tool) => (
-										<Card key={tool.id} className="h-[130px] w-full flex items-center gap-5 mb-4 px-10">
-											{!!tool.picture && (
-												<div className="w-[100px] h-[80px] flex items-center justify-center">
-													<img
-														src={tool.picture}
-														className="max-w-full max-h-full "
-														onError={(e) => {
-															e.target.onerror = null;
-															e.target.src = `${BASE_URL}/static/external?url=${tool.picture}`;
-														}}
-													/>
-												</div>
-											)}
-											<div>
-												<Typography className="text-xl">{tool.title}</Typography>
-											</div>
-											<Button
-												variant="ghost"
-												className="rounded-full w-[40px] h-[40px] p-1 ml-auto"
-												onClick={() => setConfirmDelete(tool)}
-											>
-												<Icon className="text-gray-500 text-xl" icon="mi:delete" />
-											</Button>
-										</Card>
-									))}
-								</div>
-							</div>
-						</CarouselItem>
-					))}
-				</CarouselContent>
-			</Carousel>
-
+					</CarouselContent>
+				</Carousel>
+			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
 				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
 					<div className="flex justify-between items-center pb-2">

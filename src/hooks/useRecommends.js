@@ -42,7 +42,7 @@ const useRecommends = (userId) => {
 	const { data, isLoading: loadingRecommends } = useQuery({
 		gcTime: Infinity,
 		queryKey: recommendsQueryKey,
-		queryFn: () => (auth?.authToken && userId ? fetchRecommends(auth, userId) : null)
+		queryFn: () => (userId ? fetchRecommends(auth, userId) : null)
 	});
 
 	const {

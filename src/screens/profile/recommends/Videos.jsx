@@ -68,48 +68,54 @@ const Videos = ({ data = [], isUserProfile }) => {
 					</Button>
 				)}
 			</div>
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				{data.map((video) => (
-					<a key={video.id} href={video.videoUrl} target="_blank" rel="noreferrer">
-						<Card className="h-full flex">
-							<CardHeader className="px-4 py-4 w-1/3 shrink-0">
-								<img
-									src={video.preview}
-									className="rounded-md object-cover aspect-square w-full"
-									onError={(e) => {
-										e.target.onerror = null;
-										e.target.src = `${BASE_URL}/static/external?url=${video.picture}`;
-									}}
-								/>
-							</CardHeader>
-							<CardContent className="px-0 pr-4 py-4">
-								<CardTitle className="text-lg leading-snug font-bold text-wrap flex gap-5">
-									<span>{video.title}</span>
-									<span className="shrink-0">{getDuration(video.duration)}</span>
-								</CardTitle>
-								<CardDescription className="text-black pt-2 line-clamp-6 ">{video.description}</CardDescription>
-								{isUserProfile && (
-									<CardFooter className="mt-auto p-0">
-										<div className="w-full flex justify-end">
-											<Button
-												variant="ghost"
-												className="rounded-full w-[40px] h-[40px] p-1"
-												onClick={(e) => {
-													e.preventDefault();
-													e.stopPropagation();
-													setConfirmDelete(video);
-												}}
-											>
-												<Icon className="text-gray-500 text-xl" icon="mi:delete" />
-											</Button>
-										</div>
-									</CardFooter>
-								)}
-							</CardContent>
-						</Card>
-					</a>
-				))}
-			</div>
+			{!data.length && !isUserProfile ? (
+				<div>
+					<Typography variant="muted">There are no videos added.</Typography>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					{data.map((video) => (
+						<a key={video.id} href={video.videoUrl} target="_blank" rel="noreferrer">
+							<Card className="h-full flex">
+								<CardHeader className="px-4 py-4 w-1/3 shrink-0">
+									<img
+										src={video.preview}
+										className="rounded-md object-cover aspect-square w-full"
+										onError={(e) => {
+											e.target.onerror = null;
+											e.target.src = `${BASE_URL}/static/external?url=${video.picture}`;
+										}}
+									/>
+								</CardHeader>
+								<CardContent className="px-0 pr-4 py-4">
+									<CardTitle className="text-lg leading-snug font-bold text-wrap flex gap-5">
+										<span>{video.title}</span>
+										<span className="shrink-0">{getDuration(video.duration)}</span>
+									</CardTitle>
+									<CardDescription className="text-black pt-2 line-clamp-6 ">{video.description}</CardDescription>
+									{isUserProfile && (
+										<CardFooter className="mt-auto p-0">
+											<div className="w-full flex justify-end">
+												<Button
+													variant="ghost"
+													className="rounded-full w-[40px] h-[40px] p-1"
+													onClick={(e) => {
+														e.preventDefault();
+														e.stopPropagation();
+														setConfirmDelete(video);
+													}}
+												>
+													<Icon className="text-gray-500 text-xl" icon="mi:delete" />
+												</Button>
+											</div>
+										</CardFooter>
+									)}
+								</CardContent>
+							</Card>
+						</a>
+					))}
+				</div>
+			)}
 			<ConfirmDialog
 				show={!!confirmDelete}
 				title={`Are you sure you want to delete video: ${confirmDelete?.title}?`}

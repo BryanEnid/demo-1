@@ -13,81 +13,82 @@ import { Input } from '@/chadcn/Input.jsx';
 import { Separator } from '@/chadcn/Separator.jsx';
 import { PageModal } from '@/components/PageModal.jsx';
 import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import EditableLabel from '@/components/EditableLabel.jsx';
 import { groupBy } from '@/lib/utils.js';
 import { BucketItem } from './BucketItem';
 import { useMobile } from '@/hooks/useMobile';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
 
-const CategoryLabel = forwardRef(
-	(
-		{ value, categoryEditing, category, editable, onSubmit, onChange, editCategory, cancelEditCategory, onDelete },
-		ref
-	) => (
-		<>
-			{(!editable || categoryEditing !== category) && (
-				<div className="mb-9 flex gap-2 items-center">
-					<Typography variant="h3" onClick={() => editable && editCategory(category)}>
-						{category}
-					</Typography>
-					{editable && (
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								<Button variant="ghost" className="rounded-full">
-									<Icon icon="mi:options-horizontal" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuItem className="py-3 px-3" onClick={() => editCategory(category)}>
-									<Icon icon="clarity:edit-line" className="pr-1 text-xl" />
-									Rename section
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									className="py-3 px-3 text-red-500 hover:text-red-500 focus:text-red-500"
-									onClick={onDelete}
-								>
-									<Icon icon="fluent:delete-48-regular" className="pr-1 text-xl" />
-									Delete section
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					)}
-				</div>
+const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, ref) => {
+	const [editing, setEditing] = useState(false);
+
+	/** @type {React.MutableRefObject<number>} */
+	const timeoutId = useRef();
+
+	const handleSetEditing = () => {
+		timeoutId.current = setTimeout(() => {
+			setEditing(true);
+		}, 300);
+	};
+
+	useEffect(() => {
+		return () => timeoutId.current && clearTimeout(timeoutId.current);
+	}, []);
+
+	return (
+		<div className="mb-9 flex gap-1 items-center">
+			{!editable ? (
+				<Typography variant="h3">{category}</Typography>
+			) : (
+				<>
+					<EditableLabel
+						value={category}
+						focus={editing}
+						className="text-2xl font-semibold tracking-tight h-[40px]"
+						onSave={(val) => {
+							setEditing(false);
+							onSubmit(category, val);
+						}}
+						onCancel={() => setEditing(false)}
+					/>
+					<DropdownMenu>
+						<DropdownMenuTrigger>
+							<Button variant="secondary" className="rounded-full p-1 w-[40px] h-[40px]">
+								<Icon icon="mi:options-horizontal" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuItem className="py-3 px-3" onClick={handleSetEditing}>
+								<Icon icon="clarity:edit-line" className="pr-1 text-xl" />
+								Rename section
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								className="py-3 px-3 text-red-500 hover:text-red-500 focus:text-red-500"
+								onClick={onDelete}
+							>
+								<Icon icon="fluent:delete-48-regular" className="pr-1 text-xl" />
+								Delete section
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</>
 			)}
-			{editable && categoryEditing === category && (
-				<form onSubmit={onSubmit}>
-					<div className="mb-9 flex items-center gap-1">
-						<Input
-							ref={ref}
-							value={value}
-							placeholder="Section Name"
-							onChange={({ target }) => onChange(target.value)}
-							className="bg-white/10 w-[300px]"
-						/>
-						<Button
-							type="submit"
-							variant="default"
-							className="rounded-full border"
-							disabled={!value?.length}
-							iconBegin={<Icon icon="ic:round-plus" />}
-						>
-							Save
-						</Button>
-						<Button type="button" variant="secondary" className="rounded-full" onClick={() => cancelEditCategory()}>
-							Cancel
-						</Button>
-					</div>
-				</form>
-			)}
-		</>
-	)
-);
+		</div>
+	);
+});
 CategoryLabel.displayName = 'CategoryLabel';
 
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
-	const { data: buckets, updateBucket, updateBucketsCategory, deleteBucketsCategory } = useBuckets(profile);
+	const {
+		data: buckets,
+		updateBucket,
+		updateBucketsCategory,
+		deleteBucketsCategory,
+		deleteBucket
+	} = useBuckets(profile);
 	const [{ isUserProfile, createBucket, bucketInfoOpen, showBucketInfo }] = useOutletContext();
 	const { isMobile } = useMobile();
 
@@ -98,11 +99,9 @@ export function Buckets() {
 	const [showNewCategory, setShowNewCategory] = useState(false);
 	const [newCategoryValue, setNewCategoryValue] = useState('');
 	const [tmpCategories, setTmpCategories] = useState([]);
-	const [categoryEditing, setCategoryEditing] = useState();
 
 	// Refs
 	const newCategoryRef = useRef();
-	const categoryInpRef = useRef();
 
 	const groupedBucket = useMemo(
 		() => groupBy(buckets || [], ({ category }) => category || UNCATEGORIZED_BUCKETS_LABEL),
@@ -123,12 +122,6 @@ export function Buckets() {
 	}, [showNewCategory]);
 
 	useEffect(() => {
-		if (categoryEditing) {
-			categoryInpRef.current?.focus?.();
-		}
-	}, [categoryEditing]);
-
-	useEffect(() => {
 		const filteredCategories = tmpCategories.filter((category) => !groupedBucket[category]);
 		setTmpCategories(filteredCategories);
 	}, [buckets]);
@@ -145,40 +138,20 @@ export function Buckets() {
 		setTmpCategories((val) => [newCategoryValue, ...val]);
 	};
 
-	const editCategory = (category) => {
-		setCategoryEditing(category);
-		setNewCategoryValue(category);
-		setShowNewCategory(false);
-	};
-	const cancelEditCategory = () => {
-		setCategoryEditing(null);
-		setNewCategoryValue('');
-	};
-	const submitEditCategory = (e) => {
-		e.preventDefault();
-		if (!newCategoryValue?.length) {
+	const submitEditCategory = (category, newValue) => {
+		if (!newValue?.length) {
 			return;
 		}
 
-		updateBucketsCategory(
-			{ category: encodeURIComponent(categoryEditing), data: { label: newCategoryValue } },
-			{
-				onSuccess: () => {
-					setCategoryEditing(null);
-					setNewCategoryValue('');
-				}
-			}
-		);
+		updateBucketsCategory({ category: encodeURIComponent(category), data: { label: newValue } });
 	};
 
-	const submitEditTmpCategory = (e) => {
-		e.preventDefault();
-		if (!newCategoryValue?.length) {
+	const submitEditTmpCategory = (category, newValue) => {
+		if (!newValue?.length) {
 			return;
 		}
 
-		setTmpCategories((val) => val.map((item) => (item === categoryEditing ? newCategoryValue : item)));
-		setCategoryEditing(null);
+		setTmpCategories((val) => val.map((item) => (item === category ? newValue : item)));
 		setNewCategoryValue('');
 	};
 
@@ -211,7 +184,6 @@ export function Buckets() {
 						iconBegin={<Icon icon="ic:round-plus" />}
 						onClick={() => {
 							setShowNewCategory(true);
-							setCategoryEditing(null);
 							setNewCategoryValue('');
 						}}
 					>
@@ -229,7 +201,7 @@ export function Buckets() {
 								value={newCategoryValue}
 								placeholder="Section Name"
 								onChange={({ target }) => setNewCategoryValue(target.value)}
-								className="bg-white/10 w-[300px]"
+								className="bg-white/10 w-[300px] text-2xl font-semibold tracking-tight h-[40px]"
 							/>
 							<Button
 								type="submit"
@@ -256,15 +228,9 @@ export function Buckets() {
 					tmpCategories.map((category) => (
 						<div key={category} className="mb-20">
 							<CategoryLabel
-								ref={categoryInpRef}
-								value={newCategoryValue}
-								categoryEditing={categoryEditing}
 								category={category}
 								editable={isUserProfile}
-								editCategory={editCategory}
-								cancelEditCategory={cancelEditCategory}
 								onDelete={() => setConfirmDelete(category)}
-								onChange={setNewCategoryValue}
 								onSubmit={submitEditTmpCategory}
 							/>
 
@@ -277,6 +243,7 @@ export function Buckets() {
 										className="flex items-center"
 									>
 										<BucketItem
+											defaultContextMenu
 											defaultIcon="ic:round-plus"
 											width="size-[64px]"
 											iconProps={{ color: '#06f', fontSize: '42px' }}
@@ -291,15 +258,9 @@ export function Buckets() {
 				{Object.keys(groupedBucket).map((category) => (
 					<div key={category} className="mb-20">
 						<CategoryLabel
-							ref={categoryInpRef}
-							value={newCategoryValue}
 							category={category}
 							editable={isUserProfile}
-							categoryEditing={categoryEditing}
-							editCategory={editCategory}
-							cancelEditCategory={cancelEditCategory}
 							onDelete={() => setConfirmDelete(category)}
-							onChange={setNewCategoryValue}
 							onSubmit={submitEditCategory}
 						/>
 						{/* <div className="grid gap-16 grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"> */}
@@ -318,6 +279,7 @@ export function Buckets() {
 										documentId={bucket.id}
 										isUserProfile={isUserProfile}
 										updateBucket={updateBucket}
+										deleteBucket={deleteBucket}
 										showBucketInfo={showBucketInfo}
 										width="size-36 md:size-[190px]"
 									/>
@@ -334,6 +296,7 @@ export function Buckets() {
 								>
 									{!isMobile && (
 										<BucketItem
+											defaultContextMenu
 											defaultIcon="ic:round-plus"
 											width="size-[64px]"
 											iconProps={{ color: '#06f', fontSize: '42px' }}
@@ -368,6 +331,7 @@ export function Buckets() {
 						className="flex items-center mt-10"
 					>
 						<BucketItem
+							defaultContextMenu
 							defaultIcon="ic:round-plus"
 							width="size-[64px]"
 							iconProps={{ color: '#06f', fontSize: '42px' }}
@@ -381,11 +345,12 @@ export function Buckets() {
 				title="Are you sure you want to delete this section?"
 				subTitle={`This section ${confirmDelete} includes ${groupedBucket[confirmDelete]?.length || 0} buckets`}
 				submitLabel="Delete section"
+				submitBtnVariant="destructive"
 				onClose={() => setConfirmDelete(null)}
 				onCancel={() => setConfirmDelete(null)}
 				onConfirm={() => deleteCategory(deleteWithBuckets)}
 			>
-				{groupedBucket[confirmDelete]?.length && (
+				{!!groupedBucket[confirmDelete]?.length && (
 					<div>
 						<label className="flex items-center gap-1">
 							<Input
