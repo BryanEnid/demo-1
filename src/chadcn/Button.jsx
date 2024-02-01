@@ -19,11 +19,11 @@ const buttonVariants = cva(
 			},
 			size: {
 				default: `
-				xl:py-2 xl:px-4 xl:h-10
+				xl:py-2 xl:px-4
 
-				md:py-4 md:px-3 md:h-5 
+				md:py-4 md:px-3  
 
-				py-4 px-3 h-10 
+				py-4 px-3 h-10
 				`,
 				sm: 'h-9 rounded-md px-3',
 				lg: 'h-11 rounded-md px-8',
@@ -98,6 +98,7 @@ function Button({
 	variant = 'default',
 	size = 'default',
 	asChild = false,
+	align = 'center',
 	children,
 	...props
 }) {
@@ -108,7 +109,10 @@ function Button({
 	const Comp = asChild ? Slot : 'button';
 
 	return (
-		<Comp className={cn(buttonVariants({ variant, size }), 'flex flex-col items-center', className)} {...props}>
+		<Comp
+			className={cn(buttonVariants({ variant, size }), `flex flex-col`, align && `items-${align}`, className)}
+			{...props}
+		>
 			<div className="flex gap-3 justify-between items-center">
 				{(iconBegin || iconEnd) && <Typography variant="large">{iconBegin}</Typography>}
 				<Typography variant="small">{children}</Typography>

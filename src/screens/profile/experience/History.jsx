@@ -210,7 +210,9 @@ export const History = ({ title, data }) => {
 
 						<Popover className="relative">
 							<PopoverTrigger>
-								<Input placeholder="Company" value={company.name} />
+								<Button variant="secondary" className="w-full">
+									{company?.name ? 'Company - ' + company.name : 'Company'}
+								</Button>
 							</PopoverTrigger>
 
 							<PopoverContent className="w-[100vw] sm:w-[472px] p-2" align="start">
@@ -229,7 +231,8 @@ export const History = ({ title, data }) => {
 														return (
 															<PopoverClose key={item.name}>
 																<Button
-																	className="w-full justify-start px-8 h-auto"
+																	className="w-full justify-start px-8 h-14"
+																	align="start"
 																	variant="ghost"
 																	onClick={() => handleAddCompany(item)}
 																>
@@ -258,7 +261,6 @@ export const History = ({ title, data }) => {
 										<Button iconBegin={<Icon icon="majesticons:calendar" />} variant="secondary" className="w-full">
 											{startDate ? <FormatDate date={startDate} /> : 'Start Date'}
 										</Button>
-										{/* <Input placeholder="Start Date" value={startDate} /> */}
 									</PopoverTrigger>
 
 									<PopoverContent className="w-auto p-0" align="start">
@@ -278,11 +280,6 @@ export const History = ({ title, data }) => {
 							{/* Calendar - End Date */}
 							<Popover>
 								<PopoverTrigger>
-									{/* <Input
-										placeholder={section !== 'certifications' ? 'End Date' : 'Completion Date'}
-										value={presentJob ? 'Present' : endDate}
-										disabled={presentJob}
-									/> */}
 									<Button iconBegin={<Icon icon="majesticons:calendar" />} variant="secondary" className="w-full">
 										{!endDate && (section !== 'certifications' ? 'End Date' : 'Completion Date')}
 										{presentJob === true ? 'Present' : <FormatDate date={endDate} />}
@@ -317,14 +314,16 @@ export const History = ({ title, data }) => {
 						<Popover>
 							{section !== 'certifications' && (
 								<PopoverTrigger className="flex flex-row mt-5 items-center gap-2 w-full">
-									<Button className="w-full p-10" variant="secondary">
-										{linkedBucket?.videos?.[0]?.image && (
-											<img
-												src={linkedBucket?.videos?.[0]?.image}
-												className="inline aspect-square object-cover w-10 rounded-sm mx-2"
-											/>
-										)}
-										{linkedBucket ? linkedBucket.name : 'Link to a bucket'}
+									<Button className="w-full p-10 md:p-10 xl:p-10" variant="secondary">
+										<div className="p-10">
+											{linkedBucket?.videos?.[0]?.image && (
+												<img
+													src={linkedBucket?.videos?.[0]?.image}
+													className="inline aspect-square object-cover w-10 rounded-sm mx-2"
+												/>
+											)}
+											{linkedBucket ? linkedBucket.name : 'Link to a bucket'}
+										</div>
 									</Button>
 								</PopoverTrigger>
 							)}

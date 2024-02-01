@@ -28,7 +28,6 @@ const ContextMenuSubTrigger = React.forwardRef(({ className, inset, children, ..
 	>
 		{children}
 		<Icon icon="humbleicons:chevron-up" className="ml-auto h-4 w-4" />
-		<ChevronRight className="ml-auto h-4 w-4" />
 	</ContextMenuPrimitive.SubTrigger>
 ));
 ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
