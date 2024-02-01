@@ -26,8 +26,6 @@ const FormatDate = ({ date: dateString }) => {
 		}
 	}, [dateString]);
 
-	function formatDateString(dateString) {}
-
 	return <>{output}</>;
 };
 
@@ -210,13 +208,15 @@ export const History = ({ title, data }) => {
 					<div className="flex flex-col gap-3">
 						<Input placeholder="Title" value={jobTitle} onChange={({ target }) => setJobTitle(target.value)} />
 
-						<Popover>
+						<Popover className="relative">
 							<PopoverTrigger>
-								<Input placeholder="Company" value={company.name} />
+								<Button variant="secondary" className="w-full">
+									{company?.name ? 'Company - ' + company.name : 'Company'}
+								</Button>
 							</PopoverTrigger>
 
-							<PopoverContent className="w-full p-2" align="start">
-								<div className="w-[454px] flex flex-col gap-2">
+							<PopoverContent className="w-[100vw] sm:w-[472px] p-2" align="start">
+								<div className="w-full flex flex-col gap-2">
 									<Input ref={companySearchRef} placeholder="Company" onChange={handleLogoSearch} />
 
 									<div className="z-10 bg-white">
@@ -231,7 +231,8 @@ export const History = ({ title, data }) => {
 														return (
 															<PopoverClose key={item.name}>
 																<Button
-																	className="w-full justify-start px-8 h-auto"
+																	className="w-full justify-start px-8 h-14"
+																	align="start"
 																	variant="ghost"
 																	onClick={() => handleAddCompany(item)}
 																>
@@ -257,7 +258,9 @@ export const History = ({ title, data }) => {
 							{section !== 'certifications' && (
 								<Popover className="w-full">
 									<PopoverTrigger>
-										<Input placeholder="Start Date" value={startDate} />
+										<Button iconBegin={<Icon icon="majesticons:calendar" />} variant="secondary" className="w-full">
+											{startDate ? <FormatDate date={startDate} /> : 'Start Date'}
+										</Button>
 									</PopoverTrigger>
 
 									<PopoverContent className="w-auto p-0" align="start">
@@ -277,11 +280,10 @@ export const History = ({ title, data }) => {
 							{/* Calendar - End Date */}
 							<Popover>
 								<PopoverTrigger>
-									<Input
-										placeholder={section !== 'certifications' ? 'End Date' : 'Completion Date'}
-										value={presentJob ? 'Present' : endDate}
-										disabled={presentJob}
-									/>
+									<Button iconBegin={<Icon icon="majesticons:calendar" />} variant="secondary" className="w-full">
+										{!endDate && (section !== 'certifications' ? 'End Date' : 'Completion Date')}
+										{presentJob === true ? 'Present' : <FormatDate date={endDate} />}
+									</Button>
 								</PopoverTrigger>
 
 								<PopoverContent className="w-auto p-0" align="start">
@@ -301,7 +303,7 @@ export const History = ({ title, data }) => {
 						{/* Checkbox */}
 						{section !== 'certifications' && (
 							<div className="flex flex-row items-center gap-2">
-								<Checkbox value={presentJob} onChange={setPresentJob} />
+								<Checkbox checked={presentJob} onChange={setPresentJob} />
 								<Typography variant="p" className="inline">
 									Present job
 								</Typography>
@@ -311,9 +313,18 @@ export const History = ({ title, data }) => {
 						{/* Link to bucket */}
 						<Popover>
 							{section !== 'certifications' && (
-								<PopoverTrigger className="flex flex-row mt-5 items-center gap-2">
-									<Button variant="secondary">Link to a bucket</Button>
-									{linkedBucket && 'Linked bucket: ' + linkedBucket.name}
+								<PopoverTrigger className="flex flex-row mt-5 items-center gap-2 w-full">
+									<Button className="w-full p-10 md:p-10 xl:p-10" variant="secondary">
+										<div className="py-10">
+											{linkedBucket?.videos?.[0]?.image && (
+												<img
+													src={linkedBucket?.videos?.[0]?.image}
+													className="inline aspect-square object-cover w-10 rounded-sm mx-2"
+												/>
+											)}
+											{linkedBucket ? linkedBucket.name : 'Link to a bucket'}
+										</div>
+									</Button>
 								</PopoverTrigger>
 							)}
 
@@ -388,71 +399,82 @@ export const History = ({ title, data }) => {
 					)}
 				</div>
 
-				<div className="flex flex-col gap-5">
-					{history.map((props, index) => {
-						const { title, company, companyLogoUrl, bgColor, textColor, startDate, endDate, currentCompany, bucketId } =
-							props;
-						const bucket = buckets?.find(({ id }) => id === bucketId);
-						const previewSrc = bucket?.videos?.[0]?.videoUrl;
+				<div className="flex flex-col items-center ">
+					<div className="flex flex-col gap-3 w-full max-w-[700px]">
+						{history.map((props, index) => {
+							const {
+								title,
+								company,
+								companyLogoUrl,
+								bgColor,
+								textColor,
+								startDate,
+								endDate,
+								currentCompany,
+								bucketId
+							} = props;
+							const bucket = buckets?.find(({ id }) => id === bucketId);
+							const previewSrc = bucket?.videos?.[0]?.videoUrl;
 
-						return (
-							<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
-								<Card className={`grid grid-cols-5 py-5 `} style={{ background: bgColor, color: textColor }}>
-									<CardHeader className="flex justify-center items-center">
-										<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
-									</CardHeader>
+							return (
+								<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
+									<Card className={`grid grid-cols-10 py-2`} style={{ background: bgColor, color: textColor }}>
+										<CardHeader className="flex justify-center items-center col-span-3">
+											<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
+										</CardHeader>
 
-									<CardContent className={`flex flex-col justify-center p-0 col-span-3`}>
-										<Typography variant="p" className="font-bold">
-											{title}
-										</Typography>
+										<CardContent className={`flex flex-col justify-center p-0 col-span-4`}>
+											<Typography variant="p" className="font-bold">
+												{title}
+											</Typography>
 
-										<Typography variant="p">{company}</Typography>
-										<Typography variant="p">
-											{section !== 'certifications' && (
-												<>
-													<FormatDate date={startDate} /> -{' '}
-												</>
-											)}
-											{currentCompany ? 'Present' : <FormatDate date={endDate} />}
-										</Typography>
-									</CardContent>
+											<Typography variant="p">{company}</Typography>
+											<Typography variant="p">
+												{section !== 'certifications' && (
+													<>
+														<FormatDate date={startDate} /> -{' '}
+													</>
+												)}
+												{currentCompany ? 'Present' : <FormatDate date={endDate} />}
+											</Typography>
+										</CardContent>
 
-									{section !== 'certifications' && (
-										<div className="flex justify-center items-center p-0">
-											{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
-											{/* aspect-square object-cover rounded-2xl */}
-											<div className="px-7">
-												<div className="relative rounded-2xl overflow-hidden">
-													{isYouTubeUrl(previewSrc) ? (
-														<img
-															className="aspect-square object-cover h-full rounded-2xl"
-															src={handleSrc(previewSrc, bucket)}
-														/>
-													) : (
-														<video
-															type="video/mp4"
-															autoPlay
-															muted
-															loop
-															className="aspect-square object-cover h-full "
-															src={handleSrc(previewSrc, bucket)}
-														/>
-													)}
-													<button
-														onClick={() => redirectToBucket(bucket)}
-														className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "
-													>
-														<Icon icon="fluent:window-new-16-filled" className="text-white" fontSize={30} />
-													</button>
+										{section !== 'certifications' && (
+											<div className="flex justify-center items-center p-0 col-span-3">
+												{/* {JSON.stringify(buckets?.find(({ id }) => id === bucketId)?.name, null, 2)} */}
+												{/* aspect-square object-cover rounded-2xl */}
+												<div className="px-3">
+													<div className="relative rounded-2xl overflow-hidden max-w-[125px] max-h-[125px] aspect-square">
+														{isYouTubeUrl(previewSrc) ? (
+															<img
+																className="aspect-square object-cover w-full rounded-2xl "
+																src={handleSrc(previewSrc, bucket)}
+															/>
+														) : (
+															<video
+																type="video/mp4"
+																autoPlay
+																muted
+																loop
+																className="aspect-square object-cover h-full bg-gray-400"
+																src={handleSrc(previewSrc, bucket)}
+															/>
+														)}
+														<button
+															onClick={() => redirectToBucket(bucket)}
+															className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "
+														>
+															<Icon icon="fluent:window-new-16-filled" className="text-white" fontSize={30} />
+														</button>
+													</div>
 												</div>
 											</div>
-										</div>
-									)}
-								</Card>
-							</div>
-						);
-					})}
+										)}
+									</Card>
+								</div>
+							);
+						})}
+					</div>
 
 					{!history.length && isUserProfile && (
 						<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">

@@ -161,7 +161,7 @@ export const SkillsSection = ({ data }) => {
 				</div>
 			)}
 
-			<div className="grid grid-cols-5 gap-5 text-center">
+			<div className="grid grid-cols-3 md:grid-cols-5 gap-5 text-center">
 				{data?.map(({ id, label, iconUrl }) => (
 					<Card key={id} className="flex flex-col justify-center items-center">
 						<CardHeader>

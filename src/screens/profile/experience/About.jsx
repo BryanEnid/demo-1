@@ -93,7 +93,7 @@ export const AboutSection = ({ data }) => {
 			</Typography>
 
 			{/* TODO: Handle empty state */}
-			{
+			{isUserProfile && (
 				<Textarea
 					className={cn(
 						!editMode && 'resize-none cursor-pointer overflow-hidden ',
@@ -107,9 +107,10 @@ export const AboutSection = ({ data }) => {
 					onChange={handleValueChange}
 					value={value}
 					suppressStyles={!editMode}
-					readonly={!isUserProfile}
 				/>
-			}
+			)}
+
+			{!isUserProfile && <Typography className="whitespace-pre-line">{value}</Typography>}
 
 			{!show && (
 				<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">

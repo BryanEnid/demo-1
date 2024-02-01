@@ -137,7 +137,8 @@ const Articles = ({ data = [], isUserProfile }) => {
 					</CarouselContent>
 				</Carousel>
 			)}
-			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px">
+
+			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
 				<div className="flex flex-col justify-center p-8 gap-5">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">Add Article</Typography>

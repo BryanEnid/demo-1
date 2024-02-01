@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { qrcode } from 'vite-plugin-qrcode';
 
 // Files
-import manifest from './manifest.json';
+import manifest from './public/manifest.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -22,6 +22,10 @@ export default defineConfig({
 			workbox: {
 				clientsClaim: true,
 				skipWaiting: true
+			},
+
+			devOptions: {
+				enabled: true
 			},
 
 			// Manifest

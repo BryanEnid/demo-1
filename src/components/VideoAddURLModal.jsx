@@ -86,7 +86,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 		.every(Boolean);
 
 	return (
-		<PageModal show={show} width="600px" zIndex={30} onClose={() => onClose(inputs)}>
+		<PageModal show={show} width="600px" maxWidth="100vw" zIndex={30} onClose={() => onClose(inputs)}>
 			<div className="flex flex-col justify-center items-center p-16 ">
 				<div className="flex flex-col items-start gap-10 w-full min-h-[500px]">
 					<Typography variant="h3">Add video urls</Typography>

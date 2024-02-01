@@ -6,14 +6,18 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Separator } from '@/chadcn/Separator';
 import { cn } from '@/lib/utils';
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
+import { useMobile } from '@/hooks/useMobile';
 
 export function SideBar() {
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { user, isLoading } = useAuthenticationProviders();
+	const { isMobile } = useMobile();
+
+	if (isMobile) return <></>;
 
 	return (
-		<aside className="z-10 inline-flex items-center flex-col h-screen p-4 text-gray-400 fixed top-0 left-0 border-r-[1px] bg-white shadow-md">
+		<aside className="z-20 inline-flex items-center flex-col h-dvh p-4 text-gray-400 fixed top-0 left-0 border-r-[1px] bg-white shadow-md">
 			<button onClick={() => navigate('/')}>
 				<ObserveIcon size={45} rounded />
 			</button>
@@ -35,9 +39,11 @@ export function SideBar() {
 				>
 					<Icon width={35} icon="ion:compass-outline" />
 				</button>
+
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={30} icon="ion:briefcase-outline" />
 				</button>
+
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={30} icon="ion:analytics" />
 				</button>
@@ -48,12 +54,6 @@ export function SideBar() {
 					<Icon width={23} icon="ion:add" />
 				</button>
 			</div>
-
-			{/* <div>
-        <button>
-          <Icon width={40} icon="iconamoon:trash" />
-        </button>
-      </div> */}
 		</aside>
 	);
 }

@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 
 // Components
 import { Icon } from '@iconify/react';
-import { SideBar } from '@/components/SideBar';
-import { NavBar } from '@/components/NavBar';
+import { SideBar } from '@/components/NavigationBar/SideBar';
+import { NavBar } from '@/components/NavigationBar/NavBar';
 
 // Screens
 import { Typography } from '@/chadcn/Typography';
@@ -19,11 +19,17 @@ import BucketInfo from '@/components/BucketInfo.jsx';
 
 // TODO: dynamic url
 import orgBgImg from '@/assets/image-org-bg.png';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/chadcn/Carousel';
+import { useMobile } from '@/hooks/useMobile';
+import { cn } from '@/lib/utils';
 
 function NavOption(props) {
 	const { title, href, buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
+	const width = 'w-full';
+
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
+	const { isMobile } = useMobile();
 
 	const isActive = pathname.slice(1).includes(href || title.toLowerCase());
 	const className = `${buttonProps.className || ''} ${isActive && activeClassName ? activeClassName : ''}`;
@@ -36,12 +42,23 @@ function NavOption(props) {
 		navigate(href || title.toLowerCase());
 	};
 
+	const Wrapper = isMobile
+		? (props) => <CarouselItem className={cn('basis-1/2', width)} {...props} />
+		: (props) => <React.Fragment {...props} />;
+
 	return (
-		<Button variant={isActive ? 'secondary' : 'ghost'} onClick={handleClick} {...buttonProps} className={className}>
-			<Typography variant="large" className="capitalize">
-				{title}
-			</Typography>
-		</Button>
+		<Wrapper>
+			<Button
+				variant={isActive ? 'secondary' : 'ghost'}
+				onClick={handleClick}
+				{...buttonProps}
+				className={cn(className, width)}
+			>
+				<Typography variant="large" className={cn('capitalize truncate', width)}>
+					{title}
+				</Typography>
+			</Button>
+		</Wrapper>
 	);
 }
 
@@ -51,6 +68,7 @@ export function Profile() {
 	const { pathname } = useLocation();
 	const { data: profile, isUserProfile, isLoading: profileLoading } = useProfile();
 	const { user, isLoading: authLoading } = useAuth();
+	const { isMobile } = useMobile();
 
 	const pathParts = pathname.slice(1).split('/');
 	const organizationMenu = [
@@ -115,11 +133,11 @@ export function Profile() {
 		<div>
 			<SideBar />
 
-			<div>
-				<NavBar createBucket={handleCreateBucket} />
+			<NavBar createBucket={handleCreateBucket} />
 
+			<div className="p-5 overflow-x-hidden">
 				<div className="flex">
-					<div className="w-full overflow-x-hidden">
+					<div className="w-full">
 						{isOrganization ? (
 							/* TODO: dynamic background image */
 							<div
@@ -185,28 +203,49 @@ export function Profile() {
 							<div className="container">
 								<div>
 									{/* Header */}
-									<div className="flex flex-col items-center gap-8">
-										<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48" />
-										<Typography variant="h2">{profile?.name}</Typography>
+									<div className="flex flex-col items-center gap-3">
+										{/* <img src={profile?.photoURL} className="rounded-full object-cover aspect-square xl:w-48 md:w-32" /> */}
+										<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
+										<Typography variant="h3" className="mt-6">
+											{profile?.name}
+										</Typography>
 										<Typography variant="blockquote" className="border-0">
 											“If you want to find the secrets of the universe, think in terms of energy, frequency and
 											vibration.”
 										</Typography>
 									</div>
 
-									<div className="flex mt-8 mb-20 gap-4 justify-center">
-										<NavOption title="Audio" />
-										<NavOption title="Buckets" />
-										<NavOption title="Experience" />
-										<NavOption title="Recommends" />
-										<NavOption title="Quests" />
-										<NavOption title="Website" />
+									<div className="flex flex-row justify-center my-8">
+										<div className="w-full">
+											<Carousel
+												className="relative w-full"
+												opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: false }}
+											>
+												<div className="sm:overflow-visible">
+													<CarouselContent className="mx-10 md:flex md:gap-4 md:justify-center">
+														{/* <NavOption title="Audio" /> */}
+														<NavOption title="Buckets" />
+														<NavOption title="Experience" />
+														<NavOption title="Recommends" />
+														<NavOption title="Quests" />
+														{/* <NavOption title="Website" /> */}
+													</CarouselContent>
+
+													{isMobile && (
+														<>
+															<CarouselPrevious variant="secondary" className="absolute left-0" />
+															<CarouselNext variant="secondary" className="absolute right-0" />
+														</>
+													)}
+												</div>
+											</Carousel>
+										</div>
 									</div>
 								</div>
 							</div>
 						)}
 
-						<div className="container">
+						<div className="container pb-28 sm:pb-0">
 							{/* Screens */}
 							<Outlet
 								context={[
@@ -225,7 +264,7 @@ export function Profile() {
 
 					{!!bucketInfoOpen && (
 						<motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 300, opacity: 1 }} className="shrink-0">
-							<div className="fixed top-[80px] bottom-0 right-0 overflow-auto w-[300px]">
+							<div className="fixed top-0 sm:top-[80px] right-0 overflow-auto w-[300px] h-dvh">
 								<BucketInfo
 									bucket={bucketInfoOpen}
 									profile={profile}

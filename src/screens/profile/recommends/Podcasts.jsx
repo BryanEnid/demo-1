@@ -133,8 +133,8 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 					</CarouselContent>
 				</Carousel>
 			)}
-			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px">
-				<div className="flex flex-col justify-center px-8 gap-5 relative">
+			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
+				<div className="flex flex-col justify-center px-8 gap-5 relative w-screen">
 					<div className="flex flex-col justify-center pt-8 pb-4 gap-5 sticky top-0 bg-white z-10">
 						<div className="flex justify-between items-center pb-2">
 							<Typography variant="h3">Add Podcast</Typography>

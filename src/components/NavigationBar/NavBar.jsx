@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/chadcn/Button';
-import { Modal } from './Modal';
+import { Modal } from '../Modal';
 
 import {
 	DropdownMenu,
@@ -19,16 +19,15 @@ import {
 	DropdownMenuTrigger
 } from '@/chadcn/DropDown';
 import { Typography } from '@/chadcn/Typography';
-import { Input } from '@/chadcn/Input';
-import { Textarea } from '@/chadcn/Textarea';
-import { PageModal } from './PageModal';
-import { MediaSelector } from './MediaSelector';
 import { useAuth } from '@/providers/Authentication';
+import { useMobile } from '@/hooks/useMobile';
+import { MobileNavBar } from './MobileNavBar';
 
 export function NavBar({ createBucket }) {
 	// Hooks
 	const navigate = useNavigate();
 	const { user, logout } = useAuth();
+	const { isMobile } = useMobile();
 
 	// Refs
 	const inputRef = React.useRef();
@@ -37,10 +36,13 @@ export function NavBar({ createBucket }) {
 		logout().then(() => navigate('/'));
 	};
 
+	if (isMobile) return <MobileNavBar createBucket={createBucket} />;
+
 	return (
 		<>
-			<div className="h-20 w-full" />
-			<nav className="flex fixed z-10 top-0 left-[96px] right-0 flex-row h-20 items-center justify-end p-8 gap-8 text-gray-600 bg-white">
+			<div className="h-20 w-full xl:h-24" />
+			{/* <nav className="xl:h-20 xl:p-8 flex fixed z-10 top-0 left-[96px] right-0 flex-row  items-center justify-end  gap-8 text-gray-600  bg-red-500"> */}
+			<nav className="flex fixed z-10 top-0 left-0 right-0 flex-row items-center justify-end p-3 gap-2 text-gray-600 bg-white">
 				{/* <button>Career portal</button> */}
 				{/* <button>Explore companies</button> */}
 				{/* <button>Observatory</button> */}
@@ -49,7 +51,11 @@ export function NavBar({ createBucket }) {
 				{user && (
 					<DropdownMenu>
 						<DropdownMenuTrigger>
-							<Button iconBegin={<Icon icon="majesticons:video-line" className="pr-1 text-3xl" />}>Create</Button>
+							<Button iconBegin={<Icon icon="majesticons:video-line" className="pr-1 text-2xl" />}>
+								<Typography variant="p" className="text-md">
+									Create
+								</Typography>
+							</Button>
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent className="w-56">
