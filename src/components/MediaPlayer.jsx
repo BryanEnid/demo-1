@@ -90,7 +90,7 @@ export function Video360({ className, onVideoReady, src }) {
 			/>
 
 			<a-assets>
-				<video id="video" style={{ display: 'none' }} autoPlay loop crossOrigin="anonymous">
+				<video id="video" style={{ display: 'none' }} autoPlay loop>
 					<source type="video/mp4" src={src} />
 				</video>
 			</a-assets>

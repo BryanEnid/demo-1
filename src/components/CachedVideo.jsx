@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
+import { extractYoutubeVideoId, isYouTubeUrl } from '@/lib/utils';
+import YouTube from 'react-youtube';
 
 // export const CachedVideo = ({ videoUrl, ...props }) => {
 //   const { saveVideo } = useIndexedDBVideos("cached-videos", 1);
@@ -36,7 +38,7 @@ import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 //   );
 // };
 
-export const CachedVideo = React.forwardRef(function CachedVideo({ videoUrl, ...props }, ref) {
+export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props }, ref) {
 	// const [cachedVideoUrl, setCachedVideoUrl] = React.useState(null);
 
 	// React.useEffect(() => {
@@ -77,9 +79,39 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ videoUrl, ...
 	//   </video>
 	// );
 
+	// const opts = {
+	// 	playerVars: {
+	// 		// https://developers.google.com/youtube/player_parameters
+	// 		autoplay: 1
+	// 	}
+	// };
+
+	const YoutubePlayerRef = React.useRef();
+
+	const handleYoutubeOnReady = (event) => {
+		event.target.mute();
+		event.target.playVideo();
+	};
+
+	if (isYouTubeUrl(src))
+		return (
+			<YouTube
+				ref={YoutubePlayerRef}
+				videoId={extractYoutubeVideoId(src)}
+				onReady={handleYoutubeOnReady}
+				onEnd={props.onEnded}
+				className="w-full h-full"
+				opts={{
+					playerVars: { autoplay: 1, controls: 1, loop: 0, cc_load_policy: 1, origin: window.location.href },
+					height: '100%',
+					width: '100%'
+				}}
+			/>
+		);
+
 	return (
 		<video {...props} ref={ref}>
-			<source src={videoUrl} type="video/mp4" />
+			<source src={src} type="video/mp4" />
 			Your browser does not support the video tag.
 		</video>
 	);

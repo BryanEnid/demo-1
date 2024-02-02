@@ -19,7 +19,7 @@ function MiniaturePreview({ video, onClick, id }) {
 
 	return (
 		<button key={id} onClick={() => onClick(src)}>
-			<video src={src} className="w-[250px] border-4 rounded-xl" autoPlay muted loop />
+			<video src={src} className="w-[250px] border-4 rounded-xl" autoPlay muted loop crossrigin="anonymous" />
 		</button>
 	);
 }
@@ -64,9 +64,7 @@ export function Preview() {
 	};
 
 	useEffect(() => {
-		if (videoIdIDB) {
-			return loadVideo(videoIdIDB);
-		}
+		if (videoIdIDB) loadVideo(videoIdIDB);
 	}, [videoIdIDB]);
 
 	useEffect(() => {

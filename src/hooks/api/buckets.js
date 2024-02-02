@@ -1,8 +1,8 @@
 import { handleFetch, fetchWithAuth } from '@/hooks/api/fetchWithAuth.js';
 import { BASE_URL } from '@/config/api.js';
 
-// export const getBuckets = (auth, params) => fetchWithAuth(auth, `${BASE_URL}/api/buckets`, { params });
-export const getBuckets = (auth, params) => handleFetch(`${BASE_URL}/api/buckets`, { params });
+export const getBuckets = (auth, params) => fetchWithAuth(auth, `${BASE_URL}/api/buckets`, { params });
+// export const getBuckets = (auth, params) => handleFetch(`${BASE_URL}/api/buckets`, { params });
 
 export const getBucket = (auth, id) => fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}`, { method: 'GET' });
 
@@ -15,3 +15,18 @@ export const updateBucket = (auth, { body, id }) =>
 
 export const uploadVideo = (auth, id, body) =>
 	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/video`, { method: 'POST', body });
+
+export const uploadVideoURLs = (auth, id, body) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/videoURLs`, { method: 'POST', body });
+
+export const getBucketViewers = (auth, id) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/viewers`, { method: 'GET' });
+
+export const markBucketViewed = (auth, id) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/viewers`, { method: 'PUT' });
+
+export const updateBucketsCategory = (auth, { body, category }) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'PUT', body });
+
+export const deleteBucketsCategory = (auth, category, withBuckets) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'DELETE', params: { withBuckets } });

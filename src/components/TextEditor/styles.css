@@ -1,0 +1,75 @@
+.DraftEditor-root {
+	padding-left: 0.75rem;
+	padding-right: 0.75rem;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
+}
+
+.public-DraftEditor-content {
+	min-height: 100px;
+}
+
+.readonly .public-DraftEditor-content {
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.DraftEditor-root blockquote {
+	font-style: italic;
+	border-left-width: 2px;
+	padding-left: 1.5rem;
+}
+
+.DraftEditor-root pre.public-DraftStyleDefault-pre {
+	background-color: rgba(0, 0, 0, 0.05);
+	padding: 1rem;
+	border-radius: 0.4rem;
+}
+
+.is-pinned {
+	box-shadow: 0px 0px 10px #d9d9d9;
+	border-radius: 10px;
+	transform: scale(0.95) translateY(15px);
+}
+
+.DraftEditor-root h1,
+.DraftEditor-root h2,
+.DraftEditor-root h3,
+.DraftEditor-root h4,
+.DraftEditor-root h5,
+.DraftEditor-root h6 {
+	margin: 10px 0;
+	font-family: inherit;
+	font-weight: 700;
+	line-height: 20px;
+	color: inherit;
+	text-rendering: optimizelegibility;
+}
+
+.DraftEditor-root h1,
+.DraftEditor-root h2,
+.DraftEditor-root h3 {
+	line-height: 40px;
+}
+
+/* TODO: Apply themes */
+.DraftEditor-root h2 {
+	font-size: 31px;
+}
+.DraftEditor-root h1 {
+	font-size: 39px;
+}
+.DraftEditor-root h3 {
+	font-size: 23px;
+}
+.DraftEditor-root h4 {
+	font-size: 17px;
+}
+.DraftEditor-root h5 {
+	font-size: 14px;
+}
+.DraftEditor-root h6 {
+	font-size: 11px;
+}

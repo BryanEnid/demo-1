@@ -16,8 +16,8 @@ import { cn } from '@/lib/utils';
 // ));
 // Separator.displayName = SeparatorPrimitive.Root.displayName;
 
-const Separator = () => {
-	return <div className="h-[1px] w-full bg-black/30 mt-1" />;
+const Separator = ({ className }) => {
+	return <div className={cn('h-[1px] w-full bg-black/20 mt-1', className)} />;
 };
 
 export { Separator };

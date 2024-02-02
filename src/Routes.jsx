@@ -11,6 +11,8 @@ import { Experience } from './screens/profile/experience/Experience';
 import { Preview } from './screens/video_preview/Preview';
 import { SignIn } from './screens/sign_in/SignIn';
 import Quests from './screens/profile/quests/index';
+import Recommends from '@/screens/profile/recommends';
+import { UsersScreen } from './screens/users/Users';
 
 export function Routes(props) {
 	// TODO: Preload all icons
@@ -19,6 +21,12 @@ export function Routes(props) {
 		{
 			path: '/',
 			element: <SignIn />
+		},
+
+		{
+			// ! This is temporally - Only for DEV
+			path: '/users/*',
+			element: <UsersScreen />
 		},
 
 		{
@@ -37,7 +45,7 @@ export function Routes(props) {
 				{ path: 'audio', element: <>audio</> },
 				{ path: 'buckets', element: <Buckets /> },
 				{ path: 'experience', element: <Experience /> },
-				{ path: 'recommends', element: <>recommends</> },
+				{ path: 'recommends', element: <Recommends /> },
 				{ path: 'quests', element: <Quests /> },
 				{ path: 'website', element: <>website</> },
 
@@ -60,6 +68,10 @@ export function Routes(props) {
 				{ path: 'training', element: <>Training</> },
 				{ path: 'website', element: <>Website</> }
 			]
+		},
+		{
+			path: '/linkedin/redirect',
+			element: null
 		},
 		{
 			path: '/notfound',

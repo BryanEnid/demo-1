@@ -5,11 +5,25 @@ module.exports = {
 	darkMode: ['class'],
 	content: ['./src/**/*.{js,ts,jsx,tsx}'],
 	theme: {
+		screens: {
+			sm: '640px',
+			md: '768px',
+			lg: '1024px',
+			xl: '1280px',
+			'2xl': '1536px'
+		},
+
 		container: {
 			center: true,
-			padding: '2rem',
+			// padding: '2rem',
 			screens: {
-				'2xl': '1200px'
+				// sm: '440px',
+				// md: '600px',
+				lg: '768px',
+				xl: '800px',
+				'2xl': '860px',
+				'3xl': '1100px'
+				// '3xl': '1100px'
 			}
 		},
 		extend: {

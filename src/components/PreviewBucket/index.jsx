@@ -2,28 +2,35 @@ import React from 'react';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { ReactSortable } from 'react-sortablejs';
 import { Icon } from '@iconify/react';
-import QRCode from 'react-qr-code';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
+import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 
-import { PageModal } from '@/components/PageModal.jsx';
-import { VR_3D, Video360 } from '@/components/MediaPlayer.jsx';
+import { getYouTubeVideoDetails } from '@/hooks/api/youtube.js';
+import { cn, extractYoutubeVideoId, generatePreview, getShortNumberLabel, isYouTubeUrl } from '@/lib/utils';
+import { PageModal } from '@/components/PageModal';
+import TextEditor from '@/components/TextEditor';
+import { VR_3D, Video360 } from '@/components/MediaPlayer';
 import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
+import Views from '@/components/PreviewBucket/tabs/Views';
 import QuestionsList from '@/components/QuestionsList.jsx';
-import { cn, generatePreview, generateRandomNumber } from '@/lib/utils.js';
-import { useProfile } from '@/hooks/useProfile.js';
-import { useBuckets } from '@/hooks/useBuckets.js';
-import { useToast } from '@/hooks/useToast.js';
+import VideoAddURLModal from '@/components/VideoAddURLModal.jsx';
+import { useProfile } from '@/hooks/useProfile';
+import { useBuckets } from '@/hooks/useBuckets';
+import { useToast } from '@/hooks/useToast';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
 import { Typography } from '@/chadcn/Typography';
-import { Textarea } from '@/chadcn/Textarea';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/chadcn/Tabs.jsx';
 
 import { VideoUploadButton } from '../VideoUploadButton.jsx';
 import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
+import { useMobile } from '@/hooks/useMobile.js';
+import { Listbox } from '@headlessui/react';
+import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -31,7 +38,7 @@ const QRShareView = ({ show, onClose }) => {
 	const { toast } = useToast();
 
 	return (
-		<PageModal show={show} onClose={onClose} width="600px">
+		<PageModal show={show} onClose={onClose} width="600px" zIndex={20}>
 			<div className="flex flex-col justify-center items-center p-16">
 				<div className="flex flex-col justify-center items-center gap-10 ">
 					<Typography variant="h3">Share this bucket!</Typography>
@@ -113,7 +120,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	// Hooks
 	const navigate = useNavigate();
 	const { data: profile, isUserProfile } = useProfile();
-	const { createBucket, updateBucket, deleteBucket, uploadVideo } = useBuckets(profile);
+	const { isMobile } = useMobile();
+	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs } =
+		useBuckets(profile);
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -124,12 +133,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const [enableDelete, setEnableDelete] = React.useState(false);
 	const [isDragOver, setIsDragOver] = React.useState(false);
 	const [isSharing, setSharing] = React.useState(false);
+	const [isDisplayVideoURLsModalVisible, setDisplayVideoURLsModal] = React.useState(false);
 	const [data, setData] = React.useState({
 		videos: [],
 		name: '',
 		title: '',
-		description: ''
+		private: 'false'
 	});
+	const [editorState, setEditorState] = React.useState(EditorState.createEmpty());
 
 	// Refs
 	const dropZoneRef = React.useRef();
@@ -137,8 +148,29 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const video360Ref = React.useRef();
 
 	React.useEffect(() => {
-		if (inData) setData((val) => ({ ...val, ...inData }));
+		if (inData) {
+			setData((val) => ({ ...val, ...inData, private: inData.private?.toString() }));
+
+			const { description = '' } = inData;
+			setEditorState(
+				typeof description === 'string'
+					? EditorState.createWithText(description || '')
+					: EditorState.createWithContent(convertFromRaw({ entityMap: {}, ...description }))
+			);
+		}
 	}, [inData]);
+
+	React.useEffect(() => {
+		let timerId;
+		if (documentId && show) {
+			// Mark as viewed after 5 sec
+			timerId = setTimeout(() => {
+				markBucketViewed({ id: documentId });
+			}, 5000);
+		}
+
+		return () => timerId && clearTimeout(timerId);
+	}, [documentId, show]);
 
 	// Function to toggle fullscreen
 	const toggleFullscreen = () => {
@@ -185,8 +217,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					videos: [],
 					name: '',
 					title: '',
-					description: ''
+					private: 'false'
 				});
+				setEditorState(EditorState.createEmpty());
 				setEditMode(true);
 			}, 1000);
 		} else {
@@ -202,8 +235,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 				videos: [],
 				name: '',
 				title: '',
-				description: ''
+				private: 'false'
 			});
+			setEditorState(EditorState.createEmpty());
 		}
 	};
 
@@ -215,7 +249,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		const crudFunction = documentId ? updateBucket : createBucket;
 
 		crudFunction(
-			{ data, documentId },
+			{
+				data: {
+					...data,
+					private: data.private === 'true',
+					description: convertToRaw(editorState.getCurrentContent())
+				},
+				documentId
+			},
 			{
 				onSuccess: (dbid) => {
 					if (willRedirect) handleToCaptureScreen(documentId);
@@ -314,11 +355,43 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		video360Ref.current.video.play();
 	};
 
+	const handleVideoURLsModal = () => {
+		setDisplayVideoURLsModal(true);
+	};
+
+	const handleVideoURLs = (videosURL) => {
+		setDisplayVideoURLsModal(false);
+		if (!videosURL) return;
+
+		const bucketId = documentId;
+
+		const videos = Object.values(videosURL);
+
+		saveVideoURLs(
+			{ id: bucketId, data: { videos } },
+			{
+				onSuccess: (response) => {
+					console.log(response);
+					// const videos = [...data.videos];
+					// videos[index] = { image, videoUrl: video };
+					// setData((prev) => ({ ...prev, videos }));
+					// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
+				},
+				onSettled: () => {
+					setUploading(false);
+					setProgress(0);
+				},
+				onError: console.error
+			}
+		);
+	};
+
+	const isValid = [editorState.getCurrentContent().hasText(), data.title.length].every(Boolean);
 	const isCurrentVideo360 = data.videos[currentVideo]?.is360Video;
 
 	if (isEditMode) {
 		return (
-			<PageModal show={show} onClose={handleExit} width="80vw">
+			<PageModal show={show} onClose={handleExit} width="1560px" maxWidth="100vw">
 				<div>
 					{/* Video Player */}
 					<div className="aspect-[16/9] shadow bg-black">
@@ -361,7 +434,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									<Button
 										variant="secondary"
 										onClick={() => handleCreateBucket({ cb: () => setEditMode(false) })}
-										disabled={![data.description.length, data.title.length].every(Boolean)}
+										// disabled={!isValid}
 									>
 										{isEditMode ? (editMode ? 'Create bucket' : 'Done editing') : 'Edit Bucket'}
 									</Button>
@@ -377,26 +450,70 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 										className="bg-white/10"
 									/>
 								)}
+								<div className="relative">
+									<Listbox value={data.private} onChange={(val) => setData((state) => ({ ...state, private: val }))}>
+										<Listbox.Button className="relative flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+											<div className="truncate">{data.private === 'true' ? 'Private' : 'Public'}</div>
+											<span>
+												<CaretSortIcon className="h-4 w-4 opacity-50" />
+											</span>
+										</Listbox.Button>
+										<Listbox.Options className="absolute z-50 w-full min-w-[8rem] p-1 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[headlessui-state=open]:animate-in data-[headlessui-state=closed]:animate-out data-[headlessui-state=closed]:fade-out-0 data-[headlessui-state=open]:fade-in-0 data-[headlessui-state=closed]:zoom-out-95 data-[headlessui-state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
+											<Listbox.Option
+												value="false"
+												className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+											>
+												{({ selected }) => (
+													<>
+														<span>Public</span>
+														{selected && (
+															<span className="absolute  right-2 h-3.5 w-3.5 flex items-center justify-center">
+																<CheckIcon className="h-4 w-4" aria-hidden="true" />
+															</span>
+														)}
+													</>
+												)}
+											</Listbox.Option>
+											<Listbox.Option
+												value="true"
+												className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+											>
+												{({ selected }) => (
+													<>
+														<span>Private</span>
+														{selected && (
+															<span className="absolute  right-2 h-3.5 w-3.5 flex items-center justify-center">
+																<CheckIcon className="h-4 w-4" aria-hidden="true" />
+															</span>
+														)}
+													</>
+												)}
+											</Listbox.Option>
+										</Listbox.Options>
+									</Listbox>
+								</div>
 
-								<Input
+								{/* <Input
 									value={data.title}
 									placeholder="Title"
 									onChange={({ target }) => setData((prev) => ({ ...prev, title: target.value }))}
 									className="bg-white/10"
-								/>
-								<Input
+								/> */}
+								{/* <Input
 									name="category"
 									placeholder="Category"
 									value={data.category}
 									onChange={({ target }) => setData((prev) => ({ ...prev, category: target.value }))}
 									className="bg-white/10"
-								/>
-								<Textarea
+								/> */}
+
+								{/*<Textarea
 									value={data.description}
 									placeholder="Description"
 									onChange={({ target }) => setData((prev) => ({ ...prev, description: target.value }))}
 									className="bg-white/10 min-h-[100px]"
-								/>
+								/>*/}
+								<TextEditor placeholder="Description" state={editorState} setState={setEditorState} />
 							</div>
 						</div>
 					</div>
@@ -411,14 +528,23 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									iconBegin={<Icon icon="humbleicons:camera-video" />}
 									variant="secondary"
 									onClick={() => handleCreateBucket({ willRedirect: true })}
-									disabled={![data.description.length, data.title.length].every(Boolean)}
+									// disabled={!isValid}
 								>
 									Capture
 								</Button>
+
 								<VideoUploadButton
 									onUpload={handlePrepareVideosToSave}
-									disabled={![data.description.length, data.title.length].every(Boolean)}
+									// disabled={!isValid}
 								/>
+
+								<Button
+									iconBegin={<Icon icon="carbon:url" />}
+									variant="secondary"
+									onClick={() => handleCreateBucket({ willRedirect: true })}
+								>
+									Add video URL
+								</Button>
 							</div>
 
 							<div className="text-center text-black/50 mt-8">
@@ -463,6 +589,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 													<img
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
+														//
 													/>
 
 													{item.is360Video && (
@@ -531,14 +658,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 							<Button
 								variant="secondary"
 								onClick={handleExit}
-								// disabled={![data.description.length, data.title.length].every(Boolean)}
+								// disabled={!isValid}
 								className="w-full max-w-[150px]"
 							>
 								Cancel
 							</Button>
 							<Button
 								onClick={() => handleCreateBucket({ cb: handleClose })}
-								disabled={![data.description.length, data.title.length].every(Boolean)}
+								// disabled={!isValid}
 								className="w-full max-w-[200px]"
 							>
 								Save
@@ -551,8 +678,10 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	}
 
 	return (
-		<PageModal show={show} onClose={handleExit} width="80vw">
+		<PageModal show={show} onClose={handleExit} width="1560px" maxWidth="100vw" initialFocus={videoRef}>
 			<QRShareView show={isSharing} onClose={() => setSharing(false)} />
+
+			<VideoAddURLModal show={isDisplayVideoURLsModalVisible} onClose={handleVideoURLs} />
 
 			{/* Video Player */}
 			<div className="aspect-[16/9] shadow bg-black">
@@ -561,16 +690,16 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						<>
 							<CachedVideo
 								autoPlay
-								controls={false}
+								controls={true}
 								ref={videoRef}
 								src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
 								onEnded={handleNextVideo}
 								loop={data?.videos?.length === 1}
 								className="w-full h-full object-center rounded-none z-10"
 							/>
-							<div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
+							{/* <div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
 								<Icon onClick={toggleFullscreen} className="text-3xl text-white" icon="iconamoon:screen-full-duotone" />
-							</div>
+							</div> */}
 						</>
 					)}
 
@@ -585,10 +714,16 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			</div>
 
 			<Tabs defaultValue="overview" className="w-full">
-				<TabsList>
+				<TabsList className="flex items-center">
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="q&a">Q&A</TabsTrigger>
+					{isUserProfile && <TabsTrigger value="views">Views</TabsTrigger>}
+					<div className="flex flex-1 gap-1 items-center justify-end px-4 text-[#484848]">
+						<Icon icon="ph:binoculars-fill" className="text-3xl" />
+						{getShortNumberLabel(data.viewers?.length || 0)}
+					</div>
 				</TabsList>
+
 				<TabsContent value="overview">
 					<Overview
 						data={data}
@@ -597,16 +732,26 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 						setSharing={setSharing}
 						setEditMode={setEditMode}
 						currentVideo={currentVideo}
+						description={editorState}
+						setDescription={setEditorState}
 						handlePrepareVideosToSave={handlePrepareVideosToSave}
 						handleCreateBucket={handleCreateBucket}
+						handleVideoURLsModal={handleVideoURLsModal}
 						setCurrentVideo={setCurrentVideo}
 					/>
 				</TabsContent>
+
 				<TabsContent value="q&a" disabled={isEditMode}>
 					<div className="py-10">
 						<QuestionsList profile={profile} scope={{ bucketId: documentId }} />
 					</div>
 				</TabsContent>
+
+				{isUserProfile && (
+					<TabsContent value="views">
+						<Views bucketId={documentId} profile={profile} />
+					</TabsContent>
+				)}
 			</Tabs>
 		</PageModal>
 	);

@@ -1,18 +1,10 @@
 import React, { Fragment, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 
-export function PageModal({ children, show, onClose, width }) {
-	const cancelButtonRef = useRef(null);
-
+export function PageModal({ children, show, onClose, width, maxWidth = '100vw', initialFocus, zIndex }) {
 	return (
 		<Transition.Root show={show} as={Fragment}>
-			<Dialog
-				className="relative z-10"
-				initialFocus={cancelButtonRef}
-				onClose={(...props) => {
-					onClose(...props);
-				}}
-			>
+			<Dialog className="relative" style={{ zIndex: zIndex ?? 10 }} initialFocus={initialFocus} onClose={onClose}>
 				<Transition.Child
 					as={Fragment}
 					enter="ease-out duration-300"
@@ -43,11 +35,13 @@ export function PageModal({ children, show, onClose, width }) {
 										backdropFilter: 'blur(10px)'
 									}}
 								>
-									<div className="sm:flex sm:items-start ">
+									<div className="sm:flex sm:items-start">
 										<div
-											className="text-center sm:text-left "
+											className="text-center sm:text-left"
 											style={{
+												// width: '100%',
 												width,
+												maxWidth,
 												maxHeight: '95vh', // Set a max height for the modal content
 												overflowY: 'auto' // Allow content to scroll if it exceeds the max height
 											}}

@@ -1,8 +1,8 @@
 import React from 'react';
 import Webcam from 'react-webcam';
 
-import { NavBar } from '@/components/NavBar';
-import { SideBar } from '@/components/SideBar';
+import { NavBar } from '@/components/NavigationBar/NavBar';
+import { SideBar } from '@/components/NavigationBar/SideBar';
 import { DebugOverlay } from '@/components/DebugOverlay';
 
 import { VR_3D, Video360 } from '@/components/MediaPlayer';

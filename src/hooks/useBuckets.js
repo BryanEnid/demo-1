@@ -7,8 +7,12 @@ import {
 	getBucket as handleGetBucket,
 	getBuckets as handleGetBuckets,
 	updateBucket as handleUpdateBucket,
+	markBucketViewed as handleMarkBucketViewed,
 	deleteBucket as handleDeleteBucket,
-	uploadVideo as handleUploadVideo
+	uploadVideo as handleUploadVideo,
+	uploadVideoURLs as handleUploadVideoURLs,
+	updateBucketsCategory as handleUpdateBucketsCategory,
+	deleteBucketsCategory as handleDeleteBucketsCategory
 } from './api/buckets';
 
 const COLLECTION_NAME = 'Buckets';
@@ -18,7 +22,7 @@ export const useBuckets = (owner) => {
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
-	const queryKey = [COLLECTION_NAME, owner?.id];
+	const queryKey = [COLLECTION_NAME, owner?.id, auth.authToken];
 
 	const { data } = useQuery({
 		gcTime: Infinity,
@@ -39,6 +43,14 @@ export const useBuckets = (owner) => {
 		mutationFn: ({ data: body, documentId: id }) => handleUpdateBucket(auth, { body, id }),
 		onSuccess: () => {
 			// TODO: Optimistic updates
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	const markBucketViewed = useMutation({
+		mutationFn: ({ id }) => handleMarkBucketViewed(auth, id),
+		onSuccess: () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });
 		}
@@ -69,15 +81,43 @@ export const useBuckets = (owner) => {
 		}
 	});
 
+	const saveVideoURLs = useMutation({
+		mutationFn: ({ id, data }) => handleUploadVideoURLs(auth, id, data),
+		onMutate: ({ onLoading }) => {
+			onLoading && onLoading(); // This is a callback that fires when onMutate fires
+		},
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	// TODO: Optimistic updates
+	const updateBucketsCategory = useMutation({
+		mutationFn: ({ data: body, category }) => handleUpdateBucketsCategory(auth, { body, category }),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	const deleteBucketsCategory = useMutation({
+		mutationFn: ({ category, withBuckets }) => handleDeleteBucketsCategory(auth, category, withBuckets),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
 	return {
 		data,
 		createBucket: createBucket.mutate,
 		deleteBucket: deleteBucket.mutate,
 		updateBucket: updateBucket.mutate,
-		uploadVideo: uploadVideo.mutate
-
-		// uploadFile: createBucket.mutate,
-		// uploadResumableFile: createBucket.mutate,
-		// appendVideo: createBucket.mutate
+		markBucketViewed: markBucketViewed.mutate,
+		uploadVideo: uploadVideo.mutate,
+		saveVideoURLs: saveVideoURLs.mutate,
+		updateBucketsCategory: updateBucketsCategory.mutate,
+		deleteBucketsCategory: deleteBucketsCategory.mutate
 	};
 };

@@ -45,7 +45,7 @@ export const fetchWithAuth = async ({ authToken, logout }, url, opts = {}) => {
 		return handleFetch(url, {
 			...opts,
 			headers: {
-				Authorization: `Bearer ${authToken}`,
+				...(authToken && { Authorization: `Bearer ${authToken}` }),
 				...opts.headers
 			}
 		});
