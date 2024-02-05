@@ -18,9 +18,9 @@ const dateOpts = {
 	minute: 'numeric'
 };
 
-const BucketInfo = ({ bucket, profile, canEdit, isUserProfile, onClose }) => {
+const BucketInfo = ({ bucket, canEdit, isUserProfile, onClose }) => {
 	const navigate = useNavigate();
-	const { updateBucket } = useBuckets(profile);
+	const { updateBucket } = useBuckets();
 
 	const [isPrivate, setIsPrivate] = useState(bucket.private.toString());
 	const [confirmDelete, setConfirmDelete] = useState(null);
@@ -61,7 +61,7 @@ const BucketInfo = ({ bucket, profile, canEdit, isUserProfile, onClose }) => {
 	};
 
 	return (
-		<div className="bg-[#FCFCFC] px-5 py-7 h-full">
+		<div className="bg-[#FCFCFC] px-5 py-7 pb-28 sm:pb-7 h-full overflow-y-auto">
 			<div>
 				<div className="flex items-center justify-between mb-10">
 					<Typography variant="h3" className="flex items-center gap-2">

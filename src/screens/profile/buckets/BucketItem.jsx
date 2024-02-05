@@ -23,10 +23,7 @@ export const BucketItem = ({
 	documentId,
 	onClick,
 	width = 'size-[200px]',
-	iconProps,
-	defaultIcon = 'solar:gallery-circle-broken',
 	isUserProfile,
-	defaultContextMenu,
 	updateBucket,
 	deleteBucket,
 	showBucketInfo,
@@ -116,12 +113,6 @@ export const BucketItem = ({
 										src={handleSrc(preview)}
 										className="aspect-video object-cover rounded-full w-full h-full"
 									/>
-								)}
-
-								{!preview && (
-									<div className="flex h-full w-full justify-center items-center text-gray-300 p-3">
-										<Icon fontSize="130" icon={defaultIcon} {...iconProps} />
-									</div>
 								)}
 
 								<ContextMenuContent>
