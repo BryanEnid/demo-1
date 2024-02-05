@@ -17,8 +17,23 @@ import EditableLabel from '@/components/EditableLabel.jsx';
 import { groupBy } from '@/lib/utils.js';
 import { BucketItem } from './BucketItem';
 import { useMobile } from '@/hooks/useMobile';
+import { useLayout } from '@/providers/LayoutProvider.jsx';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
+
+const AddBucketBtn = ({ onClick }) => (
+	<div className="select-none">
+		<button onClick={onClick} className={`size-[64px] transition ease-in-out hover:scale-105 select-none`}>
+			<div
+				className={`flex object-cover aspect-square shadow drop-shadow-xl rounded-full p-1 bg-white transition ease-in-out hover:shadow-md hover:shadow-primary justify-center items-center`}
+			>
+				<div className="flex h-full w-full justify-center items-center text-gray-300 p-3">
+					<Icon icon="ic:round-plus" color="#06f" fontSize="42px" />
+				</div>
+			</div>
+		</button>
+	</div>
+);
 
 const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, ref) => {
 	const [editing, setEditing] = useState(false);
@@ -82,15 +97,16 @@ CategoryLabel.displayName = 'CategoryLabel';
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
+	const [{ isUserProfile, isOrganization }] = useOutletContext();
 	const {
 		data: buckets,
 		updateBucket,
 		updateBucketsCategory,
 		deleteBucketsCategory,
 		deleteBucket
-	} = useBuckets(profile);
-	const [{ isUserProfile, createBucket, bucketInfoOpen, showBucketInfo }] = useOutletContext();
+	} = useBuckets(profile, isOrganization);
 	const { isMobile } = useMobile();
+	const { bucketInfoOpen, showBucketInfo, showCreateBucketModal } = useLayout();
 
 	// State
 	const [confirmDelete, setConfirmDelete] = useState(null);
@@ -143,7 +159,12 @@ export function Buckets() {
 			return;
 		}
 
-		updateBucketsCategory({ category: encodeURIComponent(category), data: { label: newValue } });
+		updateBucketsCategory({
+			category: encodeURIComponent(category),
+			data: { label: newValue },
+			ownerId: profile.id,
+			isOrganization
+		});
 	};
 
 	const submitEditTmpCategory = (category, newValue) => {
@@ -162,7 +183,12 @@ export function Buckets() {
 			setDeleteWithBuckets(false);
 		} else {
 			deleteBucketsCategory(
-				{ category: encodeURIComponent(confirmDelete), withBuckets },
+				{
+					category: encodeURIComponent(confirmDelete),
+					withBuckets,
+					ownerId: profile.id,
+					isOrganization
+				},
 				{
 					onSuccess: () => {
 						setConfirmDelete(null);
@@ -235,23 +261,29 @@ export function Buckets() {
 							/>
 
 							<div className="grid gap-16 grid-cols-3">
-								{isUserProfile && (
+								{isUserProfile && !isMobile && (
 									<motion.div
 										initial={{ opacity: 0, y: -20 }}
 										animate={{ opacity: 1, y: 0 }}
 										transition={{ duration: 0.5 }}
 										className="flex items-center"
 									>
-										<BucketItem
-											defaultContextMenu
-											defaultIcon="ic:round-plus"
-											width="size-[64px]"
-											iconProps={{ color: '#06f', fontSize: '42px' }}
-											onClick={() => createBucket({ category })}
-										/>
+										<AddBucketBtn onClick={() => showCreateBucketModal({ category })} />
 									</motion.div>
 								)}
 							</div>
+							{isUserProfile && isMobile && (
+								<div className="mt-10">
+									<Button
+										className="w-full"
+										variant="secondary"
+										iconBegin={<Icon name="ic:round-plus" />}
+										onClick={() => showCreateBucketModal({ category })}
+									>
+										Add bucket
+									</Button>
+								</div>
+							)}
 						</div>
 					))}
 
@@ -286,7 +318,7 @@ export function Buckets() {
 								</motion.div>
 							))}
 
-							{isUserProfile && (
+							{isUserProfile && !isMobile && (
 								<motion.div
 									key="ADD NEW"
 									initial={{ opacity: 0, y: -20 }}
@@ -294,26 +326,18 @@ export function Buckets() {
 									transition={{ duration: 0.5, delay: groupedBucket[category].length * 0.05 }}
 									className="flex items-center justify-center"
 								>
-									{!isMobile && (
-										<BucketItem
-											defaultContextMenu
-											defaultIcon="ic:round-plus"
-											width="size-[64px]"
-											iconProps={{ color: '#06f', fontSize: '42px' }}
-											onClick={() => createBucket({ category })}
-										/>
-									)}
+									<AddBucketBtn onClick={() => showCreateBucketModal({ category })} />
 								</motion.div>
 							)}
 						</div>
 
-						{isMobile && (
+						{isUserProfile && isMobile && (
 							<div className="mt-10">
 								<Button
 									className="w-full"
 									variant="secondary"
 									iconBegin={<Icon name="ic:round-plus" />}
-									onClick={() => createBucket({ category })}
+									onClick={() => showCreateBucketModal({ category })}
 								>
 									Add bucket
 								</Button>
@@ -323,21 +347,17 @@ export function Buckets() {
 				))}
 
 				{!Object.keys(groupedBucket).length && isUserProfile && !tmpCategories.length && (
-					<motion.div
-						key="ADD NEW"
-						initial={{ opacity: 0, y: -20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.05 }}
-						className="flex items-center mt-10"
-					>
-						<BucketItem
-							defaultContextMenu
-							defaultIcon="ic:round-plus"
-							width="size-[64px]"
-							iconProps={{ color: '#06f', fontSize: '42px' }}
-							onClick={() => createBucket({ category: 'Unlisted' })}
-						/>
-					</motion.div>
+					<div className="mb-20">
+						<motion.div
+							key="ADD NEW"
+							initial={{ opacity: 0, y: -20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.5, delay: 0.05 }}
+							className="flex items-center mt-10"
+						>
+							<AddBucketBtn onClick={() => showCreateBucketModal({ category: 'Unlisted' })} />
+						</motion.div>
+					</div>
 				)}
 			</div>
 			<ConfirmDialog

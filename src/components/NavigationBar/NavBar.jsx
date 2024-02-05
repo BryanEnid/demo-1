@@ -23,7 +23,7 @@ import { useAuth } from '@/providers/Authentication';
 import { useMobile } from '@/hooks/useMobile';
 import { MobileNavBar } from './MobileNavBar';
 
-export function NavBar({ createBucket }) {
+export function NavBar({ createBucket: handleCreateBucket }) {
 	// Hooks
 	const navigate = useNavigate();
 	const { user, logout } = useAuth();
@@ -33,14 +33,20 @@ export function NavBar({ createBucket }) {
 	const inputRef = React.useRef();
 
 	const handleLogOut = () => {
-		logout().then(() => navigate('/'));
+		logout().then(() => navigate('/sign-in'));
+	};
+
+	const createBucket = () => {
+		handleCreateBucket();
+		navigate(`/${user.uid}/buckets`);
 	};
 
 	if (isMobile) return <MobileNavBar createBucket={createBucket} />;
 
 	return (
 		<>
-			<div className="h-20 w-full xl:h-24" />
+			<div className="h-20 w-full" />
+			{/*xl:h-24*/}
 			{/* <nav className="xl:h-20 xl:p-8 flex fixed z-10 top-0 left-[96px] right-0 flex-row  items-center justify-end  gap-8 text-gray-600  bg-red-500"> */}
 			<nav className="flex fixed z-10 top-0 left-0 right-0 flex-row items-center justify-end p-3 gap-2 text-gray-600 bg-white">
 				{/* <button>Career portal</button> */}

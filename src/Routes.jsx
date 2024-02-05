@@ -13,22 +13,17 @@ import { SignIn } from './screens/sign_in/SignIn';
 import Quests from './screens/profile/quests/index';
 import Recommends from '@/screens/profile/recommends';
 import { UsersScreen } from './screens/users/Users';
+import { OrganizationsScreen } from './screens/organizations';
+import Layout from '@/components/Layout.jsx';
 
 export function Routes(props) {
 	// TODO: Preload all icons
 
 	const router = createBrowserRouter([
 		{
-			path: '/',
+			path: '/sign-in',
 			element: <SignIn />
 		},
-
-		{
-			// ! This is temporally - Only for DEV
-			path: '/users/*',
-			element: <UsersScreen />
-		},
-
 		{
 			path: '/capture/*',
 			element: <CaptureScreen />
@@ -38,35 +33,60 @@ export function Routes(props) {
 			element: <Preview />
 		},
 		{
-			path: '/:id',
-			element: <Profile />,
+			path: '/',
+			element: <Layout />,
 			children: [
-				{ path: '', element: <Buckets /> },
-				{ path: 'audio', element: <>audio</> },
-				{ path: 'buckets', element: <Buckets /> },
-				{ path: 'experience', element: <Experience /> },
-				{ path: 'recommends', element: <Recommends /> },
-				{ path: 'quests', element: <Quests /> },
-				{ path: 'website', element: <>website</> },
-
 				{
-					path: 'about',
+					// ! This is temporally - Only for DEV
+					path: '/users/*',
+					element: <UsersScreen />
+				},
+				{
+					path: '/organizations',
 					element: <Outlet />,
 					children: [
-						{ path: '', element: <Navigate to="mission" replace /> },
-						{ path: 'mission', element: <>Mission, Vision, & Values</> },
-						{ path: 'culture', element: <>Culture</> },
-						{ path: 'people', element: <>People</> },
-						{ path: 'resources', element: <>Resources</> },
-						{ path: 'website', element: <>Website</> },
-						{ path: '*', element: <Navigate to="mission" replace /> }
+						{ path: '', element: <OrganizationsScreen /> },
+						{
+							path: ':id',
+							element: <Profile />,
+							children: [
+								{
+									path: 'about',
+									element: <Outlet />,
+									children: [
+										{ path: '', element: <Navigate to="mission" replace /> },
+										{ path: 'mission', element: <>Mission, Vision, & Values</> },
+										{ path: 'culture', element: <>Culture</> },
+										{ path: 'people', element: <>People</> },
+										{ path: 'resources', element: <>Resources</> },
+										{ path: 'website', element: <>Website</> },
+										{ path: '*', element: <Navigate to="mission" replace /> }
+									]
+								},
+								{ path: 'buckets', element: <Buckets /> },
+								{ path: 'open-roles', element: <>Open Roles</> },
+								{ path: 'resources', element: <>Resources</> },
+								{ path: 'teams', element: <>Teams</> },
+								{ path: 'training', element: <>Training</> },
+								{ path: 'website', element: <>Website</> },
+								{ path: '', element: <Navigate to="buckets" replace /> }
+							]
+						}
 					]
 				},
-				{ path: 'open-roles', element: <>Open Roles</> },
-				{ path: 'resources', element: <>Resources</> },
-				{ path: 'teams', element: <>Teams</> },
-				{ path: 'training', element: <>Training</> },
-				{ path: 'website', element: <>Website</> }
+				{
+					path: '/:id',
+					element: <Profile />,
+					children: [
+						{ path: '', element: <Buckets /> },
+						{ path: 'audio', element: <>audio</> },
+						{ path: 'buckets', element: <Buckets /> },
+						{ path: 'experience', element: <Experience /> },
+						{ path: 'recommends', element: <Recommends /> },
+						{ path: 'quests', element: <Quests /> },
+						{ path: 'website', element: <>website</> }
+					]
+				}
 			]
 		},
 		{

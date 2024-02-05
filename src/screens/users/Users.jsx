@@ -48,8 +48,8 @@ export const UsersScreen = () => {
 
 	return (
 		<>
-			<SideBar />
-			<NavBar />
+			{/*<SideBar />*/}
+			{/*<NavBar />*/}
 
 			<div className="container mx-auto pb-28 sm:pb-0">
 				<Typography variant="h2" className="m-5">
