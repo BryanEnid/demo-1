@@ -89,7 +89,7 @@ export const MobileNavBar = ({ createBucket }) => {
 		<>
 			<div className="w-full flex justify-center fixed bottom-12 z-10">
 				<div className="flex justify-between items-center w-[90%] bg-gray-100 p-3 rounded-full ">
-					<Button variant="ghost" onClick={() => navigate('/profile')} className="text-primary">
+					<Button variant="ghost" onClick={() => navigate(`/${user?.uid}`)} className="text-primary">
 						<Icon width={30} icon="iconamoon:profile" />
 					</Button>
 

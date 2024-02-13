@@ -25,8 +25,8 @@ export const getBucketViewers = (auth, id) =>
 export const markBucketViewed = (auth, id) =>
 	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/viewers`, { method: 'PUT' });
 
-export const updateBucketsCategory = (auth, { body, category }) =>
-	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'PUT', body });
+export const updateBucketsCategory = (auth, { body, category, params }) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'PUT', body, params });
 
-export const deleteBucketsCategory = (auth, category, withBuckets) =>
-	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'DELETE', params: { withBuckets } });
+export const deleteBucketsCategory = (auth, category, params) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'DELETE', params });

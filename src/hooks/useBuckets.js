@@ -17,17 +17,21 @@ import {
 
 const COLLECTION_NAME = 'Buckets';
 
-export const useBuckets = (owner) => {
+export const useBuckets = (owner, isOrganization) => {
 	// Hooks
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
-	const queryKey = [COLLECTION_NAME, owner?.id, auth.authToken];
+	const queryKey = [COLLECTION_NAME, owner?.id, isOrganization, auth.authToken];
 
 	const { data } = useQuery({
 		gcTime: Infinity,
 		queryKey,
-		queryFn: async () => handleGetBuckets(auth, { ownerId: owner.id }),
+		queryFn: async () =>
+			handleGetBuckets(auth, {
+				ownerId: owner.id,
+				...(typeof isOrganization === 'boolean' && { isOrganization })
+			}),
 		enabled: Boolean(owner?.id)
 	});
 
@@ -94,7 +98,12 @@ export const useBuckets = (owner) => {
 
 	// TODO: Optimistic updates
 	const updateBucketsCategory = useMutation({
-		mutationFn: ({ data: body, category }) => handleUpdateBucketsCategory(auth, { body, category }),
+		mutationFn: ({ data: body, category, ownerId, isOrganization }) =>
+			handleUpdateBucketsCategory(auth, {
+				body,
+				category,
+				params: isOrganization ? { organizationId: ownerId } : { profileId: ownerId }
+			}),
 		onSuccess: () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });
@@ -102,7 +111,11 @@ export const useBuckets = (owner) => {
 	});
 
 	const deleteBucketsCategory = useMutation({
-		mutationFn: ({ category, withBuckets }) => handleDeleteBucketsCategory(auth, category, withBuckets),
+		mutationFn: ({ category, withBuckets, ownerId, isOrganization }) =>
+			handleDeleteBucketsCategory(auth, category, {
+				withBuckets,
+				...(isOrganization ? { organizationId: ownerId } : { profileId: ownerId })
+			}),
 		onSuccess: () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });

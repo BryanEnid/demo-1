@@ -196,7 +196,7 @@ export function Preview() {
 
 				{!isUploading ? (
 					<div className="flex flex-col gap-4">
-						<Button variant="outline" className="p-2" onClick={() => navigate('/profile')}>
+						<Button variant="outline" className="p-2" onClick={() => navigate(`/${user?.uid}`)}>
 							Cancel
 						</Button>
 						<Button onClick={handleSaveVideo} disabled={!isSubmitable} className="p-2 h-16 ">

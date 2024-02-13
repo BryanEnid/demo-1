@@ -119,7 +119,7 @@ const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
 const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
 	// Hooks
 	const navigate = useNavigate();
-	const { data: profile, isUserProfile } = useProfile();
+	const { data: profile, isUserProfile, isOrganization } = useProfile();
 	const { isMobile } = useMobile();
 	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs } =
 		useBuckets(profile);
@@ -252,6 +252,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 			{
 				data: {
 					...data,
+					...(isOrganization && { organizationId: profile.id }),
 					private: data.private === 'true',
 					description: convertToRaw(editorState.getCurrentContent())
 				},
@@ -420,7 +421,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					<div className="flex flex-row  px-8 my-6">
 						<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
 							{/* TODO: picture */}
-							<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
+							<img src={profile?.photoURL || profile?.picture} className="rounded-full object-cover w-20" />
 							<Typography variant="small">215k</Typography>
 						</div>
 

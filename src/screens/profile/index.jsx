@@ -2,29 +2,23 @@ import React from 'react';
 import { useNavigate, Outlet, useLocation, useMatches } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/providers/Authentication.jsx';
+import { useLayout } from '@/providers/LayoutProvider.jsx';
+import { useProfile } from '@/hooks/useProfile';
+import { useMobile } from '@/hooks/useMobile';
+import useOrganizations from '@/hooks/useOrganizations.js';
+
 // Components
 import { Icon } from '@iconify/react';
-import { SideBar } from '@/components/NavigationBar/SideBar';
-import { NavBar } from '@/components/NavigationBar/NavBar';
-
-// Screens
 import { Typography } from '@/chadcn/Typography';
 import { Button } from '@/chadcn/Button';
 import { Separator } from '@/chadcn/Separator.jsx';
-import { useProfile } from '@/hooks/useProfile';
-import { useQueryParams } from '@/hooks/useQueryParams';
-import { useAuth } from '@/providers/Authentication.jsx';
-import PreviewBucket from '@/components/PreviewBucket';
-import BucketInfo from '@/components/BucketInfo.jsx';
-
-// TODO: dynamic url
-import orgBgImg from '@/assets/image-org-bg.png';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/chadcn/Carousel';
-import { useMobile } from '@/hooks/useMobile';
-import { cn } from '@/lib/utils';
 
 function NavOption(props) {
-	const { title, href, buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
+	const { title, href, textClassName = '', buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
 	const width = 'w-full';
 
 	const navigate = useNavigate();
@@ -54,7 +48,7 @@ function NavOption(props) {
 				{...buttonProps}
 				className={cn(className, width)}
 			>
-				<Typography variant="large" className={cn('capitalize truncate', width)}>
+				<Typography variant="large" className={cn('capitalize truncate', width, textClassName)}>
 					{title}
 				</Typography>
 			</Button>
@@ -66,9 +60,11 @@ export function Profile() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
-	const { data: profile, isUserProfile, isLoading: profileLoading } = useProfile();
+	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
+	const { updateOrganization } = useOrganizations();
 	const { user, isLoading: authLoading } = useAuth();
 	const { isMobile } = useMobile();
+	const { closeBucketInfo } = useLayout();
 
 	const pathParts = pathname.slice(1).split('/');
 	const organizationMenu = [
@@ -94,17 +90,13 @@ export function Profile() {
 	const [orgSubButtons, setOrgSubButtons] = React.useState(
 		organizationMenu.find(({ label, href }) => pathParts.includes(href || label.toLowerCase()))?.subLinks || []
 	);
-	const [bucketInfoOpen, setBucketInfoOpen] = React.useState(false);
-	const [show, setShow] = React.useState(false);
-	const [bucketData, setBucketData] = React.useState(null);
+
+	const fileInpRef = React.useRef();
 
 	const [username] = pathParts;
 
-	// TODO: check if this is Organization
-	const isOrganization = false;
-
 	React.useEffect(() => {
-		setBucketInfoOpen(null);
+		closeBucketInfo();
 	}, [profile?.id]);
 
 	React.useEffect(() => {
@@ -112,54 +104,76 @@ export function Profile() {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
 
 			// ! This doesn't longer work
-			if (!profile?.uid && !profileLoading && !authLoading) return navigate('/notfound');
+			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate('/notfound');
 		})();
 	}, [profile, profileLoading, authLoading]);
 
-	if (!profile?.uid) return <></>;
+	if (!profile?.uid && !profile?.id) return <></>;
 
-	const handleCreateBucket = (data) => {
-		navigate(`/${user.uid}/buckets`);
-		setShow(true);
-		setBucketData(data);
-	};
+	const handleFilesChange = (e) => {
+		const file = e.target.files[0];
+		if (!file || !file.type.startsWith('image/')) return alert('Please drop a valid image files.');
 
-	const handleCancel = () => {
-		setShow(false);
-		setBucketData(null);
+		const bgPicture = new FormData();
+		bgPicture.append('picture', file);
+		updateOrganization({ ...profile, bgPicture });
 	};
 
 	return (
 		<div>
-			<SideBar />
+			{isOrganization ? (
+				/* TODO: dynamic background image */
+				<div className="-mt-5 -mx-5 sm:mt-0 sm:mx-0 mb-12">
+					<div
+						className="sm:p-0 h-96 bg-center bg-cover bg-top bg-no-repeat bg-[length:auto_400px]"
+						style={{ backgroundImage: `url('${profile?.bgPicture}')` }}
+					/>
+					<div className="container pt-5 px-1 sm:pt-0 sm:px-0 -mt-96 sm:-mt-80">
+						<div className="relative rounded-md sm:rounded-lg lg:rounded-[74px] p-4 sm:p-11 pb-2 bg-gradient-to-b from-[#000C1EAA] from-0% via-[#000C1EDD] via-60% to-[#000C1EFF] to-100% backdrop-blur-[115px]">
+							{isUserProfile && (
+								<>
+									<input
+										type="file"
+										className="hidden"
+										accept="image/*"
+										ref={fileInpRef}
+										onChange={handleFilesChange}
+									/>
+									<DropdownMenu>
+										<DropdownMenuTrigger className="absolute top-8 right-8 ">
+											<Button variant="secondary" className="rounded-full p-1 w-[40px] h-[40px]">
+												<Icon icon="bi:gear-fill" className="text-xl" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent className="w-56">
+											<DropdownMenuItem onClick={() => fileInpRef.current?.click?.()}>
+												<Icon icon="lucide:upload" className="pr-1 text-xl" />
+												Upload background image
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</>
+							)}
+							<div className="flex flex-col items-center">
+								<img src={profile?.picture} className="rounded-full object-cover aspect-square w-36 2xl:w-48 mb-8" />
+								<Typography variant="h2" className="text-white/[.96]">
+									{profile?.name}
+								</Typography>
+								<Typography variant="h3" className="text-center text-white/[.96] font-normal leading-normal mb-1">
+									{profile?.tagline}
+								</Typography>
+								<Typography variant="blockquote" className="text-white leading-snug !border-l-0 !pl-0">
+									“For the Benefit of All. We make Air and Space available for everyone.”
+								</Typography>
+							</div>
 
-			<NavBar createBucket={handleCreateBucket} />
-
-			<div className="p-5 overflow-x-hidden">
-				<div className="flex">
-					<div className="w-full">
-						{isOrganization ? (
-							/* TODO: dynamic background image */
-							<div
-								className={`pt-[50px] mb-12 bg-center bg-top bg-no-repeat bg-[length:auto_400px]`}
-								style={{ backgroundImage: `url('${orgBgImg}')` }}
-							>
-								<div className="container">
-									<div className="rounded-[74px] p-11 pb-2 bg-gradient-to-b from-[#000C1EAA] from-0% via-[#000C1EDD] via-60% to-[#000C1EFF] to-100% backdrop-blur-[115px]">
-										<div className="flex flex-col items-center">
-											<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-48 mb-8" />
-											<Typography variant="h2" className="text-white/[.96]">
-												NASA
-											</Typography>
-											<Typography variant="h3" className="text-white/[.96] font-normal leading-normal mb-1">
-												National Aeronautics and Space Administration
-											</Typography>
-											<Typography variant="blockquote" className="text-white leading-snug !border-l-0 !pl-0">
-												“For the Benefit of All. We make Air and Space available for everyone.”
-											</Typography>
-										</div>
-
-										<div className="flex mt-8 mb-10 gap-4 justify-center">
+							<div className="mt-5 mb-5 sm:mt-8 sm:mb-10">
+								<Carousel
+									className="relative w-full"
+									opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: false }}
+								>
+									<div className="sm:overflow-visible">
+										<CarouselContent className="mx-10 md:flex md:gap-4 md:justify-center">
 											{organizationMenu.map((item) => (
 												<NavOption
 													key={item.label}
@@ -174,18 +188,34 @@ export function Profile() {
 													onClick={() => setOrgSubButtons(item.subLinks || [])}
 												/>
 											))}
-										</div>
-										{!!orgSubButtons?.length && (
+										</CarouselContent>
+										{isMobile && (
 											<>
-												<div className="w-[60%] mx-auto">
-													<Separator />
-												</div>
-												<div className="flex mt-8 mb-10 gap-4 justify-center">
+												<CarouselPrevious variant="secondary" className="absolute left-0" />
+												<CarouselNext variant="secondary" className="absolute right-0" />
+											</>
+										)}
+									</div>
+								</Carousel>
+							</div>
+							{!!orgSubButtons?.length && (
+								<>
+									<div className="w-[60%] mx-auto">
+										<Separator />
+									</div>
+									<div className="mt-2 mb-5 sm:mt-8 sm:mb-0">
+										<Carousel
+											className="relative w-full"
+											opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: false }}
+										>
+											<div className="sm:overflow-visible">
+												<CarouselContent className="mx-10 md:flex md:gap-4 md:justify-center">
 													{orgSubButtons.map((subLink) => (
 														<NavOption
 															key={subLink.label}
 															title={subLink.label}
 															href={subLink.href}
+															textClassName="!text-sm"
 															buttonProps={{
 																activeClassName: 'font-bold underline',
 																variant: 'link',
@@ -193,89 +223,76 @@ export function Profile() {
 															}}
 														/>
 													))}
-												</div>
+												</CarouselContent>
+												{isMobile && (
+													<>
+														<CarouselPrevious variant="secondary" className="absolute left-0" />
+														<CarouselNext variant="secondary" className="absolute right-0" />
+													</>
+												)}
+											</div>
+										</Carousel>
+									</div>
+								</>
+							)}
+						</div>
+					</div>
+				</div>
+			) : (
+				<div className="container">
+					<div>
+						{/* Header */}
+						<div className="flex flex-col items-center gap-3">
+							{/* <img src={profile?.photoURL} className="rounded-full object-cover aspect-square xl:w-48 md:w-32" /> */}
+							<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
+							<Typography variant="h3" className="mt-6">
+								{profile?.name}
+							</Typography>
+							<Typography variant="blockquote" className="border-0">
+								“If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.”
+							</Typography>
+						</div>
+
+						<div className="flex flex-row justify-center my-8">
+							<div className="w-full">
+								<Carousel
+									className="relative w-full"
+									opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: false }}
+								>
+									<div className="sm:overflow-visible">
+										<CarouselContent className="mx-10 md:flex md:gap-4 md:justify-center">
+											{/* <NavOption title="Audio" /> */}
+											<NavOption title="Buckets" />
+											<NavOption title="Experience" />
+											<NavOption title="Recommends" />
+											<NavOption title="Quests" />
+											{/* <NavOption title="Website" /> */}
+										</CarouselContent>
+
+										{isMobile && (
+											<>
+												<CarouselPrevious variant="secondary" className="absolute left-0" />
+												<CarouselNext variant="secondary" className="absolute right-0" />
 											</>
 										)}
 									</div>
-								</div>
+								</Carousel>
 							</div>
-						) : (
-							<div className="container">
-								<div>
-									{/* Header */}
-									<div className="flex flex-col items-center gap-3">
-										{/* <img src={profile?.photoURL} className="rounded-full object-cover aspect-square xl:w-48 md:w-32" /> */}
-										<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
-										<Typography variant="h3" className="mt-6">
-											{profile?.name}
-										</Typography>
-										<Typography variant="blockquote" className="border-0">
-											“If you want to find the secrets of the universe, think in terms of energy, frequency and
-											vibration.”
-										</Typography>
-									</div>
-
-									<div className="flex flex-row justify-center my-8">
-										<div className="w-full">
-											<Carousel
-												className="relative w-full"
-												opts={{ align: 'start', containScroll: 'keepSnaps', dragFree: false }}
-											>
-												<div className="sm:overflow-visible">
-													<CarouselContent className="mx-10 md:flex md:gap-4 md:justify-center">
-														{/* <NavOption title="Audio" /> */}
-														<NavOption title="Buckets" />
-														<NavOption title="Experience" />
-														<NavOption title="Recommends" />
-														<NavOption title="Quests" />
-														{/* <NavOption title="Website" /> */}
-													</CarouselContent>
-
-													{isMobile && (
-														<>
-															<CarouselPrevious variant="secondary" className="absolute left-0" />
-															<CarouselNext variant="secondary" className="absolute right-0" />
-														</>
-													)}
-												</div>
-											</Carousel>
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
-
-						<div className="container pb-28 sm:pb-0">
-							{/* Screens */}
-							<Outlet
-								context={[
-									{
-										isUserProfile,
-										createBucket: handleCreateBucket,
-										bucketInfoOpen,
-										showBucketInfo: setBucketInfoOpen
-									}
-								]}
-							/>
-
-							<PreviewBucket editMode show={show} data={bucketData} onClose={handleCancel} />
 						</div>
 					</div>
-
-					{!!bucketInfoOpen && (
-						<motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 300, opacity: 1 }} className="shrink-0">
-							<div className="fixed top-0 sm:top-[80px] right-0 overflow-auto w-[300px] h-dvh">
-								<BucketInfo
-									bucket={bucketInfoOpen}
-									profile={profile}
-									canEdit={isUserProfile}
-									isUserProfile={isUserProfile}
-									onClose={() => setBucketInfoOpen(null)}
-								/>
-							</div>
-						</motion.div>
-					)}
 				</div>
+			)}
+
+			<div className="container pb-28 sm:pb-0">
+				{/* Screens */}
+				<Outlet
+					context={[
+						{
+							isUserProfile,
+							isOrganization
+						}
+					]}
+				/>
 			</div>
 		</div>
 	);
