@@ -1,4 +1,5 @@
 import { Typography } from '@/chadcn/Typography';
+import { Image } from '@/components/Image';
 import { ObserveIcon } from '@/components/ObserveIcon';
 import React from 'react';
 
@@ -31,7 +32,7 @@ export const AttachmentsSection = ({ data }) => {
 			<div className="grid grid-cols-5 gap-9">
 				{data.map(({ previewUrl, id }) => (
 					<div key={id}>
-						<img
+						<Image
 							src={previewUrl}
 							style={{ aspectRatio: 8 / 12 }}
 							className="h-full w-full object-cover border rounded-lg transition-all hover:scale-105 cursor-pointer"

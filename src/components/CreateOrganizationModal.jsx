@@ -10,6 +10,7 @@ import { Typography } from '@/chadcn/Typography.jsx';
 import { Input } from '@/chadcn/Input.jsx';
 import useOrganizations from '@/hooks/useOrganizations.js';
 import { organizationTypes } from '@/screens/organizations/constants.js';
+import { Image } from './Image';
 
 const Step1 = ({ values, handleChange }) => {
 	const [isDragOver, setIsDragOver] = React.useState(false);
@@ -67,7 +68,7 @@ const Step1 = ({ values, handleChange }) => {
 					].join(' ')}
 				>
 					{values.picture?.url ? (
-						<img src={values.picture.url} className="object-cover " />
+						<Image src={values.picture.url} className="object-cover " />
 					) : (
 						<Icon icon="lucide:upload" className="text-5xl opacity-50" />
 					)}

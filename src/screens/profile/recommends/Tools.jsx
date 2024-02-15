@@ -15,6 +15,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.jsx';
 import EditableLabel from '@/components/EditableLabel.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import useEmoji from '@/hooks/useEmoji.js';
+import { Image } from '@/components/Image';
 
 const initialToolState = {
 	title: '',
@@ -282,7 +283,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 											<Card key={tool.id} className="h-[130px] w-full flex items-center gap-5 mb-4 px-10">
 												{!!tool.picture && (
 													<div className="w-[100px] h-[80px] flex items-center justify-center">
-														<img
+														<Image
 															src={tool.picture}
 															className="max-w-full max-h-full "
 															onError={(e) => {
@@ -314,7 +315,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 				</Carousel>
 			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
-				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
+				<div className="flex flex-col justify-center p-8 gap-5 w-full">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">Add Tool</Typography>
 						<Button variant="ghost" className="rounded-full w-[40px] h-[40px]" onClick={closeCreateModal}>
@@ -341,7 +342,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 								<div className="flex flex-col justify-center items-center w-full pt-4">
 									{toolCreate.picture?.url && (
 										<div className="flex justify-center items-center rounded-lg w-[60px] h-[60px]">
-											<img src={toolCreate.picture.url} className="rounded-md max-w-full max-h-full" />
+											<Image src={toolCreate.picture.url} className="rounded-md max-w-full max-h-full" />
 										</div>
 									)}
 									<Typography variant="muted">Choose Tool picture</Typography>
@@ -357,7 +358,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 												className="cursor-pointer border border-1 w-1/5 p-2 relative"
 												onClick={() => selectImage(iconUrl)}
 											>
-												<img src={`${BASE_URL}/static/external?url=${iconUrl}`} className="max-w-full max-h-full " />
+												<Image src={`${BASE_URL}/static/external?url=${iconUrl}`} className="max-w-full max-h-full " />
 												{typeof toolCreate.picture === 'string' && toolCreate?.picture === iconUrl && (
 													<Icon icon="ci:check-big" className="text-2xl text-green-500 absolute top-0 right-0" />
 												)}

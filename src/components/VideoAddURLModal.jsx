@@ -8,6 +8,7 @@ import { PageModal } from '@/components/PageModal.jsx';
 import { Typography } from '@/chadcn/Typography.jsx';
 import { Input } from '@/chadcn/Input.jsx';
 import { Button } from '@/chadcn/Button.jsx';
+import { Image } from './Image';
 
 const VideoAddURLModal = ({ show, onClose }) => {
 	// Hooks
@@ -32,7 +33,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 
 			const ToasterView = () => (
 				<div className="flex flex-col gap-3 w-full">
-					<img src={embedCode.thumbnail} className="w-full rounded-xl aspect-video object-cover" />
+					<Image src={embedCode.thumbnail} className="w-full rounded-xl aspect-video object-cover" />
 
 					<Typography variant="small" className="text-md font-extrabold leading-5 line-clamp-1">
 						{embedCode?.title}

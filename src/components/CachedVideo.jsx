@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { extractYoutubeVideoId, isYouTubeUrl } from '@/lib/utils';
 import YouTube from 'react-youtube';
+import { YouTubePlayer } from './YoutubePlayer';
 
 // export const CachedVideo = ({ videoUrl, ...props }) => {
 //   const { saveVideo } = useIndexedDBVideos("cached-videos", 1);
@@ -39,6 +40,7 @@ import YouTube from 'react-youtube';
 // };
 
 export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props }, ref) {
+	React.useEffect(() => {}, [window.credentialless]);
 	// const [cachedVideoUrl, setCachedVideoUrl] = React.useState(null);
 
 	// React.useEffect(() => {
@@ -88,10 +90,27 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 
 	const YoutubePlayerRef = React.useRef();
 
+	React.useEffect(() => {
+		(async () => {
+			const x = await YoutubePlayerRef.current.internalPlayer.getIframe();
+			console.log(YoutubePlayerRef.current.internalPlayer);
+		})();
+		console.log(YoutubePlayerRef.current.internalPlayer);
+	}, [YoutubePlayerRef]);
+
 	const handleYoutubeOnReady = (event) => {
 		event.target.mute();
 		event.target.playVideo();
 	};
+
+	// if (isYouTubeUrl(src))
+	// 	return (
+	// 		<YouTubePlayer
+	// 			onPlayerReady={handleYoutubeOnReady}
+	// 			onPlayerStateChange={props.onEnded}
+	// 			videoId={extractYoutubeVideoId(src)}
+	// 		/>
+	// 	);
 
 	if (isYouTubeUrl(src))
 		return (
@@ -102,7 +121,18 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 				onEnd={props.onEnded}
 				className="w-full h-full"
 				opts={{
-					playerVars: { autoplay: 1, controls: 1, loop: 0, cc_load_policy: 1, origin: window.location.href },
+					playerVars: {
+						autoplay: 1,
+						controls: 1,
+						loop: 0,
+						cc_load_policy: 1,
+						// Set origin to null to load anonymously
+						// origin: window.location.href,
+						// origin: null,
+						// origin: 'https://www.youtube.com',
+						origin: 'null',
+						rel: 0
+					},
 					height: '100%',
 					width: '100%'
 				}}
@@ -110,7 +140,7 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 		);
 
 	return (
-		<video {...props} ref={ref}>
+		<video {...props} ref={ref} crossOrigin="anonymous">
 			<source src={src} type="video/mp4" />
 			Your browser does not support the video tag.
 		</video>

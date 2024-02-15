@@ -9,6 +9,7 @@ import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';
 import { cn } from '@/lib/utils.js';
 import { useMobile } from '@/hooks/useMobile';
+import { Image } from '@/components/Image';
 
 const Overview = ({
 	data,
@@ -31,7 +32,7 @@ const Overview = ({
 			<div className="flex flex-row my-3 px-1 sm:px-8 sm:my-6 outline-none">
 				{!isMobile && (
 					<div className="flex basis-2/12 flex-col items-center gap-2 mt-2">
-						<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
+						<Image src={profile?.photoURL} className="rounded-full object-cover w-20" />
 						<Typography variant="large">{profile?.name}</Typography>
 
 						<Button iconBegin={<Icon icon="ic:round-anchor" />} variant="secondary">
@@ -107,13 +108,13 @@ const Overview = ({
 							return (
 								<button onClick={() => setCurrentVideo(index)} key={image}>
 									<div>
-										{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
 										<LazyLoadImage
 											className={cn(
 												'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
 												currentVideo === index && 'border-primary scale-110'
 											)}
 											src={image}
+											crossOrigin="anonymous"
 										/>
 									</div>
 								</button>

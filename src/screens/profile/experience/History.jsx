@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '@/chadcn/
 import { Checkbox } from '@/chadcn/Checkbox';
 import { useBuckets } from '@/hooks/useBuckets';
 import { useNavigate } from 'react-router-dom';
+import { Image } from '@/components/Image';
 
 const FormatDate = ({ date: dateString }) => {
 	const [output, setOutput] = React.useState();
@@ -236,7 +237,7 @@ export const History = ({ title, data }) => {
 																	variant="ghost"
 																	onClick={() => handleAddCompany(item)}
 																>
-																	<img src={item.logo} className="aspect-square w-10 object-contain inline" />
+																	<Image src={item.logo} className="aspect-square w-10 object-contain inline" />
 																	<Typography variant="p" className="px-3 inline">
 																		{item.name}
 																	</Typography>
@@ -317,7 +318,7 @@ export const History = ({ title, data }) => {
 									<Button className="w-full p-10 md:p-10 xl:p-10" variant="secondary">
 										<div className="py-10">
 											{linkedBucket?.videos?.[0]?.image && (
-												<img
+												<Image
 													src={linkedBucket?.videos?.[0]?.image}
 													className="inline aspect-square object-cover w-10 rounded-sm mx-2"
 												/>
@@ -349,7 +350,7 @@ export const History = ({ title, data }) => {
 																	onClick={() => handleAddBucket(item)}
 																>
 																	{item.videos?.[0]?.image && (
-																		<img
+																		<Image
 																			src={item.videos?.[0]?.image}
 																			className="aspect-square w-10 object-cover inline"
 																		/>
@@ -420,7 +421,7 @@ export const History = ({ title, data }) => {
 								<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
 									<Card className={`grid grid-cols-10 py-2`} style={{ background: bgColor, color: textColor }}>
 										<CardHeader className="flex justify-center items-center col-span-3">
-											<img src={companyLogoUrl} className="aspect-square object-contain w-20" />
+											<Image src={companyLogoUrl} className="aspect-square object-contain w-20" />
 										</CardHeader>
 
 										<CardContent className={`flex flex-col justify-center p-0 col-span-4`}>
@@ -446,7 +447,7 @@ export const History = ({ title, data }) => {
 												<div className="px-3">
 													<div className="relative rounded-2xl overflow-hidden max-w-[125px] max-h-[125px] aspect-square">
 														{isYouTubeUrl(previewSrc) ? (
-															<img
+															<Image
 																className="aspect-square object-cover w-full rounded-2xl "
 																src={handleSrc(previewSrc, bucket)}
 															/>
@@ -458,6 +459,7 @@ export const History = ({ title, data }) => {
 																loop
 																className="aspect-square object-cover h-full bg-gray-400"
 																src={handleSrc(previewSrc, bucket)}
+																crossOrigin="anonymous"
 															/>
 														)}
 														<button

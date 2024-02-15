@@ -31,6 +31,7 @@ import { Spinner } from '../Spinner';
 import { useMobile } from '@/hooks/useMobile.js';
 import { Listbox } from '@headlessui/react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
+import { Image } from '../Image.jsx';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -421,7 +422,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					<div className="flex flex-row  px-8 my-6">
 						<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
 							{/* TODO: picture */}
-							<img src={profile?.photoURL || profile?.picture} className="rounded-full object-cover w-20" />
+							<Image src={profile?.photoURL || profile?.picture} className="rounded-full object-cover w-20" />
 							<Typography variant="small">215k</Typography>
 						</div>
 
@@ -587,10 +588,9 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 										if (item?.image) {
 											return (
 												<div key={item.image} className="relative draggable w-1/4 h-full aspect-video p-2 flex ">
-													<img
+													<Image
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
-														//
 													/>
 
 													{item.is360Video && (

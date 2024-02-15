@@ -15,6 +15,7 @@ import Recommends from '@/screens/profile/recommends';
 import { UsersScreen } from './screens/users/Users';
 import { OrganizationsScreen } from './screens/organizations';
 import Layout from '@/components/Layout.jsx';
+import { Redirects } from './screens/redirects/Redirects';
 
 export function Routes(props) {
 	// TODO: Preload all icons
@@ -90,8 +91,8 @@ export function Routes(props) {
 			]
 		},
 		{
-			path: '/linkedin/redirect',
-			element: null
+			path: '/redirects',
+			element: <Redirects />
 		},
 		{
 			path: '/notfound',
