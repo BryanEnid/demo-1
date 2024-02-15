@@ -6,19 +6,24 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
+import { Listbox } from '@headlessui/react';
+import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
+import { BASE_URL } from '@/config/api.js';
 import { getYouTubeVideoDetails } from '@/hooks/api/youtube.js';
 import { cn, extractYoutubeVideoId, generatePreview, getShortNumberLabel, isYouTubeUrl } from '@/lib/utils';
 import { PageModal } from '@/components/PageModal';
 import TextEditor from '@/components/TextEditor';
 import { VR_3D, Video360 } from '@/components/MediaPlayer';
 import Overview from '@/components/PreviewBucket/tabs/Overview.jsx';
+import Price from '@/components/PreviewBucket/tabs/Price.jsx';
 import Views from '@/components/PreviewBucket/tabs/Views';
 import QuestionsList from '@/components/QuestionsList.jsx';
 import VideoAddURLModal from '@/components/VideoAddURLModal.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useBuckets } from '@/hooks/useBuckets';
 import { useToast } from '@/hooks/useToast';
+import useStripeCheckout from '@/hooks/useStripeCheckout.js';
 import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
 import { Typography } from '@/chadcn/Typography';
@@ -29,8 +34,7 @@ import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
 import { useMobile } from '@/hooks/useMobile.js';
-import { Listbox } from '@headlessui/react';
-import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
+import { useAuth } from '@/providers/Authentication.jsx';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -119,10 +123,12 @@ const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
 const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
 	// Hooks
 	const navigate = useNavigate();
+	const { user } = useAuth();
 	const { data: profile, isUserProfile, isOrganization } = useProfile();
 	const { isMobile } = useMobile();
-	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs } =
+	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs, createBucketPrice } =
 		useBuckets(profile);
+	const { checkoutBucket } = useStripeCheckout();
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -389,6 +395,19 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	const isValid = [editorState.getCurrentContent().hasText(), data.title.length].every(Boolean);
 	const isCurrentVideo360 = data.videos[currentVideo]?.is360Video;
+	const canWatch =
+		isUserProfile || !data.price || user.payments?.buckets?.find(({ bucketId }) => bucketId === documentId);
+
+	const handleCheckout = async () => {
+		const { checkoutUrl } = await checkoutBucket({
+			data: {
+				bucketId: documentId,
+				successUrl: `${BASE_URL}/api/stripe/checkout-bucket/success?sessionId={CHECKOUT_SESSION_ID}&redirectUrl=${window.location.href}`
+			}
+		});
+
+		window.location.href = checkoutUrl;
+	};
 
 	if (isEditMode) {
 		return (
@@ -686,39 +705,55 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 			{/* Video Player */}
 			<div className="aspect-[16/9] shadow bg-black">
-				<div className="w-full h-full backdrop-blur-md">
-					{!isCurrentVideo360 && (
-						<>
-							<CachedVideo
-								autoPlay
-								controls={true}
-								ref={videoRef}
-								src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
-								onEnded={handleNextVideo}
-								loop={data?.videos?.length === 1}
-								className="w-full h-full object-center rounded-none z-10"
-							/>
-							{/* <div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
+				{canWatch ? (
+					<div className="w-full h-full backdrop-blur-md">
+						{!isCurrentVideo360 && (
+							<>
+								<CachedVideo
+									autoPlay
+									controls={true}
+									ref={videoRef}
+									src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
+									onEnded={handleNextVideo}
+									loop={data?.videos?.length === 1}
+									className="w-full h-full object-center rounded-none z-10"
+								/>
+								{/* <div className="transition cursor-pointer absolute top-2 right-4 p-1 rounded-md bg-slate-300/20 backdrop-blur-sm border-white border hover:bg-slate-300/50">
 								<Icon onClick={toggleFullscreen} className="text-3xl text-white" icon="iconamoon:screen-full-duotone" />
 							</div> */}
-						</>
-					)}
+							</>
+						)}
 
-					{isCurrentVideo360 && (
-						<Video360
-							onVideoReady={handle360Video}
-							src={data.videos[currentVideo]?.videoUrl}
-							className="w-screen h-screen"
-						/>
-					)}
-				</div>
+						{isCurrentVideo360 && (
+							<Video360
+								onVideoReady={handle360Video}
+								src={data.videos[currentVideo]?.videoUrl}
+								className="w-screen h-screen"
+							/>
+						)}
+					</div>
+				) : (
+					<div className="w-full h-full bg-white/80 flex flex-col gap-1 justify-center items-center">
+						<Typography variant="h4" className="text-xl">
+							{data.price.type === 'recurring'
+								? `Subscribe to the bucket content for ${data.price?.unitAmount} ${data.price?.currency} per ${data.price?.interval}.`
+								: `Get unlimited full-time access to the bucket content for ${data.price?.unitAmount} ${data.price?.currency}.`}
+						</Typography>
+						<Button onClick={handleCheckout}>{data.price.type === 'recurring' ? 'Subscribe' : 'Buy'}</Button>
+					</div>
+				)}
 			</div>
 
 			<Tabs defaultValue="overview" className="w-full">
 				<TabsList className="flex items-center">
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="q&a">Q&A</TabsTrigger>
-					{isUserProfile && <TabsTrigger value="views">Views</TabsTrigger>}
+					{isUserProfile && (
+						<>
+							<TabsTrigger value="price">Price</TabsTrigger>
+							<TabsTrigger value="views">Views</TabsTrigger>
+						</>
+					)}
 					<div className="flex flex-1 gap-1 items-center justify-end px-4 text-[#484848]">
 						<Icon icon="ph:binoculars-fill" className="text-3xl" />
 						{getShortNumberLabel(data.viewers?.length || 0)}
@@ -729,6 +764,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					<Overview
 						data={data}
 						profile={profile}
+						canWatch={canWatch}
 						isUserProfile={isUserProfile}
 						setSharing={setSharing}
 						setEditMode={setEditMode}
@@ -749,9 +785,14 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 				</TabsContent>
 
 				{isUserProfile && (
-					<TabsContent value="views">
-						<Views bucketId={documentId} profile={profile} />
-					</TabsContent>
+					<>
+						<TabsContent value="price">
+							<Price bucketId={documentId} data={data} profile={profile} savePrice={createBucketPrice} />
+						</TabsContent>
+						<TabsContent value="views">
+							<Views bucketId={documentId} profile={profile} />
+						</TabsContent>
+					</>
 				)}
 			</Tabs>
 		</PageModal>

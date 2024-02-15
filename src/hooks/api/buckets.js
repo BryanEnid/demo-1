@@ -30,3 +30,9 @@ export const updateBucketsCategory = (auth, { body, category, params }) =>
 
 export const deleteBucketsCategory = (auth, category, params) =>
 	fetchWithAuth(auth, `${BASE_URL}/api/buckets/categories/${category}`, { method: 'DELETE', params });
+
+export const createBucketPrice = (auth, id, body) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/price`, { method: 'POST', body });
+
+export const updateBucketPrice = (auth, id, body) =>
+	fetchWithAuth(auth, `${BASE_URL}/api/buckets/${id}/price`, { method: 'PUT', body });
