@@ -359,6 +359,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	const handleVideoURLsModal = () => {
 		setDisplayVideoURLsModal(true);
+		console.log(isDisplayVideoURLsModalVisible);
 	};
 
 	const handleVideoURLs = (videosURL) => {
@@ -394,6 +395,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	if (isEditMode) {
 		return (
 			<PageModal show={show} onClose={handleExit} width="1560px" maxWidth="100vw">
+				<VideoAddURLModal show={isDisplayVideoURLsModalVisible} onClose={handleVideoURLs} />
+
 				<div>
 					{/* Video Player */}
 					<div className="aspect-[16/9] shadow bg-black">
@@ -543,7 +546,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 								<Button
 									iconBegin={<Icon icon="carbon:url" />}
 									variant="secondary"
-									onClick={() => handleCreateBucket({ willRedirect: true })}
+									onClick={() => handleCreateBucket({ willRedirect: false, cb: handleVideoURLsModal })}
 								>
 									Add video URL
 								</Button>

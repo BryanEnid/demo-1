@@ -90,14 +90,6 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 
 	const YoutubePlayerRef = React.useRef();
 
-	React.useEffect(() => {
-		(async () => {
-			const x = await YoutubePlayerRef.current.internalPlayer.getIframe();
-			console.log(YoutubePlayerRef.current.internalPlayer);
-		})();
-		console.log(YoutubePlayerRef.current.internalPlayer);
-	}, [YoutubePlayerRef]);
-
 	const handleYoutubeOnReady = (event) => {
 		event.target.mute();
 		event.target.playVideo();

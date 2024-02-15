@@ -60,11 +60,7 @@ const Overview = ({
 
 								<VideoUploadButton onUpload={handlePrepareVideosToSave} />
 
-								<Button
-									iconBegin={<Icon icon="carbon:url" />}
-									variant="secondary"
-									onClick={() => handleVideoURLsModal(false)}
-								>
+								<Button iconBegin={<Icon icon="carbon:url" />} variant="secondary" onClick={handleVideoURLsModal}>
 									Add video URL
 								</Button>
 
