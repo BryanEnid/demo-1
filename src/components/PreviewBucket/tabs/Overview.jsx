@@ -104,13 +104,13 @@ const Overview = ({
 							return (
 								<button onClick={() => setCurrentVideo(index)} key={image}>
 									<div>
-										<LazyLoadImage
+										<Image
+											proxyEnabled
 											className={cn(
 												'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
 												currentVideo === index && 'border-primary scale-110'
 											)}
 											src={image}
-											crossOrigin="anonymous"
 										/>
 									</div>
 								</button>

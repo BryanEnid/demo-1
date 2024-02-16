@@ -283,14 +283,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 											<Card key={tool.id} className="h-[130px] w-full flex items-center gap-5 mb-4 px-10">
 												{!!tool.picture && (
 													<div className="w-[100px] h-[80px] flex items-center justify-center">
-														<Image
-															src={tool.picture}
-															className="max-w-full max-h-full "
-															onError={(e) => {
-																e.target.onerror = null;
-																e.target.src = `${BASE_URL}/static/external?url=${tool.picture}`;
-															}}
-														/>
+														<Image proxyEnabled src={tool.picture} className="max-w-full max-h-full " />
 													</div>
 												)}
 												<div>

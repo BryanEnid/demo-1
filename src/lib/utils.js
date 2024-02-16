@@ -5,15 +5,29 @@ export function cn(...inputs) {
 	return twMerge(clsx(inputs));
 }
 
+export const isRelativePath = (str) => {
+	// Regular expression pattern to detect relative paths
+	var pattern = /^(?!https?:\/\/)(?!www\.).*$/;
+	return pattern.test(str);
+};
+
 // Function to check if the URL is from YouTube
 export const isYouTubeUrl = (url = '') => {
-	return url?.includes('youtube.com') || url?.includes('youtu.be');
+	return url?.includes('youtube.com') || url?.includes('youtu.be') || url?.includes('ytimg.com');
 };
 
 export const extractYoutubeVideoId = (url) => {
 	const urlObject = new URL(url);
-	const searchParams = new URLSearchParams(urlObject.search);
-	return searchParams.get('v');
+	const pathname = urlObject.pathname;
+	if (pathname.startsWith('/watch')) {
+		const searchParams = new URLSearchParams(urlObject.search);
+		return searchParams.get('v');
+	} else if (pathname.startsWith('/')) {
+		// For youtu.be URLs
+		const segments = pathname.split('/');
+		return segments[1];
+	}
+	return null;
 };
 
 function dataURItoBlob(dataURI) {

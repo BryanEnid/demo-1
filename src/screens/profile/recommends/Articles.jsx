@@ -92,7 +92,11 @@ const Articles = ({ data = [], isUserProfile }) => {
 								<Card className="h-full flex flex-col">
 									<CardHeader className="px-4 py-4">
 										<a href={article.url} target="_blank" rel="noreferrer">
-											<Image src={article.picture} className="rounded-md object-cover aspect-square w-full" />
+											<Image
+												proxyEnabled
+												src={article.picture}
+												className="rounded-md object-cover aspect-square w-full"
+											/>
 										</a>
 									</CardHeader>
 									<CardContent className="px-4 pb-4">

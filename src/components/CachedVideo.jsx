@@ -95,41 +95,41 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 		event.target.playVideo();
 	};
 
-	// if (isYouTubeUrl(src))
-	// 	return (
-	// 		<YouTubePlayer
-	// 			onPlayerReady={handleYoutubeOnReady}
-	// 			onPlayerStateChange={props.onEnded}
-	// 			videoId={extractYoutubeVideoId(src)}
-	// 		/>
-	// 	);
-
 	if (isYouTubeUrl(src))
 		return (
-			<YouTube
-				ref={YoutubePlayerRef}
+			<YouTubePlayer
+				onPlayerReady={handleYoutubeOnReady}
+				onPlayerStateChange={props.onEnded}
 				videoId={extractYoutubeVideoId(src)}
-				onReady={handleYoutubeOnReady}
-				onEnd={props.onEnded}
-				className="w-full h-full"
-				opts={{
-					playerVars: {
-						autoplay: 1,
-						controls: 1,
-						loop: 0,
-						cc_load_policy: 1,
-						// Set origin to null to load anonymously
-						// origin: window.location.href,
-						// origin: null,
-						// origin: 'https://www.youtube.com',
-						origin: 'null',
-						rel: 0
-					},
-					height: '100%',
-					width: '100%'
-				}}
 			/>
 		);
+
+	// if (isYouTubeUrl(src))
+	// 	return (
+	// 		<YouTube
+	// 			ref={YoutubePlayerRef}
+	// 			videoId={extractYoutubeVideoId(src)}
+	// 			onReady={handleYoutubeOnReady}
+	// 			onEnd={props.onEnded}
+	// 			className="w-full h-full"
+	// 			opts={{
+	// 				playerVars: {
+	// 					autoplay: 1,
+	// 					controls: 1,
+	// 					loop: 0,
+	// 					cc_load_policy: 1,
+	// 					// Set origin to null to load anonymously
+	// 					// origin: window.location.href,
+	// 					// origin: null,
+	// 					// origin: 'https://www.youtube.com',
+	// 					origin: 'null',
+	// 					rel: 0
+	// 				},
+	// 				height: '100%',
+	// 				width: '100%'
+	// 			}}
+	// 		/>
+	// 	);
 
 	return (
 		<video {...props} ref={ref} crossOrigin="anonymous">

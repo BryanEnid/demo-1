@@ -112,6 +112,7 @@ export const BucketItem = ({
 								{handleSrc(preview) && isYouTubeUrl(preview) && (
 									<Image
 										draggable={false}
+										proxyEnabled
 										src={handleSrc(preview)}
 										className="aspect-video object-cover rounded-full w-full h-full"
 									/>

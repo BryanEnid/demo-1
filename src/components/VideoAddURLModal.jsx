@@ -33,7 +33,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 
 			const ToasterView = () => (
 				<div className="flex flex-col gap-3 w-full">
-					<Image src={embedCode.thumbnail} className="w-full rounded-xl aspect-video object-cover" />
+					<Image src={embedCode.thumbnail} proxyEnabled className="w-full rounded-xl aspect-video object-cover" />
 
 					<Typography variant="small" className="text-md font-extrabold leading-5 line-clamp-1">
 						{embedCode?.title}

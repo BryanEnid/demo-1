@@ -592,6 +592,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 											return (
 												<div key={item.image} className="relative draggable w-1/4 h-full aspect-video p-2 flex ">
 													<Image
+														proxyEnabled={isYouTubeUrl(item.image)}
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
 													/>
