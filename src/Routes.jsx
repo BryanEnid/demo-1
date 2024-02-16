@@ -12,6 +12,7 @@ import { Preview } from './screens/video_preview/Preview';
 import { SignIn } from './screens/sign_in/SignIn';
 import Quests from './screens/profile/quests/index';
 import Recommends from '@/screens/profile/recommends';
+import Bills from '@/screens/bills/index.jsx';
 import { UsersScreen } from './screens/users/Users';
 import { OrganizationsScreen } from './screens/organizations';
 import Layout from '@/components/Layout.jsx';
@@ -87,6 +88,10 @@ export function Routes(props) {
 						{ path: 'quests', element: <Quests /> },
 						{ path: 'website', element: <>website</> }
 					]
+				},
+				{
+					path: '/:id/bills',
+					element: <Bills />
 				}
 			]
 		},

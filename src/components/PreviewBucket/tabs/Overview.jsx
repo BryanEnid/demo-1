@@ -13,6 +13,7 @@ import { Image } from '@/components/Image';
 
 const Overview = ({
 	data,
+	canWatch,
 	profile,
 	isUserProfile,
 	description,
@@ -96,29 +97,31 @@ const Overview = ({
 					</div>
 				</div>
 			</div>
-
-			<div className="flex justify-center items-center my-6 mt-10 mx-6">
-				<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-					{data.videos.map(({ image }, index) => {
-						if (image) {
-							return (
-								<button onClick={() => setCurrentVideo(index)} key={image}>
-									<div>
-										<Image
-											proxyEnabled
-											className={cn(
-												'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
-												currentVideo === index && 'border-primary scale-110'
-											)}
-											src={image}
-										/>
-									</div>
-								</button>
-							);
-						}
-					})}
+			{canWatch && (
+				<div className="flex justify-center items-center my-6 mt-10 mx-6">
+					<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+						{data.videos.map(({ image }, index) => {
+							if (image) {
+								return (
+									<button onClick={() => setCurrentVideo(index)} key={image}>
+										<div>
+											{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
+											<Image
+												proxyEnabled
+												className={cn(
+													'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
+													currentVideo === index && 'border-primary scale-110'
+												)}
+												src={image}
+											/>
+										</div>
+									</button>
+								);
+							}
+						})}
+					</div>
 				</div>
-			</div>
+			)}
 		</>
 	);
 };

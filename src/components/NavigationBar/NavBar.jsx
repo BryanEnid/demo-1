@@ -131,10 +131,10 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 									Profile
 									<DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
 								</DropdownMenuItem>
-								{/*<DropdownMenuItem>*/}
-								{/*	Billing*/}
-								{/*	<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>*/}
-								{/*</DropdownMenuItem>*/}
+								<DropdownMenuItem onClick={() => navigate(`/${user.uid}/bills`)}>
+									Billing
+									<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+								</DropdownMenuItem>
 								{/*<DropdownMenuItem>*/}
 								{/*	Settings*/}
 								{/*	<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>*/}
