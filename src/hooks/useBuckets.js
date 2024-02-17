@@ -12,7 +12,9 @@ import {
 	uploadVideo as handleUploadVideo,
 	uploadVideoURLs as handleUploadVideoURLs,
 	updateBucketsCategory as handleUpdateBucketsCategory,
-	deleteBucketsCategory as handleDeleteBucketsCategory
+	deleteBucketsCategory as handleDeleteBucketsCategory,
+	createBucketPrice as handleCreateBucketPrice,
+	updateBucketPrice as handleUpdateBucketPrice
 } from './api/buckets';
 
 const COLLECTION_NAME = 'Buckets';
@@ -122,6 +124,22 @@ export const useBuckets = (owner, isOrganization) => {
 		}
 	});
 
+	const createBucketPrice = useMutation({
+		mutationFn: async ({ data, bucketId }) => handleCreateBucketPrice(auth, bucketId, data),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	const updateBucketPrice = useMutation({
+		mutationFn: async ({ data, bucketId }) => handleUpdateBucketPrice(auth, bucketId, data),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
 	return {
 		data,
 		createBucket: createBucket.mutate,
@@ -131,6 +149,8 @@ export const useBuckets = (owner, isOrganization) => {
 		uploadVideo: uploadVideo.mutate,
 		saveVideoURLs: saveVideoURLs.mutate,
 		updateBucketsCategory: updateBucketsCategory.mutate,
-		deleteBucketsCategory: deleteBucketsCategory.mutate
+		deleteBucketsCategory: deleteBucketsCategory.mutate,
+		createBucketPrice: createBucketPrice.mutate,
+		updateBucketPrice: updateBucketPrice.mutate
 	};
 };

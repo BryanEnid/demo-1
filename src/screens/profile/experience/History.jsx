@@ -14,20 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '@/chadcn/
 import { Checkbox } from '@/chadcn/Checkbox';
 import { useBuckets } from '@/hooks/useBuckets';
 import { useNavigate } from 'react-router-dom';
-
-const FormatDate = ({ date: dateString }) => {
-	const [output, setOutput] = React.useState();
-
-	React.useEffect(() => {
-		if (dateString) {
-			const date = new Date(dateString);
-			const formattedDate = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short' }).format(date);
-			setOutput(formattedDate);
-		}
-	}, [dateString]);
-
-	return <>{output}</>;
-};
+import FormatDate from '@/components/FormatDate.jsx';
 
 export const History = ({ title, data }) => {
 	// Hooks
