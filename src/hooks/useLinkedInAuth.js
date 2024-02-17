@@ -1,5 +1,6 @@
 import React from 'react';
 import { linkedInCB } from './api/oauth2';
+import { BASE_URL } from '@/config/api';
 
 const useSubscription = () => {
 	const subscriptionsRef = React.useRef([]);
@@ -95,7 +96,7 @@ export const useLinkedInAuth = () => {
 	};
 
 	const handleLinkedInAuth = async () => {
-		const endpoint = `http://localhost:3300/api/auth/linkedin?redirectUri=${REDIRECT_URI}`;
+		const endpoint = `${BASE_URL}/api/auth/linkedin?redirectUri=${REDIRECT_URI}`;
 		window.location.href = endpoint;
 	};
 
