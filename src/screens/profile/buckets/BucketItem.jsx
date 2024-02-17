@@ -15,6 +15,7 @@ import {
 	ContextMenuTrigger
 } from '@/chadcn/ContextMenu';
 import { useMobile } from '@/hooks/useMobile';
+import { Image } from '@/components/Image';
 
 export const BucketItem = ({
 	name,
@@ -104,12 +105,14 @@ export const BucketItem = ({
 										draggable={false}
 										src={handleSrc(preview)}
 										className="object-cover aspect-square rounded-full w-full h-full"
+										crossOrigin="anonymous"
 									/>
 								)}
 
 								{handleSrc(preview) && isYouTubeUrl(preview) && (
-									<img
+									<Image
 										draggable={false}
+										proxyEnabled
 										src={handleSrc(preview)}
 										className="aspect-video object-cover rounded-full w-full h-full"
 									/>

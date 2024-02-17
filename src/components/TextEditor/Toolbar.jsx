@@ -11,7 +11,6 @@ export const Toolbar = ({ editorState, setEditorState }) => {
 		let observer;
 		if (toolbarRef.current) {
 			const toggleStyles = ([e]) => {
-				console.log(e.intersectionRatio < 1);
 				e.target.children[0].classList.toggle('is-pinned', e.intersectionRatio < 1);
 			};
 			observer = new IntersectionObserver(toggleStyles, {

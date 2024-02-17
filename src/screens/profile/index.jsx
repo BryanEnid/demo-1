@@ -16,6 +16,7 @@ import { Button } from '@/chadcn/Button';
 import { Separator } from '@/chadcn/Separator.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/chadcn/Carousel';
+import { Image } from '@/components/Image';
 
 function NavOption(props) {
 	const { title, href, textClassName = '', buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
@@ -155,7 +156,7 @@ export function Profile() {
 								</>
 							)}
 							<div className="flex flex-col items-center">
-								<img src={profile?.picture} className="rounded-full object-cover aspect-square w-36 2xl:w-48 mb-8" />
+								<Image src={profile?.picture} className="rounded-full object-cover aspect-square w-36 2xl:w-48 mb-8" />
 								<Typography variant="h2" className="text-white/[.96]">
 									{profile?.name}
 								</Typography>
@@ -243,8 +244,7 @@ export function Profile() {
 					<div>
 						{/* Header */}
 						<div className="flex flex-col items-center gap-3">
-							{/* <img src={profile?.photoURL} className="rounded-full object-cover aspect-square xl:w-48 md:w-32" /> */}
-							<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
+							<Image src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
 							<Typography variant="h3" className="mt-6">
 								{profile?.name}
 							</Typography>

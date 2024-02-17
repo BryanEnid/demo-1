@@ -6,6 +6,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 
 import { Icon } from '@iconify/react';
+import { Image } from '../Image';
 
 const {
 	faVolumeMute,
@@ -601,7 +602,7 @@ function Editor({ videoUrl, timings, setTimings }) {
 			{currentWarning != null ? <div className="warning">{warnings[currentWarning]}</div> : ''}
 			{imageUrl !== '' ? (
 				<div className="marginVertical">
-					<img src={imageUrl} className="thumbnail" alt="Photos" />
+					<Image src={imageUrl} className="thumbnail" alt="Photos" />
 					<div className="controls">
 						<div className="player-controls">
 							<button className="settings-control" title="Reset Video" onClick={downloadSnapshot}>

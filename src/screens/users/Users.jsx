@@ -11,6 +11,7 @@ import { NavBar } from '@/components/NavigationBar/NavBar';
 import { SideBar } from '@/components/NavigationBar/SideBar';
 import { useUsers } from '@/hooks/useUsers';
 import { useMobile } from '@/hooks/useMobile';
+import { Image } from '@/components/Image';
 
 export const UsersScreen = () => {
 	const { users, isLoading } = useUsers();
@@ -31,8 +32,8 @@ export const UsersScreen = () => {
 				);
 			},
 			cell: ({ row }) => (
-				<div className="flex flex-row justify-start items-center gap-3 ">
-					<img src={row.original.photoURL} className="aspect-square w-10 h-10 rounded-full" />
+				<div className="flex flex-row justify-start items-center gap-3">
+					<Image src={row.original.photoURL} className="aspect-square w-10 h-10 rounded-full" />
 					<Typography variant="a">
 						<Link to={'/' + row.original.username}>{row.original.name}</Link>
 					</Typography>

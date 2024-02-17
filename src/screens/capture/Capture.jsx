@@ -10,6 +10,7 @@ import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { formatTimestamp } from '@/lib/utils';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { useFFMPEG } from '@/hooks/useFFMPEG';
+import { Button } from '@/chadcn/Button';
 
 export function CaptureScreen() {
 	// Hooks
@@ -29,11 +30,10 @@ export function CaptureScreen() {
 	const [screenDevice2, setScreenDevice2] = React.useState('');
 	const [audioDevice, setAudioDevice] = React.useState('');
 	const [isUploading, setUploading] = React.useState(false);
-	// const [uploadProgress, setUploadProgress] = React.useState(0);
 	const [volumeDisplay, setVolumeDisplay] = React.useState(0);
 	const [timelapsed, setTimeLapsed] = React.useState(0);
-	const [recordedAudio, setRecordedAudio] = React.useState();
-	const [recordedVideo, setRecordedVideo] = React.useState();
+	const [audioTracks, setRecordedAudio] = React.useState([]);
+	const [videoTracks, setRecordedVideo] = React.useState([]);
 	const [question, setQuestion] = React.useState(query.get('questionId'));
 
 	// Refs
@@ -42,8 +42,9 @@ export function CaptureScreen() {
 	const overlayCameraRef = React.useRef(null);
 	const mainRef = React.useRef();
 	const streamRef = React.useRef();
-	const audioRecorderRef = React.useRef();
-	const videoRecorderRef = React.useRef();
+	const mainVideoRecorderRef = React.useRef();
+	const profileVideoRecorderRef = React.useRef();
+	const profileAudioRecorderRef = React.useRef();
 
 	// TODO: handle new devices without refreshes
 	// Detects all audio and video devices and populates
@@ -95,11 +96,7 @@ export function CaptureScreen() {
 
 	// Handles input device (audio/video) change
 	React.useEffect(() => {
-		if (!!screenDevice.length || !!audioDevice.length) {
-			startScreen(screenDevice, audioDevice).catch((e) => {
-				setScreenDevice('');
-			});
-		}
+		if (screenDevice.length) startScreen(screenDevice).catch(console.error);
 
 		// TODO: Clean tracks
 		// return () => {
@@ -107,7 +104,7 @@ export function CaptureScreen() {
 		//   if (webcamRef.current?.srcObject) webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
 		//   if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
 		// };
-	}, [screenDevice, audioDevice]);
+	}, [screenDevice]);
 
 	React.useEffect(() => {
 		if (screenDevice2.length) {
@@ -133,26 +130,28 @@ export function CaptureScreen() {
 
 	// Observer for the media recorded
 	React.useEffect(() => {
-		if (recordedAudio && recordedVideo) handleRecordedVideo(recordedVideo, recordedAudio).catch(console.log);
-	}, [recordedAudio, recordedVideo]);
+		if (audioTracks.length && videoTracks.length) {
+			if (document.pictureInPictureElement) document.exitPictureInPicture();
+			handleRecordedVideo(videoTracks, audioTracks).catch(console.error);
+			stopScreenSharing();
+		}
+	}, [audioTracks, videoTracks]);
 
-	const handleRecordedVideo = async (video, audio) => {
-		// setUploading(true);
-		// overlayCameraRef.current.srcElement.exitPictureInPicture();
-
+	// ! V1: This uses WASM FFMPEG
+	const handleRecordedVideo = async (videoTracks, audioTracks) => {
+		const hasAudio = videoTracks[0].target.audioBitsPerSecond > 0;
 		// TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
-		const recordedVideo = new Blob([video.data], { type: 'video/mp4' });
-		const recordedAudio = new Blob([audio.data], { type: 'audio/mp4' });
+		const [mainVideo, profileVideo] = videoTracks.map((track) => new Blob([track?.data], { type: 'video/mp4' }));
+		const recordedAudio = new Blob([audioTracks?.[0].data], { type: 'audio/mpeg' });
 
-		const videoURL = URL.createObjectURL(recordedVideo);
+		const videoURL = URL.createObjectURL(mainVideo);
 		const audioURL = URL.createObjectURL(recordedAudio);
 
-		const { blob: muxedVideo } = await mux(videoURL, audioURL);
+		// console.log(hasAudio);
+		const { blob: muxedVideo } = await mux(videoURL, audioURL, { hasAudio });
 
-		// console.log(blob, url);
-
-		// ? For testing
-		// window.open(muxedTrackURL);
+		// ? For testing - mux has an url property
+		// window.open(url);
 
 		const request = await saveVideoIDB(muxedVideo);
 
@@ -162,38 +161,67 @@ export function CaptureScreen() {
 		};
 	};
 
+	const stopScreenSharing = () => {
+		if (streamRef.current) {
+			const tracks = streamRef.current.getTracks();
+			tracks.forEach((track) => track.stop());
+			streamRef.current = null;
+			mainRef.current.srcObject = null;
+		}
+	};
+
+	const stopRecording = () => {
+		setRecording(false);
+		mainVideoRecorderRef.current?.stop();
+		profileVideoRecorderRef.current?.stop();
+		profileAudioRecorderRef.current?.stop();
+	};
+
 	const startRecording = async () => {
-		if (!isRecording && !!screenDevice.length && !!audioDevice.length) {
+		if (!isRecording && !!screenDevice.length && !!audioDevice?.length) {
 			// Define Inputs
-			const video = mainRef.current.captureStream();
-			const audio = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: audioDevice } });
+			const mainVideo = mainRef.current.captureStream(); // main video
+			const profileVideo = overlayCameraRef.current.captureStream(); // profile video
+			const profileAudio = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: audioDevice } }); // main audio
 
 			// Generate combined stream
-			const videoRecorder = new MediaRecorder(video);
-			const audioRecorder = new MediaRecorder(audio);
-			videoRecorderRef.current = videoRecorder;
-			audioRecorderRef.current = audioRecorder;
+			const mainVideoRecorder = mainVideo.active ? new MediaRecorder(mainVideo) : null;
+			const profileVideoRecorder = profileVideo.active ? new MediaRecorder(profileVideo) : null;
+			const profileAudioRecorder = profileAudio.active ? new MediaRecorder(profileAudio) : null;
+			mainVideoRecorderRef.current = mainVideoRecorder;
+			profileVideoRecorderRef.current = profileAudioRecorder;
+			profileAudioRecorderRef.current = profileVideoRecorder;
 
 			// Start recording
-			videoRecorder.start();
-			audioRecorder.start();
+			mainVideoRecorder?.start();
+			profileVideoRecorder?.start();
+			profileAudioRecorder?.start();
 			setRecording(true);
 
 			// Video stopped
-			audioRecorder.addEventListener('dataavailable', setRecordedAudio);
-			videoRecorder.addEventListener('dataavailable', setRecordedVideo); // Video was stopped
-			// videoRecorder.addEventListener("dataavailable", handleRecordedVideo); // Video was stopped
-		}
-		if (isRecording) {
-			setRecording(false);
-			videoRecorderRef.current.stop();
-			audioRecorderRef.current.stop();
+			// mainVideoRecorder?.addEventListener('dataavailable', setRecordedVideo); // Video was stopped
+			// profileVideoRecorder?.addEventListener('dataavailable', setRecordedVideo);
+
+			// Audio stopped
+			// profileAudioRecorder?.addEventListener('dataavailable', setRecordedAudio);
+
+			// !multiple track v1
+			// Video stopped
+			mainVideoRecorder?.addEventListener('dataavailable', (params) => setRecordedVideo((prev) => [...prev, params])); // Video was stopped
+			profileVideoRecorder?.addEventListener('dataavailable', (params) =>
+				setRecordedVideo((prev) => [...prev, params])
+			);
+
+			// Audio stopped
+			profileAudioRecorder?.addEventListener('dataavailable', (params) =>
+				setRecordedAudio((prev) => [...prev, params])
+			);
 		}
 	};
 
 	// TODO: Make this start screen more modular (independent) from state
-	const startScreen = async (deviceId, audioDeviceId) => {
-		const config = { video: { width: 1920, height: 1080, deviceId }, audio: false };
+	const startScreen = async (deviceId) => {
+		const config = { video: { width: 1920, height: 1080, deviceId }, audio: deviceId === 'Screen Recording' };
 		const main = mainRef.current;
 
 		// Set default config depending on the media source
@@ -206,11 +234,14 @@ export function CaptureScreen() {
 		const stream = await mediaStore[isDisplayMedia ? 'getDisplayMedia' : 'getUserMedia'](config);
 
 		stream.getTracks().forEach((track) => {
+			// Stopped by media event API
 			track.onended = (evt) => {
 				if (isRecording) startRecording();
 				setScreenDevice('');
 				setScreenDevice2('');
-				mainRef.current = null;
+				exitPictureInPicture();
+				stopRecording();
+				// mainRef.current = null;
 			};
 		});
 
@@ -233,33 +264,39 @@ export function CaptureScreen() {
 
 		// source.connect(processor).connect(audioContext.destination);
 
-		main.srcObject = deviceId ? stream : null;
 		streamRef.current = stream;
+		main.srcObject = deviceId ? stream : null;
+		// if (main) main.srcObject = deviceId ? stream : null;
+
 		// TODO : fix this for facing mode
 		// main.style.transform = !isDisplayMedia ? "scaleX(-1)" : "scaleX(1)";
 	};
 
 	const startScreen2 = async (deviceId) => {
-		const config = { video: { width: 1920, height: 1080, deviceId }, audio: false };
 		const main = overlayCameraRef.current;
 		// new HTMLVideoElement().onloadedmetadata;
 
-		// Set default config depending on the media source
-		const isDisplayMedia = deviceId === 'Screen Recording';
-		const mediaStore = {
-			getDisplayMedia: async (props) => navigator.mediaDevices.getDisplayMedia({ ...props }),
-			getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props })
-		};
-
-		const stream = await mediaStore[isDisplayMedia ? 'getDisplayMedia' : 'getUserMedia'](config);
+		const stream = await navigator.mediaDevices.getUserMedia({
+			video: { width: 1920, height: 1080, deviceId },
+			audio: false
+		});
 
 		main.current = stream;
 		main.srcObject = deviceId ? stream : null;
+		// if (main) main.srcObject = deviceId ? stream : null;
 
 		main.onloadedmetadata = async (e) => {
 			main.current.srcElement = e.srcElement;
 			e.srcElement.requestPictureInPicture();
 		};
+	};
+
+	const startPictureInPicture = () => {
+		overlayCameraRef.current.requestPictureInPicture();
+	};
+
+	const exitPictureInPicture = () => {
+		if (document.pictureInPictureElement) document.exitPictureInPicture();
 	};
 
 	const BottomTools = () => (
@@ -275,10 +312,11 @@ export function CaptureScreen() {
 						<div className="flex flex-col gap-3 m-2">
 							<Typography variant="small">Video Input</Typography>
 
-							<div className="flex justify-center items-center ">
+							<div className="flex justify-start items-center gap-3">
 								<Icon icon="clarity:video-camera-line" className="mr-2" />
 								<div className="text-black">
 									<Select
+										disabled={isRecording}
 										value={screenDevice}
 										onValueChange={(value) => setScreenDevice(value !== 'none' ? value : '')}
 									>
@@ -304,10 +342,11 @@ export function CaptureScreen() {
 							</div>
 
 							{screenDevice === 'Screen Recording' && (
-								<div className="flex justify-center items-center">
+								<div className="flex justify-start items-center gap-3">
 									<Icon icon="iconamoon:profile-duotone" className="mr-2" />
 									<div className="text-black">
 										<Select
+											disabled={isRecording}
 											value={screenDevice2}
 											onValueChange={(value) => setScreenDevice2(value !== 'none' ? value : '')}
 										>
@@ -329,6 +368,9 @@ export function CaptureScreen() {
 											</SelectContent>
 										</Select>
 									</div>
+									<Button variant="outline" className="rounded-md" onClick={startPictureInPicture}>
+										<Icon icon="material-symbols:picture-in-picture" />
+									</Button>
 								</div>
 							)}
 						</div>
@@ -340,10 +382,14 @@ export function CaptureScreen() {
 								Audio Input
 							</Typography>
 
-							<div className="flex justify-center items-center">
+							<div className="flex justify-start items-center gap-3">
 								<Icon icon="iconamoon:microphone-duotone" className="mr-2" />
 								<div className="text-black">
-									<Select value={audioDevice} onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}>
+									<Select
+										disabled={isRecording}
+										value={audioDevice}
+										onValueChange={(value) => setAudioDevice(value !== 'none' ? value : '')}
+									>
 										<SelectTrigger className="w-[180px] bg-white">
 											<div className="truncate">
 												<SelectValue placeholder="Select Audio Device" />
@@ -382,7 +428,7 @@ export function CaptureScreen() {
 							)}
 						</div>
 
-						<div className="flex flex-col gap-3 m-2">
+						<div className="flex flex-col gap-3 m-2 hidden">
 							<Typography variant="small">Question</Typography>
 
 							<div className="flex justify-center items-center">
@@ -439,7 +485,7 @@ export function CaptureScreen() {
 					</button> */}
 
 					<button
-						onClick={startRecording}
+						onClick={isRecording ? stopRecording : startRecording}
 						className="flex rounded-full p-3 bg-[#E87259] relative justify-center items-center"
 					>
 						<Icon icon={!isRecording ? 'fluent:record-48-filled' : 'fluent:record-stop-48-filled'} className="z-10" />

@@ -13,25 +13,25 @@ import manifest from './public/manifest.json';
 export default defineConfig({
 	plugins: [
 		react(),
-		VitePWA({
-			// Registering PWA
-			registerType: 'autoUpdate',
-			injectRegister: 'script',
+		// VitePWA({
+		// 	// Registering PWA
+		// 	registerType: 'autoUpdate',
+		// 	injectRegister: 'script',
 
-			// Workbox
-			workbox: {
-				clientsClaim: true,
-				skipWaiting: true
-			},
+		// 	// Workbox
+		// 	workbox: {
+		// 		clientsClaim: true,
+		// 		skipWaiting: true
+		// 	},
 
-			devOptions: {
-				enabled: true
-			},
+		// 	devOptions: {
+		// 		enabled: true
+		// 	},
 
-			// Manifest
-			includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-			manifest
-		}),
+		// 	// Manifest
+		// 	includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+		// 	manifest
+		// }),
 		qrcode()
 	],
 
@@ -42,15 +42,14 @@ export default defineConfig({
 	server: {
 		// port: 3000
 		// ! Enable this for local https
-		https: {
-			key: path.resolve(__dirname, 'localhost.key'),
-			cert: path.resolve(__dirname, 'localhost.crt')
-		}
-
-		// headers: {
-		// 	'Cross-Origin-Opener-Policy': 'same-origin',
-		// 	'Cross-Origin-Embedder-Policy': 'require-corp'
+		// https: {
+		// 	key: path.resolve(__dirname, 'localhost.key'),
+		// 	cert: path.resolve(__dirname, 'localhost.crt')
 		// }
+		headers: {
+			'Cross-Origin-Opener-Policy': 'same-origin',
+			'Cross-Origin-Embedder-Policy': 'require-corp'
+		}
 	},
 
 	resolve: {

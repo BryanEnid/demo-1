@@ -35,6 +35,7 @@ import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
 import { useMobile } from '@/hooks/useMobile.js';
 import { useAuth } from '@/providers/Authentication.jsx';
+import { Image } from '../Image.jsx';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -364,6 +365,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 	const handleVideoURLsModal = () => {
 		setDisplayVideoURLsModal(true);
+		console.log(isDisplayVideoURLsModalVisible);
 	};
 
 	const handleVideoURLs = (videosURL) => {
@@ -412,6 +414,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	if (isEditMode) {
 		return (
 			<PageModal show={show} onClose={handleExit} width="1560px" maxWidth="100vw">
+				<VideoAddURLModal show={isDisplayVideoURLsModalVisible} onClose={handleVideoURLs} />
+
 				<div>
 					{/* Video Player */}
 					<div className="aspect-[16/9] shadow bg-black">
@@ -440,7 +444,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					<div className="flex flex-row  px-8 my-6">
 						<div className="flex basis-2/12 flex-col items-center gap-2 justify-center">
 							{/* TODO: picture */}
-							<img src={profile?.photoURL || profile?.picture} className="rounded-full object-cover w-20" />
+							<Image src={profile?.photoURL || profile?.picture} className="rounded-full object-cover w-20" />
 							<Typography variant="small">215k</Typography>
 						</div>
 
@@ -561,7 +565,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 								<Button
 									iconBegin={<Icon icon="carbon:url" />}
 									variant="secondary"
-									onClick={() => handleCreateBucket({ willRedirect: true })}
+									onClick={() => handleCreateBucket({ willRedirect: false, cb: handleVideoURLsModal })}
 								>
 									Add video URL
 								</Button>
@@ -606,10 +610,10 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 										if (item?.image) {
 											return (
 												<div key={item.image} className="relative draggable w-1/4 h-full aspect-video p-2 flex ">
-													<img
+													<Image
+														proxyEnabled={isYouTubeUrl(item.image)}
 														src={item.image}
 														className="animate-wiggle rounded-lg object-cover select-none h-full aspect-video"
-														//
 													/>
 
 													{item.is360Video && (

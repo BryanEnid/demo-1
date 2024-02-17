@@ -12,6 +12,7 @@ import { PageModal } from '@/components/PageModal.jsx';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import { Image } from '@/components/Image';
 
 const initialBookState = {
 	title: '',
@@ -177,7 +178,7 @@ const Books = ({ data = [], isUserProfile }) => {
 									<CardHeader className="px-4 py-4">
 										<div className="w-full">
 											<div className="aspect-square flex justify-center items-center">
-												<img src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full " />
+												<Image src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full" />
 											</div>
 										</div>
 									</CardHeader>
@@ -231,7 +232,7 @@ const Books = ({ data = [], isUserProfile }) => {
 				</Carousel>
 			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
-				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
+				<div className="flex flex-col justify-center p-8 gap-5 w-full">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">{bookCreate?.id ? `Book / ${bookCreate.title}` : 'Add Book'}</Typography>
 						<Button variant="ghost" className="rounded-full w-[40px] h-[40px]" onClick={closeCreateModal}>
@@ -292,7 +293,7 @@ const Books = ({ data = [], isUserProfile }) => {
 												}}
 											>
 												<div className="flex justify-center items-center aspect-square rounded-lg object-cover border-dashed border border-black/10">
-													<img src={photo.url || photo.imgUrl} className="rounded-md max-w-full max-h-full" />
+													<Image src={photo.url || photo.imgUrl} className="rounded-md max-w-full max-h-full" />
 												</div>
 												<Button
 													variant="destructive"
@@ -314,7 +315,7 @@ const Books = ({ data = [], isUserProfile }) => {
 								<div>
 									<div className="w-full">
 										<div className="aspect-square flex justify-center items-center">
-											<img
+											<Image
 												src={bookCreate.photos[activePicture]?.imgUrl}
 												className="rounded-md max-w-full max-h-full "
 											/>
@@ -327,7 +328,7 @@ const Books = ({ data = [], isUserProfile }) => {
 												className="w-[50px] aspect-square flex justify-center items-center"
 												onClick={() => setActivePicture(i)}
 											>
-												<img src={bookCreate.photos[i]?.imgUrl} className="rounded-md max-w-full max-h-full " />
+												<Image src={bookCreate.photos[i]?.imgUrl} className="rounded-md max-w-full max-h-full " />
 											</div>
 										))}
 									</div>

@@ -10,6 +10,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/chad
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
 import { useMobile } from '@/hooks/useMobile';
 import useOrganizations from '@/hooks/useOrganizations.js';
+import { Image } from '@/components/Image';
 
 export function SideBar() {
 	const navigate = useNavigate();
@@ -75,7 +76,7 @@ export function SideBar() {
 						onClick={() => navigate(`/organizations/${id}`)}
 						className="flex justify-center items-center w-[36px] h-[36px] transition ease-in-out hover:text-primary hover:scale-105"
 					>
-						<img src={picture} className="rounded-full object-cover aspect-square" />
+						<Image src={picture} className="rounded-full object-cover aspect-square" />
 					</button>
 				))}
 

@@ -53,23 +53,96 @@ export const useFFMPEG = () => {
 		return URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
 	};
 
-	const mux = async (videoURL, audioURL) => {
+	const mux2 = async (videoURL, audioURL, opts) => {
+		const { hasAudio } = opts;
 		const ffmpeg = ffmpegRef.current;
 
-		// Assuming videoURL is the video file and trackURL is the audio file
-		await ffmpeg.writeFile('input_video.mp4', await fetchFile(videoURL));
-		await ffmpeg.writeFile('input_audio.mp3', await fetchFile(audioURL));
+		// Assuming videoURL is the video file and audioURL is the additional audio file
+		const videoFileName = 'input_video.mp4';
+		const audioFileName = 'input_audio.mp3';
+		const outputFileName = 'output_combined.mp4';
+
+		await ffmpeg.writeFile(videoFileName, await fetchFile(videoURL));
+		await ffmpeg.writeFile(audioFileName, await fetchFile(audioURL));
 
 		// Executing the command to mux the video and audio
-		await ffmpeg.exec(['-i', 'input_video.mp4', '-i', 'input_audio.mp3', '-c', 'copy', 'output_combined.mp4']);
+		await ffmpeg.exec([
+			'-i',
+			videoFileName,
+			'-i',
+			audioFileName,
+			'-c:v',
+			'copy',
+			'-filter_complex',
+			'[0:a][1:a]amerge=inputs=2[a]',
+			'-map',
+			'0:v:0',
+			'-map',
+			'[a]',
+			'-c:a',
+			'aac',
+			'-strict',
+			'experimental',
+			outputFileName
+		]);
 
-		const fileData = await ffmpeg.readFile('output_combined.mp4');
+		// Read the output file
+		const fileData = await ffmpeg.readFile(outputFileName);
 		const data = new Uint8Array(fileData);
 
+		// Create Blob and URL
 		const dataBlob = new Blob([data.buffer], { type: 'video/mp4' });
 		const dataURL = URL.createObjectURL(dataBlob);
 
-		// Return URL
+		// Cleanup: delete temporary files
+		await ffmpeg.deleteFile(videoFileName);
+		await ffmpeg.deleteFile(audioFileName);
+		await ffmpeg.deleteFile(outputFileName);
+
+		// Return Blob and URL
+		return { blob: dataBlob, url: dataURL };
+	};
+
+	const mux = async (videoURL, audioURL, opts) => {
+		const { hasAudio } = opts;
+		const ffmpeg = ffmpegRef.current;
+
+		// Assuming videoURL is the video file and audioURL is the additional audio file
+		const videoFileName = 'input_video.mp4';
+		const audioFileName = 'input_audio.mp3';
+		const outputFileName = 'output_combined.mp4';
+
+		await ffmpeg.writeFile(videoFileName, await fetchFile(videoURL));
+		await ffmpeg.writeFile(audioFileName, await fetchFile(audioURL));
+
+		// Build FFmpeg command based on the presence of audio in the input video
+		const ffmpegCommand = ['-i', videoFileName, '-i', audioFileName, '-c:v', 'copy'];
+
+		if (hasAudio) {
+			ffmpegCommand.push('-filter_complex', '[0:a][1:a]amerge=inputs=2[a]', '-map', '0:v:0', '-map', '[a]');
+		} else {
+			ffmpegCommand.push('-map', '0:v:0', '-map', '1:a:0');
+		}
+
+		ffmpegCommand.push('-c:a', 'aac', '-strict', 'experimental', outputFileName);
+
+		// Executing the command to mux the video and audio
+		await ffmpeg.exec(ffmpegCommand);
+
+		// Read the output file
+		const fileData = await ffmpeg.readFile(outputFileName);
+		const data = new Uint8Array(fileData);
+
+		// Create Blob and URL
+		const dataBlob = new Blob([data.buffer], { type: 'video/mp4' });
+		const dataURL = URL.createObjectURL(dataBlob);
+
+		// Cleanup: delete temporary files
+		await ffmpeg.deleteFile(videoFileName);
+		await ffmpeg.deleteFile(audioFileName);
+		await ffmpeg.deleteFile(outputFileName);
+
+		// Return Blob and URL
 		return { blob: dataBlob, url: dataURL };
 	};
 

@@ -9,6 +9,7 @@ import { Button } from '@/chadcn/Button.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import ConfirmDialog from '@/components/ConfirmDialog.jsx';
 import VideoAddURLModal from '@/components/VideoAddURLModal.jsx';
+import { Image } from '@/components/Image';
 
 const Videos = ({ data = [], isUserProfile }) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -78,7 +79,7 @@ const Videos = ({ data = [], isUserProfile }) => {
 						<a key={video.id} href={video.videoUrl} target="_blank" rel="noreferrer">
 							<Card className="h-full flex">
 								<CardHeader className="px-4 py-4 w-1/3 shrink-0">
-									<img
+									<Image
 										src={video.preview}
 										className="rounded-md object-cover aspect-square w-full"
 										onError={(e) => {

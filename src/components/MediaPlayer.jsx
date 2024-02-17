@@ -4,6 +4,7 @@ import 'aframe';
 import { Entity, Scene } from 'aframe-react';
 import videoasset from '../assets/360example.mp4';
 import png from '@/assets/observe_logo_512.png';
+import { Image } from './Image';
 
 export function VR_3D() {
 	const [color, setColor] = React.useState('');
@@ -20,8 +21,8 @@ export function VR_3D() {
 	return (
 		<Scene>
 			<a-assets>
-				<img id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" />
-				<img id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" />
+				<Image id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg" />
+				<Image id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg" />
 			</a-assets>
 
 			<Entity primitive="a-plane" src="#groundTexture" rotation="-90 0 0" height="100" width="100" />
