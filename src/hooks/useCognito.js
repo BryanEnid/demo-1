@@ -100,7 +100,7 @@ export const useCognito = () => {
 
 			const params = querystring.stringify({
 				client_id: '3fu7gk23aupj8veu18m19b6j16',
-				logout_uri: 'https://localhost:5173/sign-in'
+				logout_uri: REDIRECT_URI
 			});
 
 			const url = `https://observe.auth.us-east-1.amazoncognito.com/logout?${params}`;
