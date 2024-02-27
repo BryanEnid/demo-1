@@ -224,7 +224,11 @@ export const History = ({ title, data }) => {
 																	variant="ghost"
 																	onClick={() => handleAddCompany(item)}
 																>
-																	<Image src={item.logo} className="aspect-square w-10 object-contain inline" />
+																	<Image
+																		proxyEnabled
+																		src={item.logo}
+																		className="aspect-square w-10 object-contain inline"
+																	/>
 																	<Typography variant="p" className="px-3 inline">
 																		{item.name}
 																	</Typography>
@@ -306,6 +310,7 @@ export const History = ({ title, data }) => {
 										<div className="py-10">
 											{linkedBucket?.videos?.[0]?.image && (
 												<Image
+													proxyEnabled
 													src={linkedBucket?.videos?.[0]?.image}
 													className="inline aspect-square object-cover w-10 rounded-sm mx-2"
 												/>
@@ -338,6 +343,7 @@ export const History = ({ title, data }) => {
 																>
 																	{item.videos?.[0]?.image && (
 																		<Image
+																			proxyEnabled
 																			src={item.videos?.[0]?.image}
 																			className="aspect-square w-10 object-cover inline"
 																		/>
@@ -408,7 +414,7 @@ export const History = ({ title, data }) => {
 								<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
 									<Card className={`grid grid-cols-10 py-2`} style={{ background: bgColor, color: textColor }}>
 										<CardHeader className="flex justify-center items-center col-span-3">
-											<Image src={companyLogoUrl} className="aspect-square object-contain w-20" />
+											<Image proxyEnabled src={companyLogoUrl} className="aspect-square object-contain w-20" />
 										</CardHeader>
 
 										<CardContent className={`flex flex-col justify-center p-0 col-span-4`}>
@@ -433,12 +439,15 @@ export const History = ({ title, data }) => {
 												{/* aspect-square object-cover rounded-2xl */}
 												<div className="px-3">
 													<div className="relative rounded-2xl overflow-hidden max-w-[125px] max-h-[125px] aspect-square">
-														{isYouTubeUrl(previewSrc) ? (
+														{isYouTubeUrl(previewSrc) && (
 															<Image
+																proxyEnabled
 																className="aspect-square object-cover w-full rounded-2xl "
 																src={handleSrc(previewSrc, bucket)}
 															/>
-														) : (
+														)}
+
+														{!isYouTubeUrl(previewSrc) && previewSrc && (
 															<video
 																type="video/mp4"
 																autoPlay
@@ -449,6 +458,7 @@ export const History = ({ title, data }) => {
 																crossOrigin="anonymous"
 															/>
 														)}
+
 														<button
 															onClick={() => redirectToBucket(bucket)}
 															className="absolute top-0 left-0 flex justify-center items-center bg-black/20 w-full h-full transition-all opacity-0 hover:opacity-100  "

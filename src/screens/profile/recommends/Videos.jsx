@@ -17,6 +17,8 @@ const Videos = ({ data = [], isUserProfile }) => {
 
 	const { isLoading, createVideo: handleCreate, deleteVideo: handleDelete } = useRecommends();
 
+	console.log(data);
+
 	const handleVideoURLs = async (videosURL) => {
 		closeCreateModal();
 		if (isLoading || !videosURL) {
@@ -80,12 +82,13 @@ const Videos = ({ data = [], isUserProfile }) => {
 							<Card className="h-full flex">
 								<CardHeader className="px-4 py-4 w-1/3 shrink-0">
 									<Image
-										src={video.preview}
+										proxyEnabled
+										src={video?.preview}
 										className="rounded-md object-cover aspect-square w-full"
-										onError={(e) => {
-											e.target.onerror = null;
-											e.target.src = `${BASE_URL}/static/external?url=${video.picture}`;
-										}}
+										// onError={(e) => {
+										// 	e.target.onerror = null;
+										// 	e.target.src = `${BASE_URL}/static/external?url=${video.preview}`;
+										// }}
 									/>
 								</CardHeader>
 								<CardContent className="px-0 pr-4 py-4">

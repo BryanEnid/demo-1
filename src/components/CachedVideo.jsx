@@ -95,7 +95,7 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 		event.target.playVideo();
 	};
 
-	if (isYouTubeUrl(src))
+	if (isYouTubeUrl(src)) {
 		return (
 			<YouTubePlayer
 				onPlayerReady={handleYoutubeOnReady}
@@ -103,6 +103,7 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 				videoId={extractYoutubeVideoId(src)}
 			/>
 		);
+	}
 
 	// if (isYouTubeUrl(src))
 	// 	return (

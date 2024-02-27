@@ -25,7 +25,7 @@ export const YouTubePlayer = ({ videoId, onPlayerReady, onPlayerStateChange }) =
 			iframeRef.current.setAttribute('credentialless', '');
 			iframeRef.current.setAttribute('src', url);
 		}
-	}, []);
+	}, [videoId]);
 
 	return (
 		<iframe

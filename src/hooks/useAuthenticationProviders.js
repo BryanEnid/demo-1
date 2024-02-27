@@ -1,19 +1,18 @@
 import React from 'react';
 import { useLinkedInAuth } from './useLinkedInAuth';
 import { useUser } from '@/hooks/useUser.js';
-// import { useGoogleAuth } from './useGoogleAuth'; // Importing useGoogleAuth hook
+import { useGoogleAuth } from './useGoogleAuth'; // Importing useGoogleAuth hook
+import { useCognito } from './useCognito';
 
 export const useAuthenticationProviders = () => {
-	// const { signInWithGoogle, onGoogleAuthStateChanged } = useGoogleAuth(); // Using useGoogleAuth hook
-	const { signInWithLinkedIn, signOut: linkedInSignOut, onAuthStateChanged: onLIAuthStateChanged } = useLinkedInAuth();
+	const { signIn, signOut, onAuthStateChanged } = useCognito();
 
 	// State
 	const [authToken, setAuthToken] = React.useState(null);
-
 	const { user, isLoading: isUserLoading, createUser, setUser, setLoading } = useUser({ authToken });
 
 	React.useEffect(() => {
-		const unsubscribeLinkedIn = onLIAuthStateChanged(async ({ accessToken, user: authUser }) => {
+		const unsubscribe = onAuthStateChanged(async ({ idToken, user: authUser }) => {
 			const data = {
 				username: authUser?.sub,
 				photoURL: authUser?.picture,
@@ -26,7 +25,7 @@ export const useAuthenticationProviders = () => {
 			if (authUser && !user?.id) await createUser(data);
 
 			if (authUser) {
-				setAuthToken(accessToken);
+				setAuthToken(idToken);
 				setUser((_user) => ({ ..._user, ...data, id: _user?.id }));
 			}
 
@@ -36,14 +35,14 @@ export const useAuthenticationProviders = () => {
 		setLoading(false);
 
 		return () => {
-			unsubscribeLinkedIn();
+			unsubscribe();
 			setUser(null);
 		};
 	}, []);
 
 	// Function to sign out
 	const signOutUser = async () => {
-		return Promise.all([linkedInSignOut()]).then(() => {
+		return Promise.all([signOut()]).then(() => {
 			setUser(null);
 			setAuthToken(null);
 		});
@@ -53,9 +52,10 @@ export const useAuthenticationProviders = () => {
 		user,
 		authToken,
 		isLoading: isUserLoading,
-		signInWithGoogle: null,
-		signInWithLinkedIn,
 		signOutUser,
-		createUser
+		createUser,
+
+		signInWithGoogle: () => signIn({ identity_provider: 'Google' }),
+		signInWithLinkedIn: () => signIn({ identity_provider: 'Linkedin' })
 	};
 };

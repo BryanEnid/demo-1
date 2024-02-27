@@ -137,9 +137,11 @@ const Tools = ({ data = [], isUserProfile }) => {
 	const addCategory = (value) => {
 		setTmpCategories((val) => [value, ...val]);
 	};
+
 	const cancelAddingCategory = () => {
 		setTmpCategories((val) => val.filter((item) => !!item));
 	};
+
 	const submitNewCategory = (oldCategory, newCategory) => {
 		setTmpCategories((val) => val.map((item) => (item === oldCategory ? newCategory : item)));
 	};
@@ -351,7 +353,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 												className="cursor-pointer border border-1 w-1/5 p-2 relative"
 												onClick={() => selectImage(iconUrl)}
 											>
-												<Image src={`${BASE_URL}/static/external?url=${iconUrl}`} className="max-w-full max-h-full " />
+												<Image src={iconUrl} className="max-w-full max-h-full" />
 												{typeof toolCreate.picture === 'string' && toolCreate?.picture === iconUrl && (
 													<Icon icon="ci:check-big" className="text-2xl text-green-500 absolute top-0 right-0" />
 												)}

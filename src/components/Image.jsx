@@ -13,8 +13,14 @@ export const Image = ({ src, proxyEnabled = false, ...props }) => {
 			try {
 				const imageUrl = proxyEnabled ? BYPASS_IMAGES_WITH_PROXY_URL + url : url;
 				const response = await fetch(imageUrl);
-				const blob = await response.blob();
-				addToCache(url, blob);
+				if (response.ok) {
+					const blob = await response.blob();
+					addToCache(url, blob);
+				} else {
+					const response = await fetch(url);
+					const blob = await response.blob();
+					addToCache(url, blob);
+				}
 			} catch (e) {
 				throw { nativeError: e, url, message: e.message };
 			}

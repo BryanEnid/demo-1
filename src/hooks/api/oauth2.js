@@ -6,3 +6,12 @@ export const linkedInCB = (code, redirectUrl) =>
 		method: 'GET',
 		params: { code, redirectUrl }
 	});
+
+export const googleCB = (accessToken) => {
+	const url = 'https://www.googleapis.com/oauth2/v1/userinfo';
+	const headers = { Authorization: `Bearer ${accessToken}` };
+
+	return handleFetch(url, {
+		headers: headers
+	});
+};

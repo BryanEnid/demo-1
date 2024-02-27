@@ -14,6 +14,8 @@ const Recommends = () => {
 	const { data: profile, isUserProfile } = useProfile();
 	const { data: recommends, isLoading } = useRecommends(profile?.id);
 
+	console.log(recommends);
+
 	if (isLoading) {
 		return (
 			<div className="flex justify-center py-10">

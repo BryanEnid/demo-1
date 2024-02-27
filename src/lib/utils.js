@@ -200,3 +200,14 @@ export const parseDuration = (str) => {
 		seconds: matches[8] === undefined ? 0 : matches[8]
 	};
 };
+
+export const decodeIdToken = (idToken) => {
+	if (!idToken) return;
+	// Split the token into its three parts: header, payload, signature
+	const parts = idToken.split('.');
+
+	// Decode the payload (middle part)
+	const payload = JSON.parse(atob(parts[1]));
+
+	return payload;
+};

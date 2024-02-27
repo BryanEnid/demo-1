@@ -43,6 +43,31 @@ const Overview = ({
 				)}
 
 				<div className="flex  flex-col w-full gap-2 pb-4 sm:gap-8 sm:basis-10/12">
+					{canWatch && (
+						<div className="flex justify-center items-center my-6 mt-10 mx-6">
+							<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+								{data.videos.map(({ image }, index) => {
+									if (image) {
+										return (
+											<button onClick={() => setCurrentVideo(index)} key={image}>
+												<div>
+													{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
+													<Image
+														proxyEnabled
+														className={cn(
+															'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
+															currentVideo === index && 'border-primary scale-110'
+														)}
+														src={image}
+													/>
+												</div>
+											</button>
+										);
+									}
+								})}
+							</div>
+						</div>
+					)}
 					<div className="flex flex-row justify-between items-center">
 						{!isMobile && (
 							<div>
@@ -97,31 +122,6 @@ const Overview = ({
 					</div>
 				</div>
 			</div>
-			{canWatch && (
-				<div className="flex justify-center items-center my-6 mt-10 mx-6">
-					<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-						{data.videos.map(({ image }, index) => {
-							if (image) {
-								return (
-									<button onClick={() => setCurrentVideo(index)} key={image}>
-										<div>
-											{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
-											<Image
-												proxyEnabled
-												className={cn(
-													'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
-													currentVideo === index && 'border-primary scale-110'
-												)}
-												src={image}
-											/>
-										</div>
-									</button>
-								);
-							}
-						})}
-					</div>
-				</div>
-			)}
 		</>
 	);
 };
