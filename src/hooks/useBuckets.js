@@ -75,6 +75,7 @@ export const useBuckets = (owner, isOrganization) => {
 			const body = new FormData();
 			body.append('video', data.video);
 			body.append('image', data.image);
+			body.append('videoType', data.videoType);
 			return handleUploadVideo(auth, id, body);
 		},
 		onMutate: ({ onLoading }) => {
