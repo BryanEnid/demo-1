@@ -352,7 +352,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 
 		// Check if the dropped file is a video
 		for (const item of files) {
-			if (!item.type.startsWith('video/')) return alert('Please drop a valid video file.');
+			if (item.type.length > 0 && !item.type.startsWith('video/') && item.name.split('.')[1] !== 'insv')
+				return alert('Please drop a valid video file.');
 		}
 
 		handlePrepareVideosToSave(files);
@@ -396,7 +397,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	};
 
 	const isValid = [editorState.getCurrentContent().hasText(), data.title.length].every(Boolean);
-	const isCurrentVideo360 = data.videos[currentVideo]?.is360Video;
+	const isCurrentVideo360 = data.videos[currentVideo]?.videoType === 'insv';
 	const canWatch =
 		isUserProfile || !data.price || user.payments?.buckets?.find(({ bucketId }) => bucketId === documentId);
 
