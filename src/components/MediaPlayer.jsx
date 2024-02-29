@@ -65,6 +65,7 @@ export function VR_3D() {
 export function Video360({ className, onVideoReady, src }) {
 	const videoRef = React.useRef();
 	const [isReady, setReady] = React.useState(null);
+	const mounted = React.useRef(false);
 
 	React.useEffect(() => {
 		const content = videoRef.current?.components?.material?.material?.map?.image;
@@ -74,7 +75,9 @@ export function Video360({ className, onVideoReady, src }) {
 		}
 
 		if (!content) setTimeout(() => setReady(false), 1000);
-	}, [isReady]);
+
+		return () => {};
+	}, [isReady, src]);
 
 	return (
 		<a-scene
