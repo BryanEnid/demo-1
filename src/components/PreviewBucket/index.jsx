@@ -346,7 +346,6 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	};
 
 	const handleDrop = (e) => {
-		setUploading(true);
 		e.preventDefault();
 		setIsDragOver(false);
 		if (!e.dataTransfer.files.length > 0) return;
