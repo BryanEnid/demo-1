@@ -7,7 +7,7 @@ import { Button } from '@/chadcn/Button.jsx';
 import { VideoUploadButton } from '@/components/VideoUploadButton.jsx';
 import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';
-import { cn } from '@/lib/utils.js';
+import { cn, isYouTubeUrl } from '@/lib/utils.js';
 import { useMobile } from '@/hooks/useMobile';
 import { Image } from '@/components/Image';
 
@@ -53,7 +53,7 @@ const Overview = ({
 												<div>
 													{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
 													<Image
-														proxyEnabled
+														proxyEnabled={isYouTubeUrl(image)}
 														className={cn(
 															'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
 															currentVideo === index && 'border-primary scale-110'

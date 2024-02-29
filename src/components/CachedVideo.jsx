@@ -40,7 +40,7 @@ import { YouTubePlayer } from './YoutubePlayer';
 // };
 
 export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props }, ref) {
-	React.useEffect(() => {}, [window.credentialless]);
+	// React.useEffect(() => {}, [window.credentialless]);
 	// const [cachedVideoUrl, setCachedVideoUrl] = React.useState(null);
 
 	// React.useEffect(() => {
@@ -132,10 +132,5 @@ export const CachedVideo = React.forwardRef(function CachedVideo({ src, ...props
 	// 		/>
 	// 	);
 
-	return (
-		<video {...props} ref={ref} crossOrigin="anonymous">
-			<source src={src} type="video/mp4" />
-			Your browser does not support the video tag.
-		</video>
-	);
+	return <video {...props} ref={ref} crossOrigin="anonymous" src={src} type="video/mp4" />;
 });

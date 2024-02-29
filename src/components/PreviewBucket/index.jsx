@@ -215,6 +215,8 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	};
 
 	const handleExit = (...props) => {
+		if (isUploading) return;
+
 		setCurrentVideo(0);
 		onClose(...props);
 
@@ -344,6 +346,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	};
 
 	const handleDrop = (e) => {
+		setUploading(true);
 		e.preventDefault();
 		setIsDragOver(false);
 		if (!e.dataTransfer.files.length > 0) return;
@@ -459,7 +462,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									<Button
 										variant="secondary"
 										onClick={() => handleCreateBucket({ cb: () => setEditMode(false) })}
-										// disabled={!isValid}
+										disabled={isUploading}
 									>
 										{isEditMode ? (editMode ? 'Create bucket' : 'Done editing') : 'Edit Bucket'}
 									</Button>
@@ -690,7 +693,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 							</Button>
 							<Button
 								onClick={() => handleCreateBucket({ cb: handleClose })}
-								// disabled={!isValid}
+								disabled={isUploading}
 								className="w-full max-w-[200px]"
 							>
 								Save

@@ -11,6 +11,7 @@ import { formatTimestamp } from '@/lib/utils';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { useFFMPEG } from '@/hooks/useFFMPEG';
 import { Button } from '@/chadcn/Button';
+import { useIndexedDBDictionary } from '@/hooks/useIndexedDBDictionary';
 
 export function CaptureScreen() {
 	// Hooks
@@ -18,6 +19,7 @@ export function CaptureScreen() {
 	const { pathname, search } = useLocation();
 	const { user } = useAuth();
 	const { saveVideo: saveVideoIDB } = useIndexedDBVideos('local-unlisted-videos', 1);
+	const { saveKeyValue, getValueByKey } = useIndexedDBDictionary('capture-preferences', 1);
 	const { data: questions } = useQuestions({ forUser: user?.id });
 	const { mux, loadFFMPEG } = useFFMPEG();
 
@@ -29,7 +31,8 @@ export function CaptureScreen() {
 	const [screenDevice, setScreenDevice] = React.useState('');
 	const [screenDevice2, setScreenDevice2] = React.useState('');
 	const [audioDevice, setAudioDevice] = React.useState('');
-	const [isUploading, setUploading] = React.useState(false);
+	const [loadingMedia, setLoadingMedia] = React.useState(true);
+	// const [isUploading, setUploading] = React.useState(false);
 	const [volumeDisplay, setVolumeDisplay] = React.useState(0);
 	const [timelapsed, setTimeLapsed] = React.useState(0);
 	const [audioTracks, setRecordedAudio] = React.useState([]);
@@ -56,8 +59,9 @@ export function CaptureScreen() {
 				if (device.kind === 'audioinput') devicesList.audio.push(device);
 			});
 			setDevices(devicesList);
-			setScreenDevice(devicesList.video[0].deviceId);
-			setAudioDevice(devicesList.audio[0].deviceId);
+			getValueByKey('video_device_1').then((value) => setScreenDevice(value ? value : devicesList.video[0].deviceId));
+			getValueByKey('video_device_2').then((value) => setScreenDevice2(value));
+			getValueByKey('audio_device_1').then((value) => setAudioDevice(value ? value : devicesList.audio[0].deviceId));
 		},
 		[setDevices]
 	);
@@ -94,9 +98,17 @@ export function CaptureScreen() {
 			.then(handleDevices);
 	}, [handleDevices]);
 
+	// Save preferences whenever selected devices changes
+	React.useEffect(() => {
+		const { audio, video } = devices;
+		if (audio.length && video.length) savePreferences(screenDevice, screenDevice2, audioDevice);
+	}, [screenDevice, screenDevice2, audioDevice]);
+
 	// Handles input device (audio/video) change
 	React.useEffect(() => {
-		if (screenDevice.length) startScreen(screenDevice).catch(console.error);
+		if (screenDevice.length) {
+			startScreen(screenDevice).catch(console.error);
+		}
 
 		// TODO: Clean tracks
 		// return () => {
@@ -106,9 +118,10 @@ export function CaptureScreen() {
 		// };
 	}, [screenDevice]);
 
+	// Handles input device (audio/video) change
 	React.useEffect(() => {
 		if (screenDevice2.length) {
-			startScreen2(screenDevice2);
+			startScreen2(screenDevice2).catch(console.error);
 		}
 	}, [screenDevice2]);
 
@@ -137,7 +150,6 @@ export function CaptureScreen() {
 		}
 	}, [audioTracks, videoTracks]);
 
-	// ! V1: This uses WASM FFMPEG
 	const handleRecordedVideo = async (videoTracks, audioTracks) => {
 		const hasAudio = videoTracks[0].target.audioBitsPerSecond > 0;
 		// TODO: MAYBE/? Change to send this as a stream to the data base so it can save it even faster without losing any info after done.
@@ -217,6 +229,13 @@ export function CaptureScreen() {
 				setRecordedAudio((prev) => [...prev, params])
 			);
 		}
+	};
+
+	const savePreferences = (videoDev1, videoDev2, audioDev1) => {
+		// console.log({ videoDev1, videoDev2, audioDev1 });
+		saveKeyValue('video_device_1', videoDev1);
+		saveKeyValue('video_device_2', videoDev2);
+		saveKeyValue('audio_device_1', audioDev1);
 	};
 
 	// TODO: Make this start screen more modular (independent) from state
