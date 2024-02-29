@@ -16,7 +16,7 @@ export const Image = ({ src, proxyEnabled = false, className, ...props }) => {
 	}, []);
 
 	return (
-		<div className="flex justify-center items-center relative h-full w-full">
+		<div className="flex justify-center items-center relative h-full">
 			{isLoading && (
 				<div className="absolute">
 					<Spinner size={30} />
