@@ -32,7 +32,7 @@ const Overview = ({
 		<>
 			<div className="flex flex-row my-3 px-1 sm:px-8 sm:my-6 outline-none">
 				{!isMobile && (
-					<div className="flex basis-2/12 flex-col items-center gap-2 mt-2">
+					<div className="flex basis-2/12 flex-col flex-s items-center gap-2 mt-2">
 						<Image src={profile?.photoURL} className="rounded-full object-cover w-20" />
 						<Typography variant="large">{profile?.name}</Typography>
 
@@ -42,32 +42,7 @@ const Overview = ({
 					</div>
 				)}
 
-				<div className="flex  flex-col w-full gap-2 pb-4 sm:gap-8 sm:basis-10/12">
-					{canWatch && (
-						<div className="flex justify-center items-center my-6 mt-10 mx-6">
-							<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-								{data.videos.map(({ image }, index) => {
-									if (image) {
-										return (
-											<button onClick={() => setCurrentVideo(index)} key={image}>
-												<div>
-													{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
-													<Image
-														proxyEnabled={isYouTubeUrl(image)}
-														className={cn(
-															'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
-															currentVideo === index && 'border-primary scale-110'
-														)}
-														src={image}
-													/>
-												</div>
-											</button>
-										);
-									}
-								})}
-							</div>
-						</div>
-					)}
+				<div className="flex  flex-col w-full gap-0 pb-4 sm:gap-8 sm:basis-10/12">
 					<div className="flex flex-row justify-between items-center">
 						{!isMobile && (
 							<div>
@@ -111,6 +86,32 @@ const Overview = ({
 							</div>
 						)}
 					</div>
+
+					{canWatch && (
+						<div className="flex justify-center items-center mt-10 mx-6">
+							<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+								{data.videos.map(({ image }, index) => {
+									if (image) {
+										return (
+											<button onClick={() => setCurrentVideo(index)} key={image}>
+												<div>
+													{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
+													<Image
+														proxyEnabled={isYouTubeUrl(image)}
+														className={cn(
+															'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
+															currentVideo === index && 'border-primary scale-110'
+														)}
+														src={image}
+													/>
+												</div>
+											</button>
+										);
+									}
+								})}
+							</div>
+						</div>
+					)}
 
 					<div>
 						<div>

@@ -96,6 +96,7 @@ export function SideBar() {
 					</Tooltip>
 				</TooltipProvider>
 			</div>
+
 			{createOrgModal && (
 				<CreateOrganizationModal
 					open={createOrgModal}

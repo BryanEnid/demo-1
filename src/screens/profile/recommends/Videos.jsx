@@ -17,8 +17,6 @@ const Videos = ({ data = [], isUserProfile }) => {
 
 	const { isLoading, createVideo: handleCreate, deleteVideo: handleDelete } = useRecommends();
 
-	console.log(data);
-
 	const handleVideoURLs = async (videosURL) => {
 		closeCreateModal();
 		if (isLoading || !videosURL) {
