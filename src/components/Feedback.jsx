@@ -82,7 +82,7 @@ export const Feedback = ({ onSubmit, show, onClose }) => {
 	const handleSubmit = () => {
 		if (onSubmit) return onSubmit(formdata);
 
-		// onClose();
+		onClose();
 		postMessage(formdata);
 		toast({ description: 'Submitted - Thanks for your feedback' });
 	};

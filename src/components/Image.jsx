@@ -34,9 +34,9 @@ export const Image = ({ src, proxyEnabled = false, className, ...props }) => {
 
 	return (
 		<div className={cn('relative')}>
-			{isLoading && (
+			{/* {isLoading && (
 				<Spinner className="absolute z-20 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]" size={30} />
-			)}
+			)} */}
 			<img
 				onLoad={handleLoad}
 				onError={handleImageFailure}
