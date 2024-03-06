@@ -6,13 +6,11 @@
 import React from 'react';
 import { Label } from '@/chadcn/Label';
 import { Input } from '@/chadcn/Input';
-import { Textarea } from '@/chadcn/textarea';
-import { Button } from '@/chadcn/Button';
+import { Textarea } from '@/chadcn/Textarea';
 import { RadioGroupItem, RadioGroup } from '@/chadcn/RadioGroup';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Typography } from '@/chadcn/Typography';
 import { useToast } from '@/hooks/useToast';
-import { useUser } from '@/hooks/useUser';
 import { useAuth } from '@/providers/Authentication';
 
 const QUESTIONS = [
