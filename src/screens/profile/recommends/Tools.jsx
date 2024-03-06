@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 
-import { groupBy } from '@/lib/utils.js';
+import { groupBy, isAWSUrl } from '@/lib/utils.js';
 import { BASE_URL } from '@/config/api.js';
 import { Card } from '@/chadcn/Card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
@@ -285,7 +285,11 @@ const Tools = ({ data = [], isUserProfile }) => {
 											<Card key={tool.id} className="h-[130px] w-full flex items-center gap-5 mb-4 px-10">
 												{!!tool.picture && (
 													<div className="w-[100px] h-[80px] flex items-center justify-center">
-														<Image proxyEnabled src={tool.picture} className="max-w-full max-h-full " />
+														<Image
+															proxyEnabled={!isAWSUrl(tool.picture)}
+															src={tool.picture}
+															className="max-w-full max-h-full"
+														/>
 													</div>
 												)}
 												<div>

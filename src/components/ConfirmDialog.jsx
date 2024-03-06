@@ -4,7 +4,7 @@ import { Typography } from '@/chadcn/Typography.jsx';
 import { Button } from '@/chadcn/Button.jsx';
 import { PageModal } from '@/components/PageModal.jsx';
 
-const ConfirmDialog = ({
+export const ConfirmDialog = ({
 	show,
 	title,
 	subTitle,

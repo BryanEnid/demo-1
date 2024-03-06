@@ -86,7 +86,7 @@ export const BucketItem = ({
 
 	return (
 		<>
-			<div ref={wrapperElRef} className={cn('flex flex-col  items-center relative select-none', className)}>
+			<div ref={wrapperElRef} className={cn('flex flex-col items-center relative select-none', className)}>
 				<button
 					onClick={() => handleOnClick(contextMenu)}
 					className={`${width} transition ease-in-out hover:scale-105 select-none`}
@@ -114,7 +114,7 @@ export const BucketItem = ({
 										draggable={false}
 										proxyEnabled
 										src={handleSrc(preview)}
-										className="aspect-video object-cover rounded-full w-full h-full"
+										className="aspect-square object-cover rounded-full w-full h-full"
 									/>
 								)}
 

@@ -38,7 +38,7 @@ export const OrganizationsScreen = () => {
 							},
 							cell: ({ row }) => (
 								<div className="flex flex-row justify-start items-center gap-3 ">
-									<Image src={row.original.picture} className="aspect-square w-10 h-10 rounded-full" />
+									<Image src={row.original.picture} className="object-contain w-10 h-10 rounded-full  bg-[#cccccc]" />
 									<Typography variant="a">
 										<Link to={'/organizations/' + row.original.id}>{row.original.name}</Link>
 									</Typography>
@@ -76,7 +76,7 @@ export const OrganizationsScreen = () => {
 							header: 'Creator',
 							cell: ({ row }) => (
 								<div className="flex flex-row justify-start items-center gap-3 ">
-									<Image src={row.original.creator.photoURL} className="aspect-square w-10 h-10 rounded-full" />
+									<Image src={row.original.creator.photoURL} className="aspect-square w-10 h-10 rounded-full " />
 									<Typography variant="a">
 										<Link to={'/' + row.original.creator.uid}>{row.original.creator.name}</Link>
 									</Typography>

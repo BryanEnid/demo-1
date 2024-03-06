@@ -16,6 +16,10 @@ export const isYouTubeUrl = (url = '') => {
 	return url?.includes('youtube.com') || url?.includes('youtu.be') || url?.includes('ytimg.com');
 };
 
+export const isAWSUrl = (url = '') => {
+	return url?.includes('amazonaws.com');
+};
+
 export const extractYoutubeVideoId = (url) => {
 	const urlObject = new URL(url);
 	const pathname = urlObject.pathname;
