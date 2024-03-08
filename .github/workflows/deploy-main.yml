@@ -40,6 +40,6 @@ jobs:
         uses: reggionick/s3-deploy@v4
         with:
           folder: dist
-          bucket: dev-observe-website
+          bucket: dev.observe.space
           bucket-region: us-east-1
           delete-removed: true
