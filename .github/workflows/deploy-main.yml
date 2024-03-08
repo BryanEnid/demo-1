@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
     strategy:
       matrix:
         node-version: [18.x]
@@ -31,6 +35,6 @@ jobs:
         uses: reggionick/s3-deploy@v4
         with:
           folder: dist
-          bucket: ${{ secrets.S3_BUCKET }}
+          bucket: dev-observe-website
           bucket-region: us-east-1
           delete-removed: true
