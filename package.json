@@ -10,8 +10,7 @@
 		"lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
 		"format": "prettier --write .",
 		"style:all": "yarn lint && prettier . --check",
-		"prepare": "husky install",
-		"sync": "aws s3 sync ./dist 's3://dev.observe.space/' "
+		"prepare": "husky install"
 	},
 	"dependencies": {
 		"@ffmpeg/ffmpeg": "^0.12.10",
