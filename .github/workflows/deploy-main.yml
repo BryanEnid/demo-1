@@ -38,14 +38,7 @@ jobs:
           yarn run build
 
       - name: Upload S3
-        uses: reggionick/s3-deploy@v4
-        with:
-          folder: dist
-          bucket: dev.observe.space
-          bucket-region: us-east-1
-          delete-removed: true
-
-      - uses: jakejarvis/s3-sync-action@master
+        uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
         env:
