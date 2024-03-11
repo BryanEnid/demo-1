@@ -17,6 +17,7 @@ import { UsersScreen } from './screens/users/Users';
 import { OrganizationsScreen } from './screens/organizations';
 import Layout from '@/components/Layout.jsx';
 import { Redirects } from './screens/redirects/Redirects';
+import { Page404 } from './screens/404';
 
 export function Routes(props) {
 	// TODO: Preload all icons
@@ -100,8 +101,8 @@ export function Routes(props) {
 			element: <Redirects />
 		},
 		{
-			path: '/notfound',
-			element: <>not found</>
+			path: '/404',
+			element: <Page404 />
 		}
 	]);
 

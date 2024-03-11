@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, Outlet, useLocation, useMatches } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation, useMatches, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
@@ -104,8 +104,7 @@ export function Profile() {
 		(() => {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
 
-			// ! This doesn't longer work
-			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate('/notfound');
+			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate(`/404?route=${pathname}`);
 		})();
 	}, [profile, profileLoading, authLoading]);
 
