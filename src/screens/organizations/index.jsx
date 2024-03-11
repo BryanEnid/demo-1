@@ -9,6 +9,7 @@ import { Typography } from '@/chadcn/Typography';
 import useOrganizations from '@/hooks/useOrganizations.js';
 import { organizationTypes } from '@/screens/organizations/constants.js';
 import { Image } from '@/components/Image';
+import DefaultImage from '@/assets/default_image.png';
 
 export const OrganizationsScreen = () => {
 	const { list, isLoading } = useOrganizations({ fullList: true });
@@ -76,9 +77,12 @@ export const OrganizationsScreen = () => {
 							header: 'Creator',
 							cell: ({ row }) => (
 								<div className="flex flex-row justify-start items-center gap-3 ">
-									<Image src={row.original.creator.photoURL} className="aspect-square w-10 h-10 rounded-full " />
+									<Image
+										src={row.original?.creator?.photoURL ?? DefaultImage}
+										className="aspect-square w-10 h-10 rounded-full "
+									/>
 									<Typography variant="a">
-										<Link to={'/' + row.original.creator.uid}>{row.original.creator.name}</Link>
+										<Link to={'/' + row.original.creator?.uid}>{row.original.creator?.name}</Link>
 									</Typography>
 								</div>
 							)
