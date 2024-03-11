@@ -105,7 +105,7 @@ export function Profile() {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
 
 			// ! This doesn't longer work
-			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate('/notfound');
+			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate('/404');
 		})();
 	}, [profile, profileLoading, authLoading]);
 
