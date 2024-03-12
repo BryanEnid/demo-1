@@ -30,10 +30,8 @@ import { Typography } from '@/chadcn/Typography';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/chadcn/Tabs.jsx';
 
 import { VideoUploadButton } from '../VideoUploadButton.jsx';
-import { CircularProgress } from '../CircularProgress.jsx';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
-import { useMobile } from '@/hooks/useMobile.js';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { Image } from '../Image.jsx';
 import { useBucket } from '@/hooks/useBucket.js';
@@ -122,16 +120,13 @@ const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
 	);
 };
 
-const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) => {
+const PreviewBucket = ({ show, onClose, editMode, documentId }) => {
 	// Hooks
 	const navigate = useNavigate();
 	const { user } = useAuth();
 	const { data: profile, isUserProfile, isOrganization } = useProfile();
-	const { isMobile } = useMobile();
-	// const { createBucket } = useBuckets(profile);
-	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs, createBucketPrice } =
-		useBuckets(profile);
-
+	const { data: inData, createBucket, updateBucket, uploadVideo } = useBucket(documentId);
+	const { markBucketViewed, deleteBucket, saveVideoURLs, createBucketPrice } = useBuckets(profile);
 	const { checkoutBucket } = useStripeCheckout();
 
 	// State
@@ -143,13 +138,13 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const [isDragOver, setIsDragOver] = React.useState(false);
 	const [isSharing, setSharing] = React.useState(false);
 	const [isDisplayVideoURLsModalVisible, setDisplayVideoURLsModal] = React.useState(false);
+	const [editorState, setEditorState] = React.useState(EditorState.createEmpty());
 	const [data, setData] = React.useState({
 		videos: [],
 		name: '',
 		title: '',
 		private: 'false'
 	});
-	const [editorState, setEditorState] = React.useState(EditorState.createEmpty());
 
 	// Refs
 	const dropZoneRef = React.useRef();

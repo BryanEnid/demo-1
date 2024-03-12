@@ -15,17 +15,17 @@ import {
 	updateBucketPrice as handleUpdateBucketPrice
 } from './api/buckets';
 
-const COLLECTION_NAME = 'Buckets';
+const COLLECTION_NAME = 'Bucket';
 
-export const useBucket = (bucketId, { owner = {}, isOrganization = false }) => {
+export const useBucket = (bucketId, { owner, isOrganization } = {}) => {
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
-	const queryKey = [COLLECTION_NAME, owner?.id, auth.authToken];
+	const queryKey = [COLLECTION_NAME, bucketId];
 
-	const { data, isLoading } = useQuery({
+	const { data, refetch, isLoading } = useQuery({
 		gcTime: Infinity,
-		queryKey: [COLLECTION_NAME, bucketId],
+		queryKey,
 		queryFn: async () => (bucketId ? handleGetBucket(auth, bucketId) : null),
 		enabled: Boolean(bucketId)
 	});
@@ -35,6 +35,7 @@ export const useBucket = (bucketId, { owner = {}, isOrganization = false }) => {
 		onSuccess: () => {
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });
+			queryClient.invalidateQueries({ queryKey: ['Buckets'] });
 		}
 	});
 
@@ -44,6 +45,7 @@ export const useBucket = (bucketId, { owner = {}, isOrganization = false }) => {
 			// TODO: Optimistic updates
 			// Invalidate and refetch
 			queryClient.invalidateQueries({ queryKey });
+			queryClient.invalidateQueries({ queryKey: ['Buckets'] });
 		}
 	});
 
@@ -108,5 +110,12 @@ export const useBucket = (bucketId, { owner = {}, isOrganization = false }) => {
 		}
 	});
 
-	return { data, isLoading };
+	return {
+		data,
+		refetch,
+		isLoading,
+		updateBucket: updateBucket.mutate,
+		createBucket: createBucket.mutate,
+		uploadVideo: uploadVideo.mutate
+	};
 };

@@ -14,14 +14,12 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger
 } from '@/chadcn/ContextMenu';
-import { useMobile } from '@/hooks/useMobile';
 import { Image } from '@/components/Image';
 import { useBucket } from '@/hooks/useBucket';
 
 export const BucketItem = ({
 	name,
 	preview,
-	data,
 	documentId,
 	onClick,
 	width = 'size-[200px]',
@@ -33,8 +31,8 @@ export const BucketItem = ({
 }) => {
 	// Hooks
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { isMobile } = useMobile();
-	// const { data: lol } = useBucket(documentId);
+
+	const { data, refetch } = useBucket(documentId);
 
 	// State
 	const [open, setOpen] = useState(false);
@@ -44,9 +42,17 @@ export const BucketItem = ({
 
 	const wrapperElRef = useRef();
 
-	// React.useEffect(() => {
-	// 	console.log(lol);
-	// }, [lol]);
+	// Watch for videos still uploading
+	React.useEffect(() => {
+		if (data) {
+			const found = data?.videos?.find(({ process }) => process?.status === 'UPLOADING');
+			if (found) {
+				const instance = setInterval(refetch, [5000]);
+				const clear = () => clearInterval(instance);
+				return clear;
+			}
+		}
+	}, [data]);
 
 	React.useEffect(() => {
 		if (searchParams.get('bucketid') === documentId && open === false) {
@@ -81,6 +87,7 @@ export const BucketItem = ({
 
 		return src;
 	};
+
 	const openNewWindow = () => {
 		window.open(
 			`${window.location.href}?bucketid=${documentId}`,
@@ -179,6 +186,7 @@ export const BucketItem = ({
 			>
 				{null}
 			</ConfirmDialog>
+
 			{data && shareModalOpen && (
 				<ShareModal
 					open={shareModalOpen}
@@ -187,6 +195,7 @@ export const BucketItem = ({
 					saveBucketSettings={updateBucketSettings}
 				/>
 			)}
+
 			{!onClick && <PreviewBucket show={open} onClose={handleExit} data={data} documentId={documentId} />}
 		</>
 	);
