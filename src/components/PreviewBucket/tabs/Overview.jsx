@@ -90,20 +90,26 @@ const Overview = ({
 					{canWatch && (
 						<div className="flex justify-center items-center mt-10 mx-6">
 							<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-								{data.videos.map(({ image }, index) => {
+								{data.videos.map(({ image, process }, index) => {
 									if (image) {
 										return (
 											<button onClick={() => setCurrentVideo(index)} key={image}>
-												<div>
+												<div className="relative">
 													{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
 													<Image
 														proxyEnabled={isYouTubeUrl(image)}
 														className={cn(
 															'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
-															currentVideo === index && 'border-primary scale-110'
+															currentVideo === index && process?.status === 'DONE' && 'border-primary scale-110'
 														)}
 														src={image}
 													/>
+
+													{process?.status !== 'DONE' && process && (
+														<div className="absolute h-full w-full text-white backdrop-grayscale backdrop-blur-sm top-0 left-0 z-10 flex justify-center items-center">
+															<Typography variant="large">Uploading - {process?.percent}%</Typography>
+														</div>
+													)}
 												</div>
 											</button>
 										);

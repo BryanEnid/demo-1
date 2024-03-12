@@ -36,6 +36,7 @@ import { Spinner } from '../Spinner';
 import { useMobile } from '@/hooks/useMobile.js';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { Image } from '../Image.jsx';
+import { useBucket } from '@/hooks/useBucket.js';
 
 const QRShareView = ({ show, onClose }) => {
 	const [value, setValue] = React.useState(window.location.href);
@@ -127,15 +128,16 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 	const { user } = useAuth();
 	const { data: profile, isUserProfile, isOrganization } = useProfile();
 	const { isMobile } = useMobile();
+	// const { createBucket } = useBuckets(profile);
 	const { createBucket, updateBucket, markBucketViewed, deleteBucket, uploadVideo, saveVideoURLs, createBucketPrice } =
 		useBuckets(profile);
+
 	const { checkoutBucket } = useStripeCheckout();
 
 	// State
 	const [isFullscreen, setIsFullscreen] = React.useState(false);
 	const [isEditMode, setEditMode] = React.useState(editMode ?? false);
 	const [isUploading, setUploading] = React.useState(false);
-	const [progress, setProgress] = React.useState(20);
 	const [currentVideo, setCurrentVideo] = React.useState(0);
 	const [enableDelete, setEnableDelete] = React.useState(false);
 	const [isDragOver, setIsDragOver] = React.useState(false);
@@ -289,7 +291,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					file: files.item(index)
 				}));
 
-				setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }));
+				// setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }));
 
 				for (const item of body) {
 					const videoType = item.file.name.split('.').at(-1);
@@ -297,7 +299,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 					reader.readAsArrayBuffer(item.file);
 					reader.onload = () =>
 						saveVideo({ result: reader.result, details: { ...item, documentId: dbid } }, videoType, {
-							onLoading: () => setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }))
+							// onLoading: () => setData((prev) => ({ ...prev, videos: [...prev.videos, ...body] }))
 						});
 				}
 			}
@@ -311,21 +313,12 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 		const video = new Blob([file.result], { type: 'video/mp4' }); // Video File
 		const image = await generatePreview(video);
 
-		// ! TODO: Display progress setProgress(Math.ceil((snapshot.bytesTransferred * 100) / snapshot.totalBytes));
-		// ! TODO: Only save when clicking save button.
 		uploadVideo(
 			{ id: bucketId, data: { video, image, videoType }, onLoading },
 			{
-				onSuccess: (response) => {
-					// console.log(response, variables, ctx);
-					// const videos = [...data.videos];
-					// videos[index] = { image, videoUrl: video };
-					// setData((prev) => ({ ...prev, videos }));
-					// navigate({ pathname: `/profile`, search: createSearchParams({ focus: selectedBucket.id }).toString() });
-				},
+				onSuccess: (response) => {},
 				onSettled: () => {
 					setUploading(false);
-					setProgress(0);
 				},
 				onError: console.error
 			}
@@ -391,7 +384,7 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 				},
 				onSettled: () => {
 					setUploading(false);
-					setProgress(0);
+					// setProgress(0);
 				},
 				onError: console.error
 			}
@@ -609,7 +602,12 @@ const PreviewBucket = ({ show, onClose, data: inData, editMode, documentId }) =>
 									filter=".undraggable"
 									ghostClass="opacity-0"
 								>
-									{[...data.videos, ...new Array(12 - data?.videos?.length).fill('')].map((item, index) => {
+									{[
+										...(data.videos.length > 0 ? data.videos : []),
+										...new Array(
+											data.videos.length > 0 ? (data.videos.length % 4 === 0 ? 0 : 4 - (data.videos.length % 4)) : 4
+										).fill('')
+									].map((item, index) => {
 										if (item?.image) {
 											return (
 												<div key={item.image} className="relative draggable w-1/4 h-full aspect-video p-2 flex ">

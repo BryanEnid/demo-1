@@ -16,6 +16,7 @@ import {
 } from '@/chadcn/ContextMenu';
 import { useMobile } from '@/hooks/useMobile';
 import { Image } from '@/components/Image';
+import { useBucket } from '@/hooks/useBucket';
 
 export const BucketItem = ({
 	name,
@@ -33,6 +34,7 @@ export const BucketItem = ({
 	// Hooks
 	const [searchParams, setSearchParams] = useSearchParams();
 	const { isMobile } = useMobile();
+	// const { data: lol } = useBucket(documentId);
 
 	// State
 	const [open, setOpen] = useState(false);
@@ -42,11 +44,14 @@ export const BucketItem = ({
 
 	const wrapperElRef = useRef();
 
+	// React.useEffect(() => {
+	// 	console.log(lol);
+	// }, [lol]);
+
 	React.useEffect(() => {
 		if (searchParams.get('bucketid') === documentId && open === false) {
 			setOpen(true);
 		}
-		// if (searchParams)
 	}, [searchParams]);
 
 	const updateBucketSettings = ({ contributors, isPrivate }) => {
