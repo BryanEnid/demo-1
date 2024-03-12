@@ -106,8 +106,22 @@ const Overview = ({
 													/>
 
 													{process?.status !== 'DONE' && process && (
-														<div className="absolute h-full w-full text-white backdrop-grayscale backdrop-blur-sm top-0 left-0 z-10 flex justify-center items-center">
-															<Typography variant="large">Uploading - {process?.percent}%</Typography>
+														<div className="absolute h-full w-full  text-white top-0 left-0 z-10 flex justify-center items-center">
+															<div
+																className="absolute top-0 right-0 w-full h-full backdrop-blur-sm backdrop-grayscale transition-all"
+																style={{ width: `${100 - process?.percent}%` }}
+															></div>
+
+															<div
+																className="absolute top-0 left-0 w-full h-full transition-all"
+																style={{ width: `${process?.percent}%` }}
+															>
+																<div className="bg-white h-full w-[1px] absolute right-0"></div>
+															</div>
+
+															<div className="relative justify-center items-center">
+																<Typography variant="large">{process?.percent}%</Typography>
+															</div>
 														</div>
 													)}
 												</div>
