@@ -32,7 +32,7 @@ export const BucketItem = ({
 	// Hooks
 	const [searchParams, setSearchParams] = useSearchParams();
 
-	const { data, refetch } = useBucket(documentId);
+	const { data, refetch, isLoading } = useBucket(documentId);
 
 	// State
 	const [open, setOpen] = useState(false);
@@ -95,6 +95,8 @@ export const BucketItem = ({
 			`popup=1, fullscreen=1, menubar=1, status=1, toolbar=1, menubar=1, noopener noreferrer, width=${window.screen.width}, height=${window.screen.height}`
 		);
 	};
+
+	if (isLoading) return <></>;
 
 	return (
 		<>
