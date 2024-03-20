@@ -1,4 +1,4 @@
-# observe-pwa
+# Observe-PWA
 
 [![License](https://img.shields.io/badge/license-Not%20Licensed-red.svg)](https://opensource.org/licenses/)
 
@@ -16,8 +16,8 @@
 
 ## Requirements
 
-- Yarn versions `>= v1.22.19 <= v1.22.21`
-- Node versions `>= v18.0.0 <= v18.19.0`
+- Yarn versions `>= v1.22.19 <= v1.*.*`
+- Node versions `>= v18.0.0 <= v20.*.*`
 
 ## Getting Started
 
