@@ -414,7 +414,7 @@ const PreviewBucket = ({ show, onClose, editMode, documentId }) => {
 							{!isCurrentVideo360 && (
 								<CachedVideo
 									autoPlay
-									controls={false}
+									controls={true}
 									ref={videoRef}
 									src={data.videos[currentVideo]?.videoUrl} // Have also low quality videos
 									onEnded={handleNextVideo}
