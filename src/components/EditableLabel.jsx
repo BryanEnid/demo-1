@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 
 import { cn } from '@/lib/utils.js';
 import { Input } from '@/chadcn/Input.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Button } from '@/chadcn/Button';
 
 const EditableLabel = ({
 	controls,

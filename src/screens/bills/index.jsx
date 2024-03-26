@@ -4,16 +4,16 @@ import { Listbox } from '@headlessui/react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 import { Icon } from '@iconify/react';
 
-import { useAuth } from '@/providers/Authentication.jsx';
-import { useProfile } from '@/hooks/useProfile.js';
-import useStripeAccount from '@/hooks/useStripeAccount.js';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Input } from '@/chadcn/Input.jsx';
-import { Calendar } from '@/chadcn/Calendar.jsx';
-import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '@/chadcn/Popover';
-import { Button } from '@/chadcn/Button.jsx';
-import FormatDate from '@/components/FormatDate.jsx';
-import { Spinner } from '@/components/Spinner.jsx';
+import { useAuth } from '@/providers/Authentication';
+import { useProfile } from '@/hooks/useProfile';
+import useStripeAccount from '@/hooks/useStripeAccount';
+import { Typography } from '@/chadcn/Typography';
+import { Input } from '@/chadcn/Input';
+import { Calendar } from '@/chadcn/Calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/chadcn/Popover';
+import { Button } from '@/chadcn/Button';
+import FormatDate from '@/components/FormatDate';
+import { Spinner } from '@/components/Spinner';
 
 const countriesMap = {
 	US: 'US'

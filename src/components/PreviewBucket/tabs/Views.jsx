@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useBucketViewers } from '@/hooks/useBucketViewers.js';
 import { Spinner } from '@/components/Spinner.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { Typography } from '@/chadcn/Typography';
 import { Image } from '@/components/Image';
 
 const Views = ({ bucketId }) => {

@@ -3,13 +3,13 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 
 import { useAuth } from '@/providers/Authentication.jsx';
 import { useUser } from '@/hooks/useUser.js';
-import { PageModal } from '@/components/PageModal.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { PageModal } from '@/components/PageModal';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Separator } from '@/chadcn/Separator.jsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/chadcn/Popover.jsx';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/chadcn/Command.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 import { Listbox } from '@headlessui/react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';

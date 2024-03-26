@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import { cn, isYouTubeUrl } from '@/lib/utils';
 import PreviewBucket from '@/components/PreviewBucket';
 import ShareModal from '@/components/ShareModal.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { Typography } from '@/chadcn/Typography';
 import {
 	ContextMenu,

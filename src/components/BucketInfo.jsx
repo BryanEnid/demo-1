@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useBuckets } from '@/hooks/useBuckets.js';
 import ShareModal from '@/components/ShareModal.jsx';
 import { Image } from './Image';

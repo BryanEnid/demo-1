@@ -6,18 +6,18 @@ import { useBuckets } from '@/hooks/useBuckets';
 import { useProfile } from '@/hooks/useProfile';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Icon } from '@iconify/react/dist/iconify.js';
-import { Button } from '@/chadcn/Button.jsx';
-import { Input } from '@/chadcn/Input.jsx';
-import { Separator } from '@/chadcn/Separator.jsx';
-import { PageModal } from '@/components/PageModal.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
-import EditableLabel from '@/components/EditableLabel.jsx';
-import { groupBy } from '@/lib/utils.js';
+import { Typography } from '@/chadcn/Typography';
+import { Icon } from '@iconify/react/dist/iconify';
+import { Button } from '@/chadcn/Button';
+import { Input } from '@/chadcn/Input';
+import { Separator } from '@/chadcn/Separator';
+import { PageModal } from '@/components/PageModal';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import EditableLabel from '@/components/EditableLabel';
+import { groupBy } from '@/lib/utils';
 import { BucketItem } from './BucketItem';
 import { useMobile } from '@/hooks/useMobile';
-import { useLayout } from '@/providers/LayoutProvider.jsx';
+import { useLayout } from '@/providers/LayoutProvider';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
 

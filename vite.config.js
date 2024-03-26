@@ -43,8 +43,8 @@ export default defineConfig({
 		// port: 3000
 		// ! Enable this for local https
 		https: {
-			key: path.resolve(__dirname, 'localhost.key'),
-			cert: path.resolve(__dirname, 'localhost.crt')
+			key: path.resolve(__dirname, './ssl/key.pem'),
+			cert: path.resolve(__dirname, './ssl/cert.pem')
 		},
 		headers: {
 			'Cross-Origin-Opener-Policy': 'same-origin',

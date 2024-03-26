@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { ReactNode, HTMLAttributes } from 'react';
 
-export function Typography({ variant, children, className, ...rest }) {
+interface TypographyProps extends HTMLAttributes<HTMLElement> {
+	variant?: 'h1' | 'h2' | 'h3' | 'large' | 'small' | 'muted' | 'p' | 'a' | 'blockquote';
+	className?: string;
+	children: ReactNode;
+}
+
+export function Typography({ variant, children, className, ...rest }: TypographyProps) {
 	switch (variant) {
 		case 'h1': {
 			return (
@@ -34,14 +40,6 @@ export function Typography({ variant, children, className, ...rest }) {
 				</h3>
 			);
 		}
-
-		// case "h4": {
-		//   return (
-		//     <h1 {...rest} className={["scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl", className].join(" ")}>
-		//       {children}
-		//     </h1>
-		//   );
-		// }
 
 		case 'large': {
 			return (

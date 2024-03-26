@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { FC, ReactNode } from 'react';
+import { Typography } from '@/chadcn/Typography';
+import { Button, ButtonVariant } from '@/chadcn/Button';
+import { PageModal } from '@/components/PageModal';
 
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
-import { PageModal } from '@/components/PageModal.jsx';
+interface ConfirmDialogProps {
+	show: boolean;
+	title: string;
+	subTitle?: string;
+	cancelLabel?: string;
+	submitLabel?: string;
+	submitBtnVariant?: ButtonVariant;
+	disabledSubmit?: boolean;
+	onClose?: (action: string) => void;
+	onCancel?: () => void;
+	onConfirm?: () => void;
+	onDelete?: () => void;
+	children: ReactNode;
+}
 
-export const ConfirmDialog = ({
+export const ConfirmDialog: FC<ConfirmDialogProps> = ({
 	show,
 	title,
 	subTitle,
@@ -47,9 +61,7 @@ export const ConfirmDialog = ({
 								variant="secondary"
 								className="rounded-full min-w-[150px] py-6 md:min-w-[100px]"
 								onClick={() => {
-									if (typeof onCancel === 'function') {
-										return onCancel();
-									}
+									if (typeof onCancel === 'function') return onCancel();
 
 									onClose('cancel');
 								}}

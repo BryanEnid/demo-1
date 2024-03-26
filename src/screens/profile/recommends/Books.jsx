@@ -3,15 +3,15 @@ import { ReactSortable } from 'react-sortablejs';
 import { Icon } from '@iconify/react';
 
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input.jsx';
 import { Textarea } from '@/chadcn/Textarea.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { Image } from '@/components/Image';
 
 const initialBookState = {

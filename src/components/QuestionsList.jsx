@@ -5,8 +5,8 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { Input } from '@/chadcn/Input.jsx';
 import { Textarea } from '@/chadcn/Textarea';
-import { Button } from '@/chadcn/Button.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { Button } from '@/chadcn/Button';
+import { Typography } from '@/chadcn/Typography';
 import useQuestions from '@/hooks/useQuestions.js';
 import { CachedVideo } from '@/components/CachedVideo.jsx';
 

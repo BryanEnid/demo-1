@@ -4,10 +4,10 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { extractYoutubeVideoId, isYouTubeUrl } from '@/lib/utils.js';
 import { useToast } from '@/hooks/useToast.js';
 import { getYouTubeVideoDetails } from '@/hooks/api/youtube.js';
-import { PageModal } from '@/components/PageModal.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { PageModal } from '@/components/PageModal';
+import { Typography } from '@/chadcn/Typography';
 import { Input } from '@/chadcn/Input.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Button } from '@/chadcn/Button';
 import { Image } from './Image';
 
 const VideoAddURLModal = ({ show, onClose }) => {

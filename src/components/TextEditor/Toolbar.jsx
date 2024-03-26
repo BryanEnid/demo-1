@@ -2,7 +2,7 @@ import React from 'react';
 import { RichUtils } from 'draft-js';
 
 import { Icon } from '@iconify/react/dist/iconify.js';
-import { Button } from '@/chadcn/Button.jsx';
+import { Button } from '@/chadcn/Button';
 
 export const Toolbar = ({ editorState, setEditorState }) => {
 	const toolbarRef = React.useRef();

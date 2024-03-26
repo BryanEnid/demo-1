@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const CredentiallessIFrame = ({ src }) => {
+export const CredentiallessIFrame = ({ src, className, onLoad }) => {
 	const iframeRef = React.useRef(null);
 
 	React.useEffect(() => {
@@ -11,5 +11,5 @@ export const CredentiallessIFrame = ({ src }) => {
 		}
 	}, []);
 
-	return <iframe ref={iframeRef} width="100%" height="100%" />;
+	return <iframe ref={iframeRef} className={className} onLoad={onLoad} />;
 };

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Listbox } from '@headlessui/react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input';
 import { Spinner } from '@/components/Spinner.jsx';
 

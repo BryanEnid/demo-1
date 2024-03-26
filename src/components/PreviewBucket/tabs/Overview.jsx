@@ -2,8 +2,8 @@ import React from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Icon } from '@iconify/react/dist/iconify.js';
 
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { VideoUploadButton } from '@/components/VideoUploadButton.jsx';
 import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';

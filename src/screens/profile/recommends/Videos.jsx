@@ -4,10 +4,10 @@ import { Icon } from '@iconify/react';
 import { parseDuration } from '@/lib/utils.js';
 import { BASE_URL } from '@/config/api.js';
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import VideoAddURLModal from '@/components/VideoAddURLModal.jsx';
 import { Image } from '@/components/Image';
 

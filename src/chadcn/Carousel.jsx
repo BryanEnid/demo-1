@@ -5,7 +5,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@radix-ui/react-icons';
 import useEmblaCarousel from 'embla-carousel-react';
 
 import { cn } from '@/lib/utils';
-import { Button } from '@/chadcn/Button.jsx';
+import { Button } from '@/chadcn/Button';
 
 const CarouselContext = React.createContext(null);
 

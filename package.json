@@ -10,7 +10,9 @@
 		"lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"format": "prettier --write .",
 		"style:all": "yarn lint && prettier . --check",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"generate-ssl": "bash ./scripts/generate_ssl.sh",
+		"generate-ssl:windows": "powershell -ExecutionPolicy Bypass -File ./scripts/generate_ssl.ps1"
 	},
 	"dependencies": {
 		"@ffmpeg/ffmpeg": "^0.12.10",

@@ -3,10 +3,10 @@ import { Icon } from '@iconify/react';
 import { Listbox, Popover } from '@headlessui/react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
-import { Button } from '@/chadcn/Button.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { Button } from '@/chadcn/Button';
+import { Typography } from '@/chadcn/Typography';
 import { Input } from '@/chadcn/Input.jsx';
 import useOrganizations from '@/hooks/useOrganizations.js';
 import { organizationTypes } from '@/screens/organizations/constants.js';
