@@ -9,7 +9,7 @@
 		"preview": "vite preview --host",
 		"lint": "eslint . --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"format": "prettier --write .",
-		"style:all": "yarn lint && prettier . --check",
+		"style:all": "yarn lint && yarn prettier . --check",
 		"prepare": "husky install",
 		"generate-ssl": "bash ./scripts/generate_ssl.sh",
 		"generate-ssl:windows": "powershell -ExecutionPolicy Bypass -File ./scripts/generate_ssl.ps1"

@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 
 import { Typography } from '@/chadcn/Typography';
 import { Button } from '@/chadcn/Button';
-import { VideoUploadButton } from '@/components/VideoUploadButton.jsx';
+import { VideoUploadButton } from '@/components/VideoUploadButton';
 import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';
 import { cn, isYouTubeUrl } from '@/lib/utils.js';

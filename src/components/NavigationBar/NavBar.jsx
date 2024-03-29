@@ -146,10 +146,10 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 									Billing
 									<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
 								</DropdownMenuItem>
-								{/*<DropdownMenuItem>*/}
-								{/*	Settings*/}
-								{/*	<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>*/}
-								{/*</DropdownMenuItem>*/}
+								<DropdownMenuItem onClick={() => navigate(`/${user.uid}/settings`)}>
+									Settings
+									<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+								</DropdownMenuItem>
 								{/*<DropdownMenuItem>*/}
 								{/*	Keyboard shortcuts*/}
 								{/*	<DropdownMenuShortcut>⌘K</DropdownMenuShortcut>*/}

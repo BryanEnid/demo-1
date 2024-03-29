@@ -16,6 +16,7 @@ export const useProfile = () => {
 	const { selected, isLoading: isOrgLoading } = useOrganizations(isOrganization ? { id } : undefined);
 
 	const enabled = id && id != 'profile' && !isOrganization;
+
 	const {
 		data: profile,
 		isLoading: userProfileLoading,

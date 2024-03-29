@@ -51,6 +51,7 @@ export function SideBar() {
 				>
 					<Icon width={35} icon="ion:compass-outline" />
 				</button>
+
 				<button
 					onClick={() => navigate('/organizations')}
 					className={cn(
@@ -60,6 +61,7 @@ export function SideBar() {
 				>
 					<Icon width={35} icon="octicon:organization-24" />
 				</button>
+
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={30} icon="ion:briefcase-outline" />
 				</button>
@@ -70,6 +72,7 @@ export function SideBar() {
 
 				<Separator className="my-1" />
 
+				{/* List of organizations created by user */}
 				{list.map(({ id, picture }) => (
 					<button
 						key={id}
@@ -80,6 +83,7 @@ export function SideBar() {
 					</button>
 				))}
 
+				{/* Toggle button to open 'Create Organization' modal */}
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -97,6 +101,7 @@ export function SideBar() {
 				</TooltipProvider>
 			</div>
 
+			{/* Create Org Modal */}
 			{createOrgModal && (
 				<CreateOrganizationModal
 					open={createOrgModal}

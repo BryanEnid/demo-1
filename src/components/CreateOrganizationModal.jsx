@@ -232,6 +232,7 @@ const CreateOrganizationModal = ({ open, isLoading, onClose: handleClose, onCrea
 					<Typography variant="muted" className="text-center text-sm">
 						For groups looking to develop a co-curated profile
 					</Typography>
+
 					<Button
 						variant="ghost"
 						className="rounded-full w-[40px] h-[40px] absolute top-[-2px] right-0"
@@ -243,6 +244,7 @@ const CreateOrganizationModal = ({ open, isLoading, onClose: handleClose, onCrea
 				<div>
 					<ModalStepComponent values={orgData} handleChange={handleChange} />
 				</div>
+
 				<div className="flex justify-end gap-2 w-full">
 					{modalStep === 0 ? (
 						<Button variant="secondary" className="rounded-md" onClick={closeModal}>

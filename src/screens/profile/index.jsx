@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate, Outlet, useLocation, useMatches, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { useLayout } from '@/providers/LayoutProvider.jsx';
@@ -17,6 +16,7 @@ import { Separator } from '@/chadcn/Separator.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/chadcn/Carousel';
 import { Image } from '@/components/Image';
+import useSettings from '@/hooks/useSettings';
 
 function NavOption(props) {
 	const { title, href, textClassName = '', buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
@@ -62,11 +62,11 @@ export function Profile() {
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
+	const { data: settings } = useSettings();
 	const { updateOrganization } = useOrganizations();
 	const { user, isLoading: authLoading } = useAuth();
 	const { isMobile } = useMobile();
 	const { closeBucketInfo } = useLayout();
-
 	const pathParts = pathname.slice(1).split('/');
 	const organizationMenu = [
 		{
@@ -103,12 +103,14 @@ export function Profile() {
 	React.useEffect(() => {
 		(() => {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
-
 			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate(`/404?route=${pathname}`);
 		})();
 	}, [profile, profileLoading, authLoading]);
 
 	if (!profile?.uid && !profile?.id) return <></>;
+
+	const sampleQuote =
+		'If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.';
 
 	const handleFilesChange = (e) => {
 		const file = e.target.files[0];
@@ -154,6 +156,7 @@ export function Profile() {
 									</DropdownMenu>
 								</>
 							)}
+
 							<div className="flex flex-col items-center">
 								<Image src={profile?.picture} className="rounded-full object-cover aspect-square w-36 2xl:w-48 mb-8" />
 								<Typography variant="h2" className="text-white/[.96]">
@@ -243,12 +246,15 @@ export function Profile() {
 					<div>
 						{/* Header */}
 						<div className="flex flex-col items-center gap-3">
-							<Image src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
+							<Image
+								src={settings?.image || profile?.photoURL}
+								className="rounded-full object-cover aspect-square w-36 2xl:w-48"
+							/>
 							<Typography variant="h3" className="mt-6">
-								{profile?.name}
+								{settings?.name || profile?.name}
 							</Typography>
 							<Typography variant="blockquote" className="border-0">
-								“If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.”
+								"{settings?.headline || sampleQuote}"
 							</Typography>
 						</div>
 

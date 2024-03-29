@@ -29,7 +29,7 @@ import { Input } from '@/chadcn/Input';
 import { Typography } from '@/chadcn/Typography';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/chadcn/Tabs.jsx';
 
-import { VideoUploadButton } from '../VideoUploadButton.jsx';
+import { VideoUploadButton } from '../VideoUploadButton';
 import { CachedVideo } from '../CachedVideo.jsx';
 import { Spinner } from '../Spinner';
 import { useAuth } from '@/providers/Authentication.jsx';

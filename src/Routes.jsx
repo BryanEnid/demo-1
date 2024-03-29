@@ -13,6 +13,7 @@ import { SignIn } from './screens/sign_in/SignIn';
 import Quests from './screens/profile/quests/index';
 import Recommends from '@/screens/profile/recommends';
 import Bills from '@/screens/bills/index.jsx';
+import Settings from '@/screens/settings/index.jsx';
 import { UsersScreen } from './screens/users/Users';
 import { OrganizationsScreen } from './screens/organizations';
 import Layout from '@/components/Layout.jsx';
@@ -93,6 +94,10 @@ export function Routes(props) {
 				{
 					path: '/:id/bills',
 					element: <Bills />
+				},
+				{
+					path: '/:id/settings',
+					element: <Settings />
 				}
 			]
 		},
