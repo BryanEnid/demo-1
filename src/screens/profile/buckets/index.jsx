@@ -1,10 +1,8 @@
 import React, { useMemo, useState, useRef, useEffect, forwardRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
 import { useBuckets } from '@/hooks/useBuckets';
 import { useProfile } from '@/hooks/useProfile';
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
 import { Typography } from '@/chadcn/Typography';
 import { Icon } from '@iconify/react/dist/iconify';
@@ -20,7 +18,6 @@ import { useMobile } from '@/hooks/useMobile';
 import { useLayout } from '@/providers/LayoutProvider';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
-
 const AddBucketBtn = ({ onClick }) => (
 	<div className="select-none">
 		<button onClick={onClick} className={`size-[64px] transition ease-in-out hover:scale-105 select-none`}>
@@ -34,23 +31,18 @@ const AddBucketBtn = ({ onClick }) => (
 		</button>
 	</div>
 );
-
 const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, ref) => {
 	const [editing, setEditing] = useState(false);
-
-	/** @type {React.MutableRefObject<number>} */
+	// /** @type {React.MutableRefObject<number>} */
 	const timeoutId = useRef();
-
 	const handleSetEditing = () => {
 		timeoutId.current = setTimeout(() => {
 			setEditing(true);
 		}, 300);
 	};
-
 	useEffect(() => {
 		return () => timeoutId.current && clearTimeout(timeoutId.current);
 	}, []);
-
 	return (
 		<div className="mb-9 flex gap-1 items-center">
 			{!editable ? (
@@ -93,7 +85,6 @@ const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, re
 	);
 });
 CategoryLabel.displayName = 'CategoryLabel';
-
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
@@ -360,6 +351,11 @@ export function Buckets() {
 					</div>
 				)}
 			</div>
+			{/* 
+			Remove ConfirmDialog and instead delete bucket list immediately 
+			Then offer undo button to restore recently deleted bucket list
+			onDelete will add timer 7days for bucket list deletion from database, after undo button disappears
+			*/}
 			<ConfirmDialog
 				show={!!confirmDelete}
 				title="Are you sure you want to delete this section?"
@@ -382,6 +378,7 @@ export function Buckets() {
 							/>
 							Delete this section and keep these {groupedBucket[confirmDelete]?.length || 0} buckets
 						</label>
+
 						<label className="flex items-center gap-1">
 							<Input
 								checked={deleteWithBuckets}

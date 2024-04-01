@@ -7,7 +7,7 @@ import { useLayout } from '@/providers/LayoutProvider.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useMobile } from '@/hooks/useMobile';
 import useOrganizations from '@/hooks/useOrganizations.js';
-
+import { Input } from '@/chadcn/Input';
 // Components
 import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
@@ -21,22 +21,17 @@ import useSettings from '@/hooks/useSettings';
 function NavOption(props) {
 	const { title, href, textClassName = '', buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
 	const width = 'w-full';
-
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { isMobile } = useMobile();
-
 	const isActive = pathname.slice(1).includes(href || title.toLowerCase());
 	const className = `${buttonProps.className || ''} ${isActive && activeClassName ? activeClassName : ''}`;
-
 	const handleClick = () => {
 		if (typeof onClick === 'function') {
 			onClick(props);
 		}
-
 		navigate(href || title.toLowerCase());
 	};
-
 	const Wrapper = isMobile
 		? (props) => <CarouselItem className={cn('basis-1/2', width)} {...props} />
 		: (props) => <React.Fragment {...props} />;
@@ -62,7 +57,14 @@ export function Profile() {
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
-	const { data: settings } = useSettings();
+	const [isDragOver, setIsDragOver] = React.useState(false);
+
+	const { data: settings, uploadUserProfilePicture, updateSettings } = useSettings();
+	const [userIMG, setUserIMG] = React.useState('/src/assets/observe_logo_512_og.png');
+	const [headline, setHeadline] = React.useState('');
+	const [edit, setEdit] = React.useState(false);
+	const quoteRef = React.useRef();
+
 	const { updateOrganization } = useOrganizations();
 	const { user, isLoading: authLoading } = useAuth();
 	const { isMobile } = useMobile();
@@ -86,16 +88,29 @@ export function Profile() {
 		{ label: 'Training', subLinks: [] },
 		{ label: 'Website', subLinks: [] }
 	];
-
 	// State
 	const [orgSubButtons, setOrgSubButtons] = React.useState(
 		organizationMenu.find(({ label, href }) => pathParts.includes(href || label.toLowerCase()))?.subLinks || []
 	);
-
+	const [username] = pathParts;
 	const fileInpRef = React.useRef();
 
-	const [username] = pathParts;
+	React.useEffect(() => {
+		if (quoteRef.current) {
+			quoteRef.current.focus();
+		}
+	}, [edit]);
+	React.useEffect(() => {
+		if (settings?.headline) {
+			setHeadline(settings?.headline);
+		}
 
+		if (settings.image) {
+			setUserIMG(settings.image);
+		} else if (profile?.photoURL) {
+			setUserIMG(profile?.photoURL);
+		}
+	}, [profile?.photoURL, settings?.image, settings?.headline]);
 	React.useEffect(() => {
 		closeBucketInfo();
 	}, [profile?.id]);
@@ -119,6 +134,61 @@ export function Profile() {
 		const bgPicture = new FormData();
 		bgPicture.append('picture', file);
 		updateOrganization({ ...profile, bgPicture });
+	};
+	const handleUpload = async (image) => {
+		if (!image) return;
+		const fd = new FormData();
+		fd.append('image', image.file);
+		try {
+			await uploadUserProfilePicture(fd);
+		} catch (error) {
+			console.log('onSubmitImage error: ', error);
+		}
+	};
+	const handleChange = (e) => {
+		setUserIMG(e.target.value);
+	};
+
+	const handleImageChange = (e) => {
+		const file = e.target.files[0];
+		const value = { file, url: URL.createObjectURL(file) };
+		// setValues((val) => ({ ...val, image: value }));
+		setUserIMG(value.url);
+		handleUpload(value);
+	};
+
+	const openFileExplorer = () => {
+		fileInpRef.current?.click?.();
+	};
+
+	const handleDragOver = (e) => {
+		e.preventDefault();
+		setIsDragOver(true);
+	};
+	const handleDragLeave = () => {
+		setIsDragOver(false);
+	};
+	const handleDrop = (e) => {
+		e.preventDefault();
+		setIsDragOver(false);
+		if (!e.dataTransfer.files.length > 0) return;
+		const { files } = e.dataTransfer;
+		const file = files[0];
+		if (!file || !file.type.startsWith('image/')) return alert('Please drop a valid image files.');
+		const value = { files, url: URL.createObjectURL(files) };
+		handleChange({ target: { name: 'image', value } });
+	};
+	const handleHeadline = (e) => {
+		e.preventDefault();
+		setEdit(false);
+		if (e.target.value === settings.headline) return;
+		setHeadline(e.target.value);
+
+		try {
+			updateSettings({ headline: e.target.value });
+		} catch (error) {
+			setHeadline(settings?.headline || sampleQuote);
+		}
 	};
 
 	return (
@@ -246,18 +316,56 @@ export function Profile() {
 					<div>
 						{/* Header */}
 						<div className="flex flex-col items-center gap-3">
-							<Image
-								src={settings?.image || profile?.photoURL}
-								className="rounded-full object-cover aspect-square w-36 2xl:w-48"
-							/>
+							<div className="group relative">
+								<input type="file" className="hidden" accept="image/*" ref={fileInpRef} onChange={handleImageChange} />
+								<div
+									onClick={openFileExplorer}
+									onDragOver={handleDragOver}
+									onDragLeave={handleDragLeave}
+									onDrop={handleDrop}
+									style={{ transition: '0.5s' }}
+								>
+									<Image
+										src={userIMG || settings?.image || profile?.image}
+										className="rounded-full object-cover aspect-square w-36 2xl:w-48 hover:cursor-pointer hover:opacity-75"
+										alt="Profile Image"
+									/>
+									<div className="absolute top-0 bottom-0 left-0 right-0 w-full h-full opacity-0 transition-opacity duration-300 font-medium group-hover:opacity-100">
+										<Icon
+											icon="lucide:camera"
+											className="text-black text-6xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center "
+										/>
+									</div>
+								</div>
+							</div>
+
 							<Typography variant="h3" className="mt-6">
 								{settings?.name || profile?.name}
 							</Typography>
-							<Typography variant="blockquote" className="border-0">
-								"{settings?.headline || sampleQuote}"
-							</Typography>
+							{edit ? (
+								<Input
+									type="text"
+									className="border-b border-black p-2  text-center text-xl mb-2.5"
+									value={headline || ''}
+									onBlur={(e) => handleHeadline(e)}
+									onChange={(e) => setHeadline(e.target.value)}
+									onEnter={(e) => handleHeadline(e)}
+									ref={quoteRef}
+								/>
+							) : (
+								<Typography
+									variant="blockquote"
+									className="group border-b border-transparent p-2 text-center text-xl cursor-pointer duration-50"
+									onClick={() => setEdit(true)}
+								>
+									"{headline || settings?.headline || sampleQuote}"
+									<Icon
+										icon="lucide:edit"
+										className="ml-2 text-black inline font-xs font-thin cursor-pointer hover:text-primary opacity-0 group-hover:opacity-75 duration-50 hover:text-black "
+									/>
+								</Typography>
+							)}
 						</div>
-
 						<div className="flex flex-row justify-center my-8">
 							<div className="w-full">
 								<Carousel

@@ -76,7 +76,7 @@ const Settings = () => {
 		}
 		// finally {
 		// setLoading(false);
-		// console.log('Finish line - set loading false');
+		// console.log('Finish line');
 		// }
 	};
 	const handleUpload = async (image) => {
@@ -132,6 +132,7 @@ const Settings = () => {
 					<div>
 						<div className="flex justify-center">
 							<input type="file" className="hidden" accept="image/*" ref={fileInpRef} onChange={handleImageChange} />
+
 							<div
 								onClick={openFileExplorer}
 								onDragOver={handleDragOver}
@@ -145,7 +146,7 @@ const Settings = () => {
 							>
 								{values.image?.url || values.image ? (
 									<Image
-										src={values.image.url || values.image}
+										src={values.image?.url || values.image}
 										className="rounded-full object-cover aspect-square w-36 2xl:w-48 "
 									/>
 								) : (
@@ -153,6 +154,7 @@ const Settings = () => {
 								)}
 							</div>
 						</div>
+
 						<Input name="headline" value={values.headline} placeholder="Headline" onChange={handleChange} />
 						<Input name="email" value={values.email} placeholder="Email" onChange={handleChange} />
 						<Input name="fname" value={values.fname} placeholder="First Name" onChange={handleChange} />
