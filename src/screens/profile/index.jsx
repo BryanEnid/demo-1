@@ -94,6 +94,8 @@ export function Profile() {
 	);
 	const [username] = pathParts;
 	const fileInpRef = React.useRef();
+	const sampleQuote =
+		'If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.';
 
 	React.useEffect(() => {
 		if (quoteRef.current) {
@@ -101,14 +103,19 @@ export function Profile() {
 		}
 	}, [edit]);
 	React.useEffect(() => {
+		// ! Temporary settings check/creation - TODO: create user settings when user profile is created
+		if (settings.length === 0) {
+			updateSettings({
+				name: user.name,
+				email: user.email,
+				headline: sampleQuote
+			});
+		}
 		if (settings?.headline) {
 			setHeadline(settings?.headline);
 		}
-
 		if (settings.image) {
-			setUserIMG(settings.image);
-		} else if (profile?.photoURL) {
-			setUserIMG(profile?.photoURL);
+			setUserIMG(settings?.image || profile?.photoURL);
 		}
 	}, [profile?.photoURL, settings?.image, settings?.headline]);
 	React.useEffect(() => {
@@ -123,9 +130,6 @@ export function Profile() {
 	}, [profile, profileLoading, authLoading]);
 
 	if (!profile?.uid && !profile?.id) return <></>;
-
-	const sampleQuote =
-		'If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.';
 
 	const handleFilesChange = (e) => {
 		const file = e.target.files[0];
@@ -314,7 +318,7 @@ export function Profile() {
 			) : (
 				<div className="container">
 					<div>
-						{/* Header */}
+						{/* Profile Image, Name, Quote */}
 						<div className="flex flex-col items-center gap-3">
 							<div className="group relative">
 								<input type="file" className="hidden" accept="image/*" ref={fileInpRef} onChange={handleImageChange} />
@@ -338,7 +342,6 @@ export function Profile() {
 									</div>
 								</div>
 							</div>
-
 							<Typography variant="h3" className="mt-6">
 								{settings?.name || profile?.name}
 							</Typography>
@@ -366,6 +369,8 @@ export function Profile() {
 								</Typography>
 							)}
 						</div>
+
+						{/* Navbar (Buckets, Experience, Recommends, Quests) */}
 						<div className="flex flex-row justify-center my-8">
 							<div className="w-full">
 								<Carousel

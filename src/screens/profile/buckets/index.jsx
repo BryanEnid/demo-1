@@ -84,11 +84,13 @@ const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, re
 		</div>
 	);
 });
+
 CategoryLabel.displayName = 'CategoryLabel';
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
 	const [{ isUserProfile, isOrganization }] = useOutletContext();
+
 	const {
 		data: buckets,
 		updateBucket,
@@ -96,6 +98,7 @@ export function Buckets() {
 		deleteBucketsCategory,
 		deleteBucket
 	} = useBuckets(profile, isOrganization);
+
 	const { isMobile } = useMobile();
 	const { bucketInfoOpen, showBucketInfo, showCreateBucketModal } = useLayout();
 
@@ -192,6 +195,7 @@ export function Buckets() {
 
 	return (
 		<div>
+			{/* Add section button */}
 			{isUserProfile && (
 				<div className="justify-center flex mb-8 min-h-[40px] md:justify-start w-full">
 					<Button
@@ -208,7 +212,7 @@ export function Buckets() {
 					</Button>
 				</div>
 			)}
-
+			{/* User Lists and Buckets */}
 			<div className="flex flex-col">
 				{showNewCategory && (
 					<form onSubmit={saveCategory}>
@@ -240,7 +244,6 @@ export function Buckets() {
 						</div>
 					</form>
 				)}
-
 				{!!tmpCategories.length &&
 					tmpCategories.map((category) => (
 						<div key={category} className="mb-20">
@@ -277,7 +280,6 @@ export function Buckets() {
 							)}
 						</div>
 					))}
-
 				{Object.keys(groupedBucket).map((category) => (
 					<div key={category} className="mb-20">
 						<CategoryLabel
@@ -286,6 +288,7 @@ export function Buckets() {
 							onDelete={() => setConfirmDelete(category)}
 							onSubmit={submitEditCategory}
 						/>
+
 						{/* <div className="grid gap-16 grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"> */}
 						<div className="relative grid gap-1 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ">
 							{groupedBucket[category].map((bucket, index) => (
@@ -336,7 +339,6 @@ export function Buckets() {
 						)}
 					</div>
 				))}
-
 				{!Object.keys(groupedBucket).length && isUserProfile && !tmpCategories.length && (
 					<div className="mb-20">
 						<motion.div
@@ -351,11 +353,6 @@ export function Buckets() {
 					</div>
 				)}
 			</div>
-			{/* 
-			Remove ConfirmDialog and instead delete bucket list immediately 
-			Then offer undo button to restore recently deleted bucket list
-			onDelete will add timer 7days for bucket list deletion from database, after undo button disappears
-			*/}
 			<ConfirmDialog
 				show={!!confirmDelete}
 				title="Are you sure you want to delete this section?"
@@ -378,7 +375,6 @@ export function Buckets() {
 							/>
 							Delete this section and keep these {groupedBucket[confirmDelete]?.length || 0} buckets
 						</label>
-
 						<label className="flex items-center gap-1">
 							<Input
 								checked={deleteWithBuckets}

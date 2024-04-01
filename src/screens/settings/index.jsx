@@ -154,7 +154,8 @@ const Settings = () => {
 								)}
 							</div>
 						</div>
-
+						{/* TODO: Minimize repeated code */}
+						{/* TODO: handle onEnter key to submit */}
 						<Input name="headline" value={values.headline} placeholder="Headline" onChange={handleChange} />
 						<Input name="email" value={values.email} placeholder="Email" onChange={handleChange} />
 						<Input name="fname" value={values.fname} placeholder="First Name" onChange={handleChange} />
