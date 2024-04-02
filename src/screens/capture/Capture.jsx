@@ -1,10 +1,8 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select';
 import { Typography } from '@/chadcn/Typography';
-import { useQueryParams } from '@/hooks/useQueryParams';
 import useQuestions from '@/hooks/useQuestions.js';
 import { useIndexedDBVideos } from '@/hooks/useIndexedDBVideos';
 import { formatTimestamp } from '@/lib/utils';
@@ -12,6 +10,8 @@ import { useAuth } from '@/providers/Authentication.jsx';
 import { useFFMPEG } from '@/hooks/useFFMPEG';
 import { Button } from '@/chadcn/Button';
 import { useIndexedDBDictionary } from '@/hooks/useIndexedDBDictionary';
+import audioWorkletProcessor from './audio-worklet-processor?worker&url'; // ! This import is not supported if the file is TS
+import { throttle } from '@/lib/utils';
 
 export function CaptureScreen() {
 	// Hooks
@@ -31,9 +31,6 @@ export function CaptureScreen() {
 	const [screenDevice, setScreenDevice] = React.useState('');
 	const [screenDevice2, setScreenDevice2] = React.useState('');
 	const [audioDevice, setAudioDevice] = React.useState('');
-	const [loadingMedia, setLoadingMedia] = React.useState(true);
-	// const [isUploading, setUploading] = React.useState(false);
-	const [volumeDisplay, setVolumeDisplay] = React.useState(0);
 	const [timelapsed, setTimeLapsed] = React.useState(0);
 	const [audioTracks, setRecordedAudio] = React.useState([]);
 	const [videoTracks, setRecordedVideo] = React.useState([]);
@@ -48,6 +45,43 @@ export function CaptureScreen() {
 	const mainVideoRecorderRef = React.useRef();
 	const profileVideoRecorderRef = React.useRef();
 	const profileAudioRecorderRef = React.useRef();
+	const volumeDisplay = React.useRef();
+
+	// Shows audio input levels
+	React.useEffect(() => {
+		let audioContext = new AudioContext();
+		let sourceNode;
+		let processorNode;
+
+		const setupAudio = async () => {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: audioDevice } });
+			await audioContext.audioWorklet.addModule(audioWorkletProcessor);
+
+			sourceNode = audioContext.createMediaStreamSource(stream);
+			processorNode = new AudioWorkletNode(audioContext, 'vumeter');
+
+			const setVolumeDisplayThrottled = throttle((input) => (volumeDisplay.current.style.scale = input), 100);
+
+			processorNode.port.onmessage = (event) => {
+				if (event.data.type === 'audioData') {
+					const { average } = event.data.data;
+					const volume = 1 + average * 8;
+					const max_cap = 1.3;
+					setVolumeDisplayThrottled(volume > max_cap ? max_cap : volume);
+				}
+			};
+
+			sourceNode.connect(processorNode).connect(audioContext.destination);
+		};
+		setupAudio();
+
+		// Clean
+		return () => {
+			if (processorNode) processorNode.disconnect();
+			if (sourceNode) sourceNode.disconnect();
+			audioContext.close();
+		};
+	}, [audioDevice]);
 
 	// TODO: handle new devices without refreshes
 	// Detects all audio and video devices and populates
@@ -240,11 +274,13 @@ export function CaptureScreen() {
 
 	// TODO: Make this start screen more modular (independent) from state
 	const startScreen = async (deviceId) => {
-		const config = { video: { width: 1920, height: 1080, deviceId }, audio: deviceId === 'Screen Recording' };
+		const hasAudio = deviceId === 'Screen Recording';
+		const isDisplayMedia = deviceId === 'Screen Recording';
+		const config = { video: { width: 1920, height: 1080, deviceId }, audio: hasAudio };
 		const main = mainRef.current;
 
 		// Set default config depending on the media source
-		const isDisplayMedia = deviceId === 'Screen Recording';
+
 		const mediaStore = {
 			getDisplayMedia: async (props) => navigator.mediaDevices.getDisplayMedia({ ...props }),
 			getUserMedia: async (props) => navigator.mediaDevices.getUserMedia({ ...props })
@@ -263,25 +299,6 @@ export function CaptureScreen() {
 				// mainRef.current = null;
 			};
 		});
-
-		// Shows audio input levels
-		// ! Vercel breaks with this code. I think it related how the app gets build
-		// ! The worklet needs to be served as an static file
-		// const audioContext = new AudioContext();
-		// await audioContext.audioWorklet.addModule("/src/screens/capture/audio-worklet-processor.js"); // Replace with your actual path
-		// const source = audioContext.createMediaStreamSource(stream);
-		// const processor = new AudioWorkletNode(audioContext, "vumeter");
-
-		// processor.port.onmessage = (event) => {
-		//   if (event.data.type === "audioData") {
-		//     const { average } = event.data.data;
-		//     const volume = 1 + average * 8;
-		//     const max_cap = 1.6;
-		//     setVolumeDisplay(volume > max_cap ? max_cap : volume);
-		//   }
-		// };
-
-		// source.connect(processor).connect(audioContext.destination);
 
 		streamRef.current = stream;
 		main.srcObject = deviceId ? stream : null;
@@ -485,7 +502,9 @@ export function CaptureScreen() {
 							</button>
 
 							<div
-								style={{ transform: `scale(${volumeDisplay})`, transition: 'transform 0.1s linear' }}
+								ref={volumeDisplay}
+								// transform: `scale(${volumeDisplay.current})`,
+								style={{ transition: 'all 0.1s linear' }}
 								className="absolute top-0 left-0 w-full h-full bg-blue-400 rounded-full"
 							/>
 						</div>

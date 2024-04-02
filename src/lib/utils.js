@@ -20,6 +20,27 @@ export const isAWSUrl = (url = '') => {
 	return url?.includes('amazonaws.com');
 };
 
+export const throttle = (func, delay) => {
+	let lastExecuted = 0;
+	return (...args) => {
+		const now = Date.now();
+		if (now - lastExecuted >= delay) {
+			func(...args);
+			lastExecuted = now;
+		}
+	};
+};
+
+export const debounce = (func, delay) => {
+	let timeoutId;
+	return (...args) => {
+		clearTimeout(timeoutId);
+		timeoutId = setTimeout(() => {
+			func(...args);
+		}, delay);
+	};
+};
+
 export const extractYoutubeVideoId = (url) => {
 	const urlObject = new URL(url);
 	const pathname = urlObject.pathname;
