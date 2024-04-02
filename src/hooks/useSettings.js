@@ -29,6 +29,19 @@ const useSettings = () => {
 		enabled: true
 	});
 
+	const { mutateAsync: asyncGetSettings } = useMutation({
+		mutationFn: () => getSettings(auth)
+	});
+
+	const getUserSettings = async () => {
+		try {
+			await asyncGetSettings();
+			await queryClient.invalidateQueries({ queryKey });
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	const { mutateAsync: create } = useMutation({
 		mutationFn: (data) => handleUpdate(auth, data)
 	});
@@ -61,6 +74,7 @@ const useSettings = () => {
 		data: settings || [],
 		updateSettings,
 		uploadUserProfilePicture,
+		getUserSettings,
 		isLoading: settingsLoading || false
 	};
 };

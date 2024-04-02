@@ -59,7 +59,7 @@ export function Profile() {
 	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
 	const [isDragOver, setIsDragOver] = React.useState(false);
 
-	const { data: settings, uploadUserProfilePicture, updateSettings } = useSettings();
+	const { data: settings, uploadUserProfilePicture, updateSettings, getUserSettings } = useSettings();
 	const [userIMG, setUserIMG] = React.useState('/src/assets/observe_logo_512_og.png');
 	const [headline, setHeadline] = React.useState('');
 	const [edit, setEdit] = React.useState(false);
@@ -103,18 +103,19 @@ export function Profile() {
 		}
 	}, [edit]);
 	React.useEffect(() => {
-		// ! Temporary settings check/creation - TODO: create user settings when user profile is created
-		if (settings.length === 0) {
-			updateSettings({
-				name: user.name,
-				email: user.email,
-				headline: sampleQuote
-			});
-		}
+		(async () => {
+			try {
+				const res = await getUserSettings();
+			} catch (error) {
+				console.log('Error: ', error);
+			}
+		})();
+	}, []);
+	React.useEffect(() => {
 		if (settings?.headline) {
 			setHeadline(settings?.headline);
 		}
-		if (settings.image) {
+		if (settings?.image || profile?.photoURL) {
 			setUserIMG(settings?.image || profile?.photoURL);
 		}
 	}, [profile?.photoURL, settings?.image, settings?.headline]);
