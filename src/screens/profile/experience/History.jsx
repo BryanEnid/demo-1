@@ -16,6 +16,8 @@ import { useBuckets } from '@/hooks/useBuckets';
 import { useNavigate } from 'react-router-dom';
 import { Image } from '@/components/Image';
 import FormatDate from '@/components/FormatDate.jsx';
+import { setErrorMap } from 'zod';
+import { useEmptyStateErrorTracker } from '@/hooks/useEmptyStateErrorTracker';
 
 export const History = ({ title, data }) => {
 	// Hooks
@@ -32,7 +34,7 @@ export const History = ({ title, data }) => {
 
 	// Form
 	const [loadedEditHistoryItem, setLoadedEditHistoryItem] = React.useState();
-	const [jobTitle, setJobTitle] = React.useState();
+	const [jobTitle, setJobTitle] = React.useState('');
 	const [company, setCompany] = React.useState('');
 	const [startDate, setStartDate] = React.useState();
 	const [endDate, setEndDate] = React.useState();
@@ -47,6 +49,12 @@ export const History = ({ title, data }) => {
 	const section = React.useMemo(() => String(title).toLowerCase().replace(' ', '-'), [title]);
 	const thisYear = React.useMemo(() => new Date().getFullYear(), []);
 
+	const initialStates =
+		section === 'certifications' ? [endDate, jobTitle, company] : [startDate, endDate, jobTitle, company];
+	const { error, setError, findEmptyStateError, disabledSubmit, setDisabledSubmit } =
+		useEmptyStateErrorTracker(initialStates);
+
+	// UseEffects
 	React.useEffect(() => {
 		const fetchImageColors = async () => {
 			const colorPromises = data?.map(async (item) => {
@@ -62,15 +70,28 @@ export const History = ({ title, data }) => {
 		fetchImageColors(data);
 	}, [data]);
 
+	React.useEffect(() => {
+		handleEndDate();
+	}, [startDate, presentJob]);
+
 	const handleClose = (type) => {
 		if (type === 'escape') return;
-
 		clear();
 		setShow(false);
 	};
 
 	// TODO: Handle form instead
+
+	const handleEndDate = () => {
+		if (presentJob && !endDate && startDate) setEndDate(startDate);
+		if (!presentJob && endDate === 'presentDay') setEndDate(null);
+	};
+
 	const handleSave = () => {
+		if (findEmptyStateError() === true) {
+			setDisabledSubmit(true);
+			return;
+		}
 		const payload = [...data];
 		let index = payload.findIndex(({ id }) => id === loadedEditHistoryItem?.id);
 		if (index === -1) index = payload.length;
@@ -140,6 +161,8 @@ export const History = ({ title, data }) => {
 		setPresentJob(false);
 		setLinkedBucket(null);
 		setLogos([]);
+		setDisabledSubmit(true);
+		setError('');
 	};
 
 	const handleSrc = (src, item) => {
@@ -158,15 +181,21 @@ export const History = ({ title, data }) => {
 			setPresentJob(item.currentCompany);
 			setLinkedBucket(item.bucket);
 			setShow(true);
+			setDisabledSubmit(true);
 		}
 	};
 
 	const handleDeleteItem = () => {
+		if (!showDeleteConfirmation) {
+			setShowDeleteConfirmation(true);
+			return;
+		}
 		const filteredItems = data.filter((item) => item.id !== loadedEditHistoryItem.id);
 		updateProfile({ body: filteredItems, id: profile.uid, section });
 
 		clear();
 		setShow(false);
+		setShowDeleteConfirmation(false);
 	};
 
 	if (!isUserProfile && !history) return;
@@ -191,14 +220,23 @@ export const History = ({ title, data }) => {
 				onConfirm={handleSave}
 				onDelete={loadedEditHistoryItem && handleDeleteItem}
 				title="Add your experience"
+				disabledSubmit={disabledSubmit}
 			>
 				<div className="flex flex-col">
 					<div className="flex flex-col gap-3">
-						<Input placeholder="Title" value={jobTitle} onChange={({ target }) => setJobTitle(target.value)} />
+						<Input
+							required
+							error={error}
+							placeholder="Title"
+							value={jobTitle}
+							onChange={({ target }) => {
+								setJobTitle(target.value);
+							}}
+						/>
 
 						<Popover className="relative">
 							<PopoverTrigger>
-								<Button variant="secondary" className="w-full">
+								<Button errored={error && !company} variant="secondary" className={`w-full`}>
 									{company?.name ? 'Company - ' + company.name : 'Company'}
 								</Button>
 							</PopoverTrigger>
@@ -227,7 +265,7 @@ export const History = ({ title, data }) => {
 																	<Image
 																		proxyEnabled
 																		src={item.logo}
-																		className="aspect-square w-10 object-contain inline"
+																		className="aspect-square w-10 object-contain inline z-10"
 																	/>
 																	<Typography variant="p" className="px-3 inline">
 																		{item.name}
@@ -250,7 +288,12 @@ export const History = ({ title, data }) => {
 							{section !== 'certifications' && (
 								<Popover className="w-full">
 									<PopoverTrigger>
-										<Button iconBegin={<Icon icon="majesticons:calendar" />} variant="secondary" className="w-full">
+										<Button
+											errored={error && !startDate}
+											iconBegin={<Icon icon="majesticons:calendar" />}
+											variant="secondary"
+											className={`w-full`}
+										>
 											{startDate ? <FormatDate date={startDate} /> : 'Start Date'}
 										</Button>
 									</PopoverTrigger>
@@ -272,7 +315,12 @@ export const History = ({ title, data }) => {
 							{/* Calendar - End Date */}
 							<Popover>
 								<PopoverTrigger>
-									<Button iconBegin={<Icon icon="majesticons:calendar" />} variant="secondary" className="w-full">
+									<Button
+										errored={error && !endDate && !presentJob}
+										iconBegin={<Icon icon="majesticons:calendar" />}
+										variant="secondary"
+										className={`w-full`}
+									>
 										{!endDate && (section !== 'certifications' ? 'End Date' : 'Completion Date')}
 										{presentJob === true ? 'Present' : <FormatDate date={endDate} />}
 									</Button>
@@ -294,7 +342,7 @@ export const History = ({ title, data }) => {
 
 						{/* Checkbox */}
 						{section !== 'certifications' && (
-							<div className="flex flex-row items-center gap-2">
+							<div className={`flex flex-row items-center gap-2`}>
 								<Checkbox checked={presentJob} onChange={setPresentJob} />
 								<Typography variant="p" className="inline">
 									Present job
@@ -362,6 +410,7 @@ export const History = ({ title, data }) => {
 								</div>
 							</PopoverContent>
 						</Popover>
+						{error && <Typography className="text-red-500">{error}</Typography>}
 					</div>
 				</div>
 
@@ -387,7 +436,12 @@ export const History = ({ title, data }) => {
 					<Typography variant="h2">{title}</Typography>
 
 					{isUserProfile && (
-						<button onClick={() => setShow(true)}>
+						<button
+							onClick={() => {
+								setShow(true);
+								setDisabledSubmit(true);
+							}}
+						>
 							<Icon icon="gravity-ui:plus" fontSize={30} className="mb-1 p-2" />
 						</button>
 					)}
@@ -411,10 +465,16 @@ export const History = ({ title, data }) => {
 							const previewSrc = bucket?.videos?.[0]?.videoUrl;
 
 							return (
-								<div key={index} onClick={() => handleEditHistoryItem({ ...props, bucket })}>
+								<div
+									key={index}
+									onClick={() => {
+										handleEditHistoryItem({ ...props, bucket });
+										setDisabledSubmit(true);
+									}}
+								>
 									<Card className={`grid grid-cols-10 py-2`} style={{ background: bgColor, color: textColor }}>
 										<CardHeader className="flex justify-center items-center col-span-3">
-											<Image proxyEnabled src={companyLogoUrl} className="aspect-square object-contain w-20" />
+											<Image proxyEnabled src={companyLogoUrl} className="aspect-square object-contain w-20 z-0" />
 										</CardHeader>
 
 										<CardContent className={`flex flex-col justify-center p-0 col-span-4`}>
@@ -479,7 +539,13 @@ export const History = ({ title, data }) => {
 						<div className="rounded-xl p-10 border-dashed border-2 border-primary flex flex-col text-center text-slate-500">
 							Customize your profile by listing the talents and expertise that define you. A modal will pop up, allowing
 							you to effortlessly manage and showcase your skills. Let your strengths shine!
-							<Button variant="link" onClick={() => setShow(true)}>
+							<Button
+								variant="link"
+								onClick={() => {
+									setShow(true);
+									setDisabledSubmit(true);
+								}}
+							>
 								🌟 Click on this link to add your skills.
 							</Button>
 						</div>

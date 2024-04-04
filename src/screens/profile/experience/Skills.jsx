@@ -166,7 +166,7 @@ export const SkillsSection = ({ data }) => {
 				{data?.map(({ id, label, iconUrl }) => (
 					<Card key={id} className="flex flex-col justify-center items-center">
 						<CardHeader>
-							{iconUrl && <Image src={iconUrl} className=" rounded-lg aspect-square h-20 object-contain inline" />}
+							{iconUrl && <Image src={iconUrl} className=" rounded-lg aspect-square h-20 object-contain inline z-0" />}
 							<CardTitle>{label}</CardTitle>
 						</CardHeader>
 					</Card>

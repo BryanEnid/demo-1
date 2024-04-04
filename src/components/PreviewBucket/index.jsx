@@ -251,6 +251,7 @@ const PreviewBucket = ({ show, onClose, editMode, documentId }) => {
 		navigate({ pathname: '/capture', search: createSearchParams({ bucketid: dbid }).toString() });
 
 	const handleCreateBucket = (params) => {
+		if (!data.name) return;
 		const { willRedirect = false, cb = () => {}, onSuccess = () => {} } = params;
 		const crudFunction = documentId ? updateBucket : createBucket;
 
@@ -685,7 +686,7 @@ const PreviewBucket = ({ show, onClose, editMode, documentId }) => {
 							</Button>
 							<Button
 								onClick={() => handleCreateBucket({ cb: handleClose })}
-								disabled={isUploading}
+								disabled={isUploading || !data.name}
 								className="w-full max-w-[200px]"
 							>
 								Save

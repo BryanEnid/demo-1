@@ -16,6 +16,15 @@ export const isYouTubeUrl = (url = '') => {
 	return url?.includes('youtube.com') || url?.includes('youtu.be') || url?.includes('ytimg.com');
 };
 
+export const isValidUrl = (url) => {
+	try {
+		new URL(url);
+		return true;
+	} catch (error) {
+		return false;
+	}
+};
+
 export const isAWSUrl = (url = '') => {
 	return url?.includes('amazonaws.com');
 };

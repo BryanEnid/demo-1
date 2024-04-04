@@ -297,7 +297,7 @@ const Books = ({ data = [], isUserProfile }) => {
 												</div>
 												<Button
 													variant="destructive"
-													className="absolute -top-[2px] -right-[2px] rounded-full w-[15px] h-[15px] p-1 opacity-50 hover:opacity-70"
+													className="absolute -top-[2px] -right-[2px] rounded-full z-20 w-[15px] h-[15px] p-1 opacity-50 hover:opacity-70"
 													onClick={() => removePhoto(photo)}
 												>
 													<Icon icon="mingcute:close-fill" fontSize={10} />
@@ -306,7 +306,7 @@ const Books = ({ data = [], isUserProfile }) => {
 										))}
 									</ReactSortable>
 									<div className="flex justify-center items-center w-full pt-4">
-										<Typography variant="muted">Choose files or drag it here</Typography>
+										<Typography variant="muted">Choose Image files or drag Image here</Typography>
 									</div>
 								</div>
 							</>

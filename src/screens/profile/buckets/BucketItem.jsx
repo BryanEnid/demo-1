@@ -83,7 +83,7 @@ export const BucketItem = ({
 	};
 
 	const handleSrc = (src) => {
-		if (isYouTubeUrl(src)) return data.videos[0].image;
+		if (isYouTubeUrl(src)) return data.videos?.[0]?.image;
 
 		return src;
 	};

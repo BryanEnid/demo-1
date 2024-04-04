@@ -49,6 +49,8 @@ interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>
 	iconEnd?: React.ReactNode;
 	align?: 'start' | 'center' | 'end';
 	children?: React.ReactNode;
+	errored?: boolean;
+	disabled?: boolean;
 }
 
 const VARIANT_OPTIONS: Record<string, ButtonVariant> = {
@@ -76,6 +78,8 @@ function Button({
 	asChild = false,
 	align = 'center',
 	children,
+	errored = false,
+	disabled,
 	...props
 }: ButtonProps) {
 	// Validate variant and size
@@ -83,10 +87,16 @@ function Button({
 	if (!Object.values(SIZE_OPTIONS).includes(size)) console.warn(`Invalid size: ${size}`);
 
 	const Comp = asChild ? Slot : 'button';
-
 	return (
 		<Comp
-			className={cn(buttonVariants({ variant, size }), `flex flex-col`, align && `items-${align}`, className)}
+			className={cn(
+				buttonVariants({ variant, size }),
+				`flex flex-col`,
+				align && `items-${align}`,
+				className,
+				errored && 'border-2 border-red-500',
+				disabled && 'bg-gray-300'
+			)}
 			{...props}
 		>
 			<div className="flex gap-3 justify-between items-center">

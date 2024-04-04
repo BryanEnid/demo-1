@@ -12,7 +12,9 @@ export function VideoUploadButton({ onUpload, disabled }) {
 			const extension = '.' + file.name.split('.').at(-1).toLowerCase();
 			const accept = ['.mp4', '.insv', '.mov', '.webm', '.avi', '.ogg', '.mkv', '.mpg', '.mpeg', '.3gp'];
 
-			if (!accept.includes(extension)) return alert(`Not supported format: ${extension}`);
+			if (!accept.includes(extension)) {
+				return alert(`Not supported format: ${extension}\nSupported format: ${accept.join(' ')}`);
+			}
 		}
 
 		if (files.length) onUpload(files);

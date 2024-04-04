@@ -171,8 +171,8 @@ const Tools = ({ data = [], isUserProfile }) => {
 							<DropdownMenuItem
 								className="py-3 px-3"
 								onClick={() => {
-									setShowNewCategory(true);
 									setNewCategoryValue('');
+									setShowCreateModal(true);
 								}}
 							>
 								<Icon icon="ic:round-plus" className="pr-1 text-xl" />

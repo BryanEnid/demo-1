@@ -12,6 +12,7 @@ import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { Image } from '@/components/Image';
+import { isValidUrl } from '@/lib/utils';
 
 const Articles = ({ data = [], isUserProfile }) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -49,7 +50,7 @@ const Articles = ({ data = [], isUserProfile }) => {
 		let timerId;
 		if (articleUrl?.length) {
 			timerId = setTimeout(() => {
-				fetchArticlePreview(articleUrl);
+				isValidUrl(articleUrl) && fetchArticlePreview(articleUrl);
 			}, 300);
 		} else {
 			clearArticlePreview();
@@ -68,7 +69,9 @@ const Articles = ({ data = [], isUserProfile }) => {
 					<Button
 						variant="outline"
 						className="text-primary rounded-full w-[30px] h-[30px] p-1"
-						onClick={() => setShowCreateModal(true)}
+						onClick={() => {
+							setShowCreateModal(true);
+						}}
 					>
 						<Icon icon="ic:round-plus" className="text-2xl" />
 					</Button>

@@ -11,6 +11,7 @@ import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { Image } from '@/components/Image';
+import { isValidUrl } from '@/lib/utils';
 
 const Podcasts = ({ data = [], isUserProfile }) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -50,7 +51,9 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 		let timerId;
 		if (search?.length) {
 			timerId = setTimeout(() => {
-				searchPodcastsPreview(search);
+				if (isValidUrl(search)) {
+					searchPodcastsPreview(search);
+				}
 			}, 300);
 		} else {
 			clearPodcastsPreview();
@@ -69,7 +72,9 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 					<Button
 						variant="outline"
 						className="text-primary rounded-full w-[30px] h-[30px] p-1"
-						onClick={() => setShowCreateModal(true)}
+						onClick={() => {
+							setShowCreateModal(true);
+						}}
 					>
 						<Icon icon="ic:round-plus" className="text-2xl" />
 					</Button>
@@ -160,6 +165,9 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 							)}
 							{!isLoading && isPodcastsError && !podcastsPreview?.length && (
 								<Typography className="text-red-500">Podcasts not found</Typography>
+							)}
+							{!isLoading && !isPodcastsError && !podcastsPreview?.length && (
+								<Typography className="text-red-500">Invalid URL</Typography>
 							)}
 							{!isLoading && !!podcastsPreview?.length && (
 								<div>

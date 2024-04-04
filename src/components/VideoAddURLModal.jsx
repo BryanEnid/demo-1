@@ -104,7 +104,12 @@ const VideoAddURLModal = ({ show, onClose }) => {
 									)}
 								</div>
 
-								<Icon fontSize={20} className="text-gray-500" icon="mi:delete" onClick={() => handleDeleteItem(key)} />
+								<Icon
+									fontSize={20}
+									className={`text-gray-500 ${Object.keys(inputs).length === 1 ? 'hidden' : ''}`}
+									icon="mi:delete"
+									onClick={() => handleDeleteItem(key)}
+								/>
 							</div>
 
 							{inputs[key].title && (
@@ -115,7 +120,13 @@ const VideoAddURLModal = ({ show, onClose }) => {
 						</div>
 					))}
 
-					<Button iconBegin={<Icon icon="ic:round-add" />} variant="default" onClick={handleAddNewItem}>
+					<Button
+						// className={`${inputs[Object.keys(inputs).length - 1]?.valid === true ? '' : 'bg-gray-300'} `}
+						disabled={!handleSaveDisabled}
+						iconBegin={<Icon icon="ic:round-add" />}
+						variant="default"
+						onClick={handleAddNewItem}
+					>
 						Add new url
 					</Button>
 				</div>
