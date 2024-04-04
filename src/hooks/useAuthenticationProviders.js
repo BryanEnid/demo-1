@@ -22,6 +22,7 @@ export const useAuthenticationProviders = () => {
 				uid: authUser?.sub
 			};
 
+			// TODO: Check for user and cache it
 			if (authUser && !user?.id) await createUser(data);
 
 			if (authUser) {

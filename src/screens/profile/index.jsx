@@ -56,19 +56,20 @@ export function Profile() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
-	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
-	const [isDragOver, setIsDragOver] = React.useState(false);
-
-	const { data: settings, uploadUserProfilePicture, updateSettings, getUserSettings } = useSettings();
-	const [userIMG, setUserIMG] = React.useState('/src/assets/observe_logo_512_og.png');
-	const [headline, setHeadline] = React.useState('');
-	const [edit, setEdit] = React.useState(false);
-	const quoteRef = React.useRef();
-
-	const { updateOrganization } = useOrganizations();
-	const { user, isLoading: authLoading } = useAuth();
 	const { isMobile } = useMobile();
 	const { closeBucketInfo } = useLayout();
+	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
+	const { data: settings, uploadUserProfilePicture, updateSettings, isLoading } = useSettings();
+	const { updateOrganization } = useOrganizations();
+	const { user, isLoading: authLoading } = useAuth();
+
+	const [isDragOver, setIsDragOver] = React.useState(false);
+	const [userIMG, setUserIMG] = React.useState('');
+	const [headline, setHeadline] = React.useState('');
+	const [edit, setEdit] = React.useState(false);
+
+	const quoteRef = React.useRef();
+
 	const pathParts = pathname.slice(1).split('/');
 	const organizationMenu = [
 		{
@@ -102,23 +103,19 @@ export function Profile() {
 			quoteRef.current.focus();
 		}
 	}, [edit]);
+
 	React.useEffect(() => {
-		(async () => {
-			try {
-				const res = await getUserSettings();
-			} catch (error) {
-				console.log('Error: ', error);
-			}
-		})();
-	}, []);
-	React.useEffect(() => {
-		if (settings?.headline) {
+		if (!isLoading) {
+			const image =
+				settings?.image || profile?.photoURL
+					? settings?.image ?? profile?.photoURL
+					: '/src/assets/observe_logo_512_og.png';
+
 			setHeadline(settings?.headline);
+			setUserIMG(image);
 		}
-		if (settings?.image || profile?.photoURL) {
-			setUserIMG(settings?.image || profile?.photoURL);
-		}
-	}, [profile?.photoURL, settings?.image, settings?.headline]);
+	}, [settings, isLoading]);
+
 	React.useEffect(() => {
 		closeBucketInfo();
 	}, [profile?.id]);
@@ -170,9 +167,11 @@ export function Profile() {
 		e.preventDefault();
 		setIsDragOver(true);
 	};
+
 	const handleDragLeave = () => {
 		setIsDragOver(false);
 	};
+
 	const handleDrop = (e) => {
 		e.preventDefault();
 		setIsDragOver(false);
@@ -183,6 +182,7 @@ export function Profile() {
 		const value = { files, url: URL.createObjectURL(files) };
 		handleChange({ target: { name: 'image', value } });
 	};
+
 	const handleHeadline = (e) => {
 		e.preventDefault();
 		setEdit(false);
@@ -343,30 +343,37 @@ export function Profile() {
 									</div>
 								</div>
 							</div>
+
 							<Typography variant="h3" className="mt-6">
 								{settings?.name || profile?.name}
 							</Typography>
-							{edit ? (
+
+							{edit && isUserProfile && (
 								<Input
 									type="text"
 									className="border-b border-black p-2  text-center text-xl mb-2.5"
-									value={headline || ''}
+									value={headline}
 									onBlur={(e) => handleHeadline(e)}
 									onChange={(e) => setHeadline(e.target.value)}
 									onEnter={(e) => handleHeadline(e)}
 									ref={quoteRef}
 								/>
-							) : (
+							)}
+
+							{!edit && (
 								<Typography
+									key={headline}
 									variant="blockquote"
 									className="group border-b border-transparent p-2 text-center text-xl cursor-pointer duration-50"
-									onClick={() => setEdit(true)}
+									onClick={() => isUserProfile && setEdit(true)}
 								>
-									"{headline || settings?.headline || sampleQuote}"
-									<Icon
-										icon="lucide:edit"
-										className="ml-2 text-black inline font-xs font-thin cursor-pointer hover:text-primary opacity-0 group-hover:opacity-75 duration-50 hover:text-black "
-									/>
+									"{headline || sampleQuote}"
+									{isUserProfile && (
+										<Icon
+											icon="lucide:edit"
+											className="ml-2 text-black inline font-xs font-thin cursor-pointer hover:text-primary opacity-0 group-hover:opacity-75 duration-50 hover:text-black "
+										/>
+									)}
 								</Typography>
 							)}
 						</div>

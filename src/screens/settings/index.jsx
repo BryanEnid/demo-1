@@ -13,7 +13,7 @@ import { Icon } from '@iconify/react';
 // import { Listbox } from '@headlessui/react';
 import useSettings from '@/hooks/useSettings.js';
 
-const initialValues = {
+export const initialValues = {
 	uid: '',
 	email: '',
 	name: '',
@@ -25,60 +25,23 @@ const initialValues = {
 	company: '',
 	image: null
 };
+
 const Settings = () => {
 	const { user } = useAuth();
 	const [values, setValues] = useState(initialValues);
 	const [isDragOver, setIsDragOver] = React.useState(false);
 	const fileInpRef = useRef();
-	// const navigate = useNavigate();
 	const { data: settings, updateSettings, uploadUserProfilePicture } = useSettings();
 
 	useEffect(() => {
-		if (settings.uid) {
-			setValues((val) => ({
-				...val,
-				...settings
-			}));
-		} else if (user && !values.email) {
-			const fullNameArr = user.name.split(' ');
-			setValues((val) => ({
-				...val,
-				uid: user.uid,
-				name: user.name,
-				fname: fullNameArr[0],
-				lname: fullNameArr[1],
-				email: user.email,
-				bio: '',
-				company: '',
-				headline: '',
-				title: ''
-			}));
-		}
-	}, [user]);
-	// useEffect(() => {
-	// 	if (data?.id) {
-	// 		setValues({
-	// 			email: data.individual.email,
-	// 			fname: data.individual?.first_name,
-	// 			lname: data.individual?.last_name,
-	// 		});
-	// 	}
-	// }, [data]);
-	// if (user && profile && user?.id !== profile?.id) {
-	// 	navigate(`/${profile.uid}`);
-	// }
+		if (Object.keys(settings).length) setValues(settings);
+	}, [settings]);
+
 	const onSubmit = async (e) => {
 		e.preventDefault();
-		try {
-			await updateSettings(values);
-		} catch (error) {
-			console.log('onSubmit error: ', error);
-		}
-		// finally {
-		// setLoading(false);
-		// console.log('Finish line');
-		// }
+		updateSettings(values);
 	};
+
 	const handleUpload = async (image) => {
 		if (!image) return;
 		const fd = new FormData();
@@ -109,6 +72,7 @@ const Settings = () => {
 		e.preventDefault();
 		setIsDragOver(true);
 	};
+
 	const handleDragLeave = () => {
 		setIsDragOver(false);
 	};

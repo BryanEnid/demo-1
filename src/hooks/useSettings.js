@@ -10,7 +10,7 @@ const useSettings = () => {
 	const { id } = useParams();
 	// id:  93ef0bf2-d8ac-4508-b5a9-956335c4ca6e
 
-	const { pathname } = useLocation();
+	// const { pathname } = useLocation();
 	// pathname:  /93ef0bf2-d8ac-4508-b5a9-956335c4ca6e/settings
 
 	const { user, ...auth } = useAuth();
@@ -19,31 +19,19 @@ const useSettings = () => {
 	// username:  93ef0bf2-d8ac-4508-b5a9-956335c4ca6e
 
 	const queryClient = useQueryClient();
-	const queryKey = [COLLECTION_NAME, auth.authToken];
+	const queryKey = [COLLECTION_NAME, id, auth.authToken];
 
 	// GET SETTINGS
 	const { data: settings, isLoading: settingsLoading } = useQuery({
 		gcTime: Infinity,
 		queryKey: queryKey,
-		queryFn: () => getSettings(auth),
-		enabled: true
+		queryFn: () => getSettings(auth, id),
+		enabled: Boolean(auth)
 	});
 
-	const { mutateAsync: asyncGetSettings } = useMutation({
-		mutationFn: () => getSettings(auth)
-	});
-
-	const getUserSettings = async () => {
-		try {
-			await asyncGetSettings();
-			await queryClient.invalidateQueries({ queryKey });
-		} catch (error) {
-			console.error(error);
-		}
-	};
-
-	const { mutateAsync: create } = useMutation({
-		mutationFn: (data) => handleUpdate(auth, data)
+	const { mutate: updateSettings } = useMutation({
+		mutationFn: (data) => handleUpdate(auth, data),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey })
 	});
 
 	const { mutateAsync: upload } = useMutation({
@@ -59,22 +47,12 @@ const useSettings = () => {
 		}
 	};
 
-	const updateSettings = async (data) => {
-		try {
-			await create(data);
-			await queryClient.invalidateQueries({ queryKey });
-		} catch (error) {
-			console.error(error);
-		}
-	};
-
 	// TODO: delete
 
 	return {
-		data: settings || [],
+		data: settings ?? {},
 		updateSettings,
 		uploadUserProfilePicture,
-		getUserSettings,
 		isLoading: settingsLoading || false
 	};
 };
