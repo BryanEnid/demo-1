@@ -96,7 +96,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 						<div key={key} className="flex flex-col w-full gap-2">
 							<div key={key} className="flex flex-row items-center w-full gap-2">
 								<div className="inline-flex items-center relative w-full h-full">
-									<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} />
+									<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} autofocus />
 									{inputs[key].valid && (
 										<div className="absolute right-1 p-1 rounded-full bg-white z-10">
 											<Icon fontSize={20} icon="tabler:check" className="text-green-600 h-full" />

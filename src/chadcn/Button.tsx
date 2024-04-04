@@ -94,9 +94,9 @@ function Button({
 				`flex flex-col`,
 				align && `items-${align}`,
 				className,
-				errored && 'border-2 border-red-500',
-				disabled && 'bg-gray-300'
+				errored && 'border-2 border-red-500'
 			)}
+			disabled={disabled}
 			{...props}
 		>
 			<div className="flex gap-3 justify-between items-center">
