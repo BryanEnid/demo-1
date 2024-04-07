@@ -84,7 +84,7 @@ export const AttachmentModal = ({ show, onConfirm, onCancel }) => {
 		// Upload files
 		const body = new FormData();
 		files.forEach((item) => body.append('documents', item, item.name));
-		updateProfile({ body, section: 'attachments', id: profile.id });
+		updateProfile({ body, section: 'attachments', id: profile.uid });
 
 		// CB
 		onConfirm();
