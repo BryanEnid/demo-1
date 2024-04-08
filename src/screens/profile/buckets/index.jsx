@@ -112,7 +112,6 @@ export function Buckets() {
 
 	// Refs
 	const newCategoryRef = useRef();
-
 	const groupedBucket = useMemo(
 		() => groupBy(buckets || [], ({ category }) => category || UNCATEGORIZED_BUCKETS_LABEL),
 		[buckets]
@@ -142,7 +141,6 @@ export function Buckets() {
 		if (!newCategoryValue?.length) {
 			return;
 		}
-
 		setNewCategoryValue('');
 		setShowNewCategory(false);
 		setTmpCategories((val) => [newCategoryValue, ...val]);
@@ -253,8 +251,8 @@ export function Buckets() {
 								onDelete={() => setConfirmDelete(category)}
 								onSubmit={submitEditTmpCategory}
 							/>
-
 							<div className="grid gap-16 grid-cols-3">
+								{/* tempCategories add button */}
 								{isUserProfile && !isMobile && (
 									<motion.div
 										initial={{ opacity: 0, y: -20 }}
@@ -288,8 +286,6 @@ export function Buckets() {
 							onDelete={() => setConfirmDelete(category)}
 							onSubmit={submitEditCategory}
 						/>
-
-						{/* <div className="grid gap-16 grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"> */}
 						<div className="relative grid gap-1 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ">
 							{groupedBucket[category].map((bucket, index) => (
 								<motion.div
@@ -311,7 +307,6 @@ export function Buckets() {
 									/>
 								</motion.div>
 							))}
-
 							{isUserProfile && !isMobile && (
 								<motion.div
 									key="ADD NEW"
@@ -324,7 +319,6 @@ export function Buckets() {
 								</motion.div>
 							)}
 						</div>
-
 						{isUserProfile && isMobile && (
 							<div className="mt-10">
 								<Button

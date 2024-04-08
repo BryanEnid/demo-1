@@ -120,7 +120,7 @@ const HoldToTriggerButton = ({ onRelease, text, holdTime }) => {
 	);
 };
 
-const PreviewBucket = ({ show, onClose, editMode, documentId }) => {
+const PreviewBucket = ({ show, onClose, editMode, documentId, bucketCategory }) => {
 	// Hooks
 	const navigate = useNavigate();
 	const { user } = useAuth();
@@ -251,9 +251,16 @@ const PreviewBucket = ({ show, onClose, editMode, documentId }) => {
 		navigate({ pathname: '/capture', search: createSearchParams({ bucketid: dbid }).toString() });
 
 	const handleCreateBucket = (params) => {
-		if (!data.name) return;
+		if (!data.name) {
+			console.log('Error: Name is required');
+			console.log('Create form error notification/css here - src/components/PreviewBucket/index.jsx');
+			return;
+		}
 		const { willRedirect = false, cb = () => {}, onSuccess = () => {} } = params;
 		const crudFunction = documentId ? updateBucket : createBucket;
+		if (!data.category && bucketCategory) {
+			data.category = bucketCategory;
+		}
 
 		crudFunction(
 			{

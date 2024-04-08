@@ -39,14 +39,22 @@ const LayoutView = () => {
 				<div className="flex">
 					<div className="w-full">
 						<Outlet />
-						<PreviewBucket editMode show={bucketCreateOpen} data={bucketData} onClose={closeCreateBucketModal} />
+						<PreviewBucket
+							editMode
+							show={bucketCreateOpen}
+							data={bucketData}
+							bucketCategory={bucketData?.category}
+							onClose={closeCreateBucketModal}
+						/>
 					</div>
 
 					{!!bucketInfoOpen && (
 						<motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 300, opacity: 1 }} className="shrink-0">
 							<div className="fixed top-0 sm:top-[64px] bottom-0 right-0 overflow-auto w-[300px]">
 								<BucketInfo
-									bucket={bucketInfoOpen}
+									bucketId={bucketInfoOpen.id}
+									userId={bucketInfoOpen.creator.uid}
+									// bucket={bucketInfoOpen}
 									canEdit={bucketInfoOpen.creatorId === user.id}
 									isUserProfile={bucketInfoOpen.creatorId === user.id}
 									onClose={closeBucketInfo}
