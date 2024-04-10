@@ -46,6 +46,7 @@ jobs:
   production:
     runs-on: ubuntu-latest
     environment: PRD
+    needs: development
 
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
