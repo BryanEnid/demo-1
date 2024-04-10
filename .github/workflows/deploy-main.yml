@@ -6,13 +6,14 @@ on:
       - main
 
 jobs:
-  build:
+  development:
     runs-on: ubuntu-latest
+    environment: DEV
 
     env:
-      AWS_S3_BUCKET: dev.observe.space
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET: dev.observe.space
       AWS_REGION: 'us-east-1' # optional: defaults to us-east-1
       SOURCE_DIR: './dist/' # optional: defaults to entire repository
 
@@ -37,7 +38,53 @@ jobs:
       - name: Build
         run: |
           echo -e "\e[36m Build \e[0m" 
-          yarn run build
+          yarn run build --mode development
 
       - name: Upload S3
         run: aws s3 sync ${{ env.SOURCE_DIR }} s3://${{ env.AWS_S3_BUCKET }} --delete --region ${{ env.AWS_REGION }}
+
+  production:
+    runs-on: ubuntu-latest
+    environment: PRD
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET: www.observe.space
+      AWS_REGION: 'us-east-1' # optional: defaults to us-east-1
+      SOURCE_DIR: './dist/' # optional: defaults to entire repository
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      # Default steps
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: Hydra
+          minimum-approvals: 1
+          issue-title: 'Deploying to prod from dev'
+          issue-body: 'Please approve or deny the deployment'
+          exclude-workflow-initiator-as-approver: false
+
+      # - name: Use Yarn
+      #   run: |
+      #     echo -e "\e[36m Use Yarn - Yarn version: \e[0m $(yarn --version)"
+      #     yarn
+
+      # - name: Build
+      #   run: |
+      #     echo -e "\e[36m Build \e[0m"
+      #     yarn run build --mode development
+
+      # - name: Upload S3
+      #   run: aws s3 sync ${{ env.SOURCE_DIR }} s3://${{ env.AWS_S3_BUCKET }} --delete --region ${{ env.AWS_REGION }}
