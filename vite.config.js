@@ -24,9 +24,9 @@ export default defineConfig({
 				skipWaiting: true
 			},
 
-			devOptions: {
-				enabled: true
-			},
+			// devOptions: {
+			// 	enabled: true
+			// },
 
 			// Manifest
 			includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
@@ -43,14 +43,13 @@ export default defineConfig({
 		// port: 3000
 		// ! Enable this for local https
 		https: {
-			key: path.resolve(__dirname, 'localhost.key'),
-			cert: path.resolve(__dirname, 'localhost.crt')
+			key: path.resolve(__dirname, './ssl/key.pem'),
+			cert: path.resolve(__dirname, './ssl/cert.pem')
+		},
+		headers: {
+			'Cross-Origin-Opener-Policy': 'same-origin',
+			'Cross-Origin-Embedder-Policy': 'require-corp'
 		}
-
-		// headers: {
-		// 	'Cross-Origin-Opener-Policy': 'same-origin',
-		// 	'Cross-Origin-Embedder-Policy': 'require-corp'
-		// }
 	},
 
 	resolve: {

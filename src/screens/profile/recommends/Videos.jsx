@@ -4,11 +4,12 @@ import { Icon } from '@iconify/react';
 import { parseDuration } from '@/lib/utils.js';
 import { BASE_URL } from '@/config/api.js';
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import VideoAddURLModal from '@/components/VideoAddURLModal.jsx';
+import { Image } from '@/components/Image';
 
 const Videos = ({ data = [], isUserProfile }) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -78,13 +79,14 @@ const Videos = ({ data = [], isUserProfile }) => {
 						<a key={video.id} href={video.videoUrl} target="_blank" rel="noreferrer">
 							<Card className="h-full flex">
 								<CardHeader className="px-4 py-4 w-1/3 shrink-0">
-									<img
-										src={video.preview}
+									<Image
+										proxyEnabled
+										src={video?.preview}
 										className="rounded-md object-cover aspect-square w-full"
-										onError={(e) => {
-											e.target.onerror = null;
-											e.target.src = `${BASE_URL}/static/external?url=${video.picture}`;
-										}}
+										// onError={(e) => {
+										// 	e.target.onerror = null;
+										// 	e.target.src = `${BASE_URL}/static/external?url=${video.preview}`;
+										// }}
 									/>
 								</CardHeader>
 								<CardContent className="px-0 pr-4 py-4">

@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import { cn, isYouTubeUrl } from '@/lib/utils';
 import PreviewBucket from '@/components/PreviewBucket';
 import ShareModal from '@/components/ShareModal.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { Typography } from '@/chadcn/Typography';
 import {
 	ContextMenu,
@@ -14,12 +14,12 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger
 } from '@/chadcn/ContextMenu';
-import { useMobile } from '@/hooks/useMobile';
+import { Image } from '@/components/Image';
+import { useBucket } from '@/hooks/useBucket';
 
 export const BucketItem = ({
 	name,
 	preview,
-	data,
 	documentId,
 	onClick,
 	width = 'size-[200px]',
@@ -31,7 +31,8 @@ export const BucketItem = ({
 }) => {
 	// Hooks
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { isMobile } = useMobile();
+
+	const { data, refetch, isLoading } = useBucket(documentId);
 
 	// State
 	const [open, setOpen] = useState(false);
@@ -41,11 +42,22 @@ export const BucketItem = ({
 
 	const wrapperElRef = useRef();
 
+	// Watch for videos still uploading
+	React.useEffect(() => {
+		if (data) {
+			const found = data?.videos?.find(({ process }) => process?.status === 'UPLOADING');
+			if (found) {
+				const instance = setInterval(refetch, [5000]);
+				const clear = () => clearInterval(instance);
+				return clear;
+			}
+		}
+	}, [data]);
+
 	React.useEffect(() => {
 		if (searchParams.get('bucketid') === documentId && open === false) {
 			setOpen(true);
 		}
-		// if (searchParams)
 	}, [searchParams]);
 
 	const updateBucketSettings = ({ contributors, isPrivate }) => {
@@ -71,10 +83,11 @@ export const BucketItem = ({
 	};
 
 	const handleSrc = (src) => {
-		if (isYouTubeUrl(src)) return data.videos[0].image;
+		if (isYouTubeUrl(src)) return data.videos?.[0]?.image;
 
 		return src;
 	};
+
 	const openNewWindow = () => {
 		window.open(
 			`${window.location.href}?bucketid=${documentId}`,
@@ -83,9 +96,11 @@ export const BucketItem = ({
 		);
 	};
 
+	if (isLoading) return <></>;
+
 	return (
 		<>
-			<div ref={wrapperElRef} className={cn('flex flex-col  items-center relative select-none', className)}>
+			<div ref={wrapperElRef} className={cn('flex flex-col items-center relative select-none', className)}>
 				<button
 					onClick={() => handleOnClick(contextMenu)}
 					className={`${width} transition ease-in-out hover:scale-105 select-none`}
@@ -104,14 +119,16 @@ export const BucketItem = ({
 										draggable={false}
 										src={handleSrc(preview)}
 										className="object-cover aspect-square rounded-full w-full h-full"
+										crossOrigin="anonymous"
 									/>
 								)}
 
 								{handleSrc(preview) && isYouTubeUrl(preview) && (
-									<img
+									<Image
 										draggable={false}
+										proxyEnabled
 										src={handleSrc(preview)}
-										className="aspect-video object-cover rounded-full w-full h-full"
+										className="aspect-square object-cover rounded-full w-full h-full"
 									/>
 								)}
 
@@ -171,6 +188,7 @@ export const BucketItem = ({
 			>
 				{null}
 			</ConfirmDialog>
+
 			{data && shareModalOpen && (
 				<ShareModal
 					open={shareModalOpen}
@@ -179,6 +197,7 @@ export const BucketItem = ({
 					saveBucketSettings={updateBucketSettings}
 				/>
 			)}
+
 			{!onClick && <PreviewBucket show={open} onClose={handleExit} data={data} documentId={documentId} />}
 		</>
 	);

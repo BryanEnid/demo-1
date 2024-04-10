@@ -24,6 +24,8 @@ const useOrganizations = ({ id, search, fullList } = {}) => {
 		...(search && { search }),
 		...(typeof fullList === 'boolean' && { fullList })
 	};
+
+	// retrieves data 'dataList' from API
 	const { data: dataList, isLoading: isListLoading } = useQuery({
 		gcTime: Infinity,
 		queryKey: [...queryKey, search, fullList],
@@ -42,10 +44,6 @@ const useOrganizations = ({ id, search, fullList } = {}) => {
 		mutationFn: ({ data }) => handleCreateOrganization(auth, data)
 	});
 
-	const { mutateAsync: uploadOrgPicture, isPending: isUploadLoading } = useMutation({
-		mutationFn: ({ data, id }) => handleUploadOrgPicture(auth, id, data)
-	});
-
 	const { mutateAsync: uploadOrgBgPicture, isPending: isBgUploadLoading } = useMutation({
 		mutationFn: ({ data, id }) => handleUploadOrgBgPicture(auth, id, data)
 	});
@@ -59,11 +57,15 @@ const useOrganizations = ({ id, search, fullList } = {}) => {
 		onSuccess: () => queryClient.invalidateQueries({ queryKey })
 	});
 
+	const { mutateAsync: uploadOrgPicture, isPending: isUploadLoading } = useMutation({
+		mutationFn: ({ data, id }) => handleUploadOrgPicture(auth, id, data)
+	});
+
 	const createOrganization = async ({ picture, ...data }) => {
 		try {
 			const { id } = await create({ data });
-			await uploadOrgPicture({ id, data: picture });
 
+			await uploadOrgPicture({ id, data: picture });
 			await queryClient.invalidateQueries({ queryKey });
 		} catch (err) {
 			console.log(err);
@@ -73,14 +75,12 @@ const useOrganizations = ({ id, search, fullList } = {}) => {
 	const updateOrganization = async ({ picture, bgPicture, ...data }) => {
 		try {
 			await update({ id: data.id, data });
-
 			if (picture instanceof FormData) {
 				await uploadOrgPicture({ id: data.id, data: picture });
 			}
 			if (bgPicture instanceof FormData) {
 				await uploadOrgBgPicture({ id: data.id, data: bgPicture });
 			}
-
 			await queryClient.invalidateQueries({ queryKey });
 		} catch (e) {
 			console.log(e);

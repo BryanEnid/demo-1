@@ -2,14 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { Image } from '@/components/Image';
+import { isValidUrl } from '@/lib/utils';
 
 const Podcasts = ({ data = [], isUserProfile }) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -49,7 +51,9 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 		let timerId;
 		if (search?.length) {
 			timerId = setTimeout(() => {
-				searchPodcastsPreview(search);
+				if (isValidUrl(search)) {
+					searchPodcastsPreview(search);
+				}
 			}, 300);
 		} else {
 			clearPodcastsPreview();
@@ -68,7 +72,9 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 					<Button
 						variant="outline"
 						className="text-primary rounded-full w-[30px] h-[30px] p-1"
-						onClick={() => setShowCreateModal(true)}
+						onClick={() => {
+							setShowCreateModal(true);
+						}}
 					>
 						<Icon icon="ic:round-plus" className="text-2xl" />
 					</Button>
@@ -92,7 +98,7 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 								<Card className="h-full flex flex-col">
 									<CardHeader className="px-4 py-4">
 										<a href={podcast.url} target="_blank" rel="noreferrer">
-											<img src={podcast.picture} className="rounded-md object-cover aspect-square w-full" />
+											<Image src={podcast.picture} className="rounded-md object-cover aspect-square w-full" />\
 										</a>
 									</CardHeader>
 									<CardContent className="px-4 pb-4">
@@ -134,7 +140,7 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 				</Carousel>
 			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
-				<div className="flex flex-col justify-center px-8 gap-5 relative w-screen">
+				<div className="flex flex-col justify-center px-8 gap-5 relative w-full">
 					<div className="flex flex-col justify-center pt-8 pb-4 gap-5 sticky top-0 bg-white z-10">
 						<div className="flex justify-between items-center pb-2">
 							<Typography variant="h3">Add Podcast</Typography>
@@ -160,6 +166,9 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 							{!isLoading && isPodcastsError && !podcastsPreview?.length && (
 								<Typography className="text-red-500">Podcasts not found</Typography>
 							)}
+							{!isLoading && !isPodcastsError && !podcastsPreview?.length && (
+								<Typography className="text-red-500">Invalid URL</Typography>
+							)}
 							{!isLoading && !!podcastsPreview?.length && (
 								<div>
 									{podcastsPreview.map((podcast) => (
@@ -169,7 +178,7 @@ const Podcasts = ({ data = [], isUserProfile }) => {
 											onClick={() => setSelectedPodcast(podcast)}
 										>
 											<div className="w-[50px] h-[50px] relative shrink-0">
-												<img src={podcast.picture} className="rounded-md object-cover aspect-square w-full" />
+												<Image src={podcast.picture} className="rounded-md object-cover aspect-square w-full" />
 												{podcast.id === selectedPodcast?.id && (
 													<div className="absolute top-0 right-0 bottom-0 left-0 bg-gray-900/50 rounded-md flex items-center justify-center">
 														<Icon icon="ci:check-big" className="text-green-500 text-3xl" />

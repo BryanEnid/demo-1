@@ -2,16 +2,18 @@ import React from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Icon } from '@iconify/react/dist/iconify.js';
 
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
-import { VideoUploadButton } from '@/components/VideoUploadButton.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
+import { VideoUploadButton } from '@/components/VideoUploadButton';
 import TextEditor from '@/components/TextEditor/index.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown.jsx';
-import { cn } from '@/lib/utils.js';
+import { cn, isYouTubeUrl } from '@/lib/utils.js';
 import { useMobile } from '@/hooks/useMobile';
+import { Image } from '@/components/Image';
 
 const Overview = ({
 	data,
+	canWatch,
 	profile,
 	isUserProfile,
 	description,
@@ -30,8 +32,8 @@ const Overview = ({
 		<>
 			<div className="flex flex-row my-3 px-1 sm:px-8 sm:my-6 outline-none">
 				{!isMobile && (
-					<div className="flex basis-2/12 flex-col items-center gap-2 mt-2">
-						<img src={profile?.photoURL} className="rounded-full object-cover w-20" />
+					<div className="flex basis-2/12 flex-col flex-s items-center gap-2 mt-2">
+						<Image src={profile?.photoURL} className="rounded-full object-cover w-20" />
 						<Typography variant="large">{profile?.name}</Typography>
 
 						<Button iconBegin={<Icon icon="ic:round-anchor" />} variant="secondary">
@@ -40,7 +42,7 @@ const Overview = ({
 					</div>
 				)}
 
-				<div className="flex  flex-col w-full gap-2 pb-4 sm:gap-8 sm:basis-10/12">
+				<div className="flex  flex-col w-full gap-0 pb-4 sm:gap-8 sm:basis-10/12">
 					<div className="flex flex-row justify-between items-center">
 						{!isMobile && (
 							<div>
@@ -59,11 +61,7 @@ const Overview = ({
 
 								<VideoUploadButton onUpload={handlePrepareVideosToSave} />
 
-								<Button
-									iconBegin={<Icon icon="carbon:url" />}
-									variant="secondary"
-									onClick={() => handleVideoURLsModal(false)}
-								>
+								<Button iconBegin={<Icon icon="carbon:url" />} variant="secondary" onClick={handleVideoURLsModal}>
 									Add video URL
 								</Button>
 
@@ -89,6 +87,52 @@ const Overview = ({
 						)}
 					</div>
 
+					{canWatch && (
+						<div className="flex justify-center items-center mt-10 mx-6">
+							<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+								{data.videos.map(({ image, process }, index) => {
+									if (image) {
+										return (
+											<button onClick={() => setCurrentVideo(index)} key={image}>
+												<div className="relative">
+													{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
+													<Image
+														proxyEnabled={isYouTubeUrl(image)}
+														className={cn(
+															'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
+															currentVideo === index && process?.status === 'DONE' && 'border-primary scale-110'
+														)}
+														src={image}
+													/>
+
+													{process?.status !== 'DONE' && process && (
+														<div className="absolute h-full w-full  text-white top-0 left-0 z-10 flex justify-center items-center">
+															<div
+																className="absolute top-0 right-0 w-full h-full backdrop-blur-sm backdrop-grayscale transition-all"
+																style={{ width: `${100 - process?.percent}%` }}
+															></div>
+
+															<div
+																className="absolute top-0 left-0 w-full h-full transition-all"
+																style={{ width: `${process?.percent}%` }}
+															>
+																<div className="bg-white h-full w-[1px] absolute right-0"></div>
+															</div>
+
+															<div className="relative justify-center items-center">
+																<Typography variant="large">{process?.percent}%</Typography>
+															</div>
+														</div>
+													)}
+												</div>
+											</button>
+										);
+									}
+								})}
+							</div>
+						</div>
+					)}
+
 					<div>
 						<div>
 							{/* <Typography variant="large">{data.title}</Typography> */}
@@ -97,29 +141,6 @@ const Overview = ({
 							</Typography>
 						</div>
 					</div>
-				</div>
-			</div>
-
-			<div className="flex justify-center items-center my-6 mt-10 mx-6">
-				<div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-					{data.videos.map(({ image }, index) => {
-						if (image) {
-							return (
-								<button onClick={() => setCurrentVideo(index)} key={image}>
-									<div>
-										{/* <img src={image} className="rounded-lg object-cover w-40 h-28" /> */}
-										<LazyLoadImage
-											className={cn(
-												'rounded-lg aspect-video object-cover transition-all border-transparent border-[4px]',
-												currentVideo === index && 'border-primary scale-110'
-											)}
-											src={image}
-										/>
-									</div>
-								</button>
-							);
-						}
-					})}
 				</div>
 			</div>
 		</>

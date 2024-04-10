@@ -1,15 +1,9 @@
-import { useRef, useEffect, useCallback } from 'react';
-
-import { getLinkedInUser } from '@/hooks/api/linkedinAuth.js';
-import linkedInConfig from '@/config/linkedIn';
-
-const getCodeFromWindowURL = (url) => {
-	const popupWindowURL = new URL(url);
-	return popupWindowURL.searchParams.get('code');
-};
+import React from 'react';
+import { linkedInCB } from './api/oauth2';
+import { BASE_URL } from '@/config/api';
 
 const useSubscription = () => {
-	const subscriptionsRef = useRef([]);
+	const subscriptionsRef = React.useRef([]);
 
 	const unsubscribe = (cb) => {
 		subscriptionsRef.current = subscriptionsRef.current.filter((item) => item !== cb);
@@ -31,52 +25,86 @@ const useSubscription = () => {
 	};
 };
 
+const getCodeFromBrowser = () => {
+	const popupWindowURL = new URL(window.location.href);
+	return popupWindowURL.searchParams.get('code');
+};
+
+// const REDIRECT_URI = `${window.location.origin}/redirects?provider=linkedin`;
+// const REDIRECT_URI = `http://localhost:3300/api/auth/linkedin`;
 const ACCESS_TOKEN_KEY = 'linkedInAccessToken';
 const USER_KEY = 'linkedInUser';
+const REDIRECT_URI = `${window.location.origin}/sign-in`;
 
-const useLinkedInAuth = () => {
+export const useLinkedInAuth = () => {
+	// Hooks
 	const { emit, subscribe } = useSubscription();
-	const loadingRef = useRef(false);
+	const loadingRef = React.useRef(false);
 
-	const handlePostMessage = useCallback(
-		async (event) => {
-			if (event.data.type === 'code' && !loadingRef.current) {
-				loadingRef.current = true;
-				const { code } = event.data;
+	React.useEffect(() => {
+		if (window.location.pathname === '/sign-in') {
+			const code = getCodeFromBrowser();
+			if (code) handleSaveUserLocally(code);
+		}
+	}, []);
 
-				const { accessToken, user } = await getLinkedInUser(code);
+	React.useEffect(() => {
+		new Promise((res) => {
+			const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+			const user = JSON.parse(localStorage.getItem(USER_KEY));
 
-				localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-				localStorage.setItem(USER_KEY, JSON.stringify(user));
+			res({ accessToken, user });
+		})
+			.then((auth) => {
+				if (auth?.accessToken && auth?.user) {
+					emit(auth);
+				}
+			})
+			.catch(console.log);
+	}, []);
 
-				emit({ accessToken, user });
-				loadingRef.current = false;
-			}
-		},
-		[emit]
-	);
+	const handleSaveUserLocally = async (code) => {
+		if (!loadingRef.current) {
+			loadingRef.current = true;
+			const { accessToken, user } = await linkedInCB(code, REDIRECT_URI);
+			localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+			localStorage.setItem(USER_KEY, JSON.stringify(user));
 
-	const signInWithPopup = async () => {
-		const { clientId, redirectUrl, oauthUrl, scope, state } = linkedInConfig;
-		const url = `${oauthUrl}&client_id=${clientId}&scope=${scope}&state=${state}&redirect_uri=${redirectUrl}`;
+			emit({ accessToken, user });
+			loadingRef.current = false;
+		}
+	};
 
-		const width = 450;
-		const height = 730;
-		const left = window.screen.width / 2 - width / 2;
-		const top = window.screen.height / 2 - height / 2;
+	const handleLinkedInAuthPopUp = () => {
+		// ! COEP and COOP doesn't allow window.postMessage
+		// const REDIRECT_URI = `${window.location.origin}/redirects?provider=linkedin`;
+		// const width = 450;
+		// const height = 730;
+		// const left = window.screen.width / 2 - width / 2;
+		// const top = window.screen.height / 2 - height / 2;
+		// // Make a request to your backend server to initiate the OAuth2 flow
+		// const response = await fetch(`http://localhost:3300/api/auth/linkedin?redirectUri=${REDIRECT_URI}`);
+		// const url = await response.text();
+		// // Open a popup window for LinkedIn authentication
+		// popup = window.open(
+		// 	url,
+		// 	{ wait: true, app: 'Linkedin' },
+		// 	`popup=1, menubar=no, location=no, resizable=no, scrollbars=no, status=no, width=${width}, height=${height}, top=${top}, left=${left}`
+		// );
+		// // Listen for messages from the popup window
+		// window.addEventListener('message', handleMessage);
+	};
 
-		await window.open(
-			url,
-			{ wait: true, app: 'Linkedin' },
-			`menubar=no,location=no,resizable=no,scrollbars=no,status=no, width=${width}, height=${height}, top=${top}, left=${left}`
-		);
+	const handleLinkedInAuth = async () => {
+		const endpoint = `${BASE_URL}/api/auth/linkedin?redirectUri=${REDIRECT_URI}`;
+		window.location.href = endpoint;
 	};
 
 	const onAuthStateChanged = (cb) => {
 		return subscribe(cb);
 	};
 
-	const signOut = () => {
+	const handleLogout = () => {
 		return new Promise((res) => {
 			localStorage.removeItem(ACCESS_TOKEN_KEY);
 			localStorage.removeItem(USER_KEY);
@@ -86,36 +114,11 @@ const useLinkedInAuth = () => {
 		});
 	};
 
-	useEffect(() => {
-		new Promise((res) => {
-			const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-			const user = JSON.parse(localStorage.getItem(USER_KEY));
-
-			res({ accessToken, user });
-		}).then((auth) => {
-			if (auth?.accessToken && auth?.user) {
-				emit(auth);
-			}
-		});
-	}, []);
-
-	useEffect(() => {
-		if (window.opener && window.opener !== window) {
-			const code = getCodeFromWindowURL(window.location.href);
-			window.opener.postMessage({ type: 'code', code: code }, '*');
-			window.close();
-		}
-
-		window.addEventListener('message', handlePostMessage);
-
-		return () => window.removeEventListener('message', handlePostMessage);
-	}, [handlePostMessage]);
-
 	return {
-		signInWithPopup,
+		// userData,
 		onAuthStateChanged,
-		signOut
+		signInWithLinkedIn: handleLinkedInAuth,
+		signOut: handleLogout,
+		handleSaveUserLocally
 	};
 };
-
-export default useLinkedInAuth;

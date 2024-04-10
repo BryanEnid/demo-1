@@ -9,6 +9,7 @@ import React from 'react';
 import { useExperience } from './useExperience';
 import { useProfile } from '@/hooks/useProfile';
 import { ClearBitAttribution } from '@/components/ClearBitAttribution';
+import { Image } from '@/components/Image';
 
 const example = {
 	label: 'React',
@@ -112,7 +113,7 @@ export const SkillsSection = ({ data }) => {
 											className="h-[50px] px-8 justify-start"
 											onClick={() => handleAddSkill(searchText, item)}
 										>
-											<img src={item.logo} className="aspect-square w-10 object-contain inline" />
+											<Image src={item.logo} className="aspect-square w-10 object-contain inline" />
 											<Typography variant="p" className="px-3 inline">
 												add "{item.name}" logo for {searchText} skill
 											</Typography>
@@ -141,7 +142,7 @@ export const SkillsSection = ({ data }) => {
 							className="bg-gray-200 rounded-full cursor-default py-6"
 							variant="ghost"
 							iconBegin={
-								iconUrl && <img src={iconUrl} className="rounded-lg aspect-square h-7 object-contain inline" />
+								iconUrl && <Image src={iconUrl} className="rounded-lg aspect-square h-7 object-contain inline" />
 							}
 							iconEnd={<Icon icon="tabler:x" onClick={() => handleRemoveSkill(label)} className="cursor-pointer" />}
 						>
@@ -165,7 +166,7 @@ export const SkillsSection = ({ data }) => {
 				{data?.map(({ id, label, iconUrl }) => (
 					<Card key={id} className="flex flex-col justify-center items-center">
 						<CardHeader>
-							{iconUrl && <img src={iconUrl} className=" rounded-lg aspect-square h-20 object-contain inline" />}
+							{iconUrl && <Image src={iconUrl} className=" rounded-lg aspect-square h-20 object-contain inline z-0" />}
 							<CardTitle>{label}</CardTitle>
 						</CardHeader>
 					</Card>

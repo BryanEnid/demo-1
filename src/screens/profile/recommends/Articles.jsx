@@ -3,14 +3,16 @@ import { Icon } from '@iconify/react';
 
 import { parseDuration } from '@/lib/utils.js';
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { Image } from '@/components/Image';
+import { isValidUrl } from '@/lib/utils';
 
 const Articles = ({ data = [], isUserProfile }) => {
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -48,7 +50,7 @@ const Articles = ({ data = [], isUserProfile }) => {
 		let timerId;
 		if (articleUrl?.length) {
 			timerId = setTimeout(() => {
-				fetchArticlePreview(articleUrl);
+				isValidUrl(articleUrl) && fetchArticlePreview(articleUrl);
 			}, 300);
 		} else {
 			clearArticlePreview();
@@ -67,7 +69,9 @@ const Articles = ({ data = [], isUserProfile }) => {
 					<Button
 						variant="outline"
 						className="text-primary rounded-full w-[30px] h-[30px] p-1"
-						onClick={() => setShowCreateModal(true)}
+						onClick={() => {
+							setShowCreateModal(true);
+						}}
 					>
 						<Icon icon="ic:round-plus" className="text-2xl" />
 					</Button>
@@ -86,42 +90,50 @@ const Articles = ({ data = [], isUserProfile }) => {
 					className="w-full"
 				>
 					<CarouselContent>
-						{data.map((article) => (
-							<CarouselItem key={article.id} className="basis-1/2 lg:basis-1/4">
-								<Card className="h-full flex flex-col">
-									<CardHeader className="px-4 py-4">
-										<a href={article.url} target="_blank" rel="noreferrer">
-											<img src={article.picture} className="rounded-md object-cover aspect-square w-full" />
-										</a>
-									</CardHeader>
-									<CardContent className="px-4 pb-4">
-										<CardTitle className="text-lg leading-snug font-bold text-wrap">
+						{data.map((article) => {
+							return (
+								<CarouselItem key={article.id} className="basis-1/2 lg:basis-1/4">
+									<Card className="h-full flex flex-col">
+										<CardHeader className="px-4 py-4">
 											<a href={article.url} target="_blank" rel="noreferrer">
-												{article.title}
+												<Image
+													proxyEnabled
+													src={article.picture}
+													className="rounded-md object-cover aspect-square w-full"
+												/>
 											</a>
-										</CardTitle>
-										<Typography className="text-xs !mt-0 text-wrap">
-											<span className="mr-2">Reading Time</span>
-											<span>{article.readingTime ? `${parseDuration(article.readingTime)?.minutes} mins` : 'N/A'}</span>
-										</Typography>
-										<CardDescription className="text-black pt-2 line-clamp-6 ">{article.description}</CardDescription>
-									</CardContent>
-									{isUserProfile && (
-										<CardFooter className="mt-auto px-4 pb-4">
-											<div className="w-full flex justify-center">
-												<Button
-													variant="ghost"
-													className="rounded-full w-[40px] h-[40px] p-1"
-													onClick={() => setConfirmDelete(article)}
-												>
-													<Icon className="text-gray-500 text-xl" icon="mi:delete" />
-												</Button>
-											</div>
-										</CardFooter>
-									)}
-								</Card>
-							</CarouselItem>
-						))}
+										</CardHeader>
+										<CardContent className="px-4 pb-4">
+											<CardTitle className="text-lg leading-snug font-bold text-wrap">
+												<a href={article.url} target="_blank" rel="noreferrer">
+													{article.title}
+												</a>
+											</CardTitle>
+											<Typography className="text-xs !mt-0 text-wrap">
+												<span className="mr-2">Reading Time</span>
+												<span>
+													{article.readingTime ? `${parseDuration(article.readingTime)?.minutes} mins` : 'N/A'}
+												</span>
+											</Typography>
+											<CardDescription className="text-black pt-2 line-clamp-6 ">{article.description}</CardDescription>
+										</CardContent>
+										{isUserProfile && (
+											<CardFooter className="mt-auto px-4 pb-4">
+												<div className="w-full flex justify-center">
+													<Button
+														variant="ghost"
+														className="rounded-full w-[40px] h-[40px] p-1"
+														onClick={() => setConfirmDelete(article)}
+													>
+														<Icon className="text-gray-500 text-xl" icon="mi:delete" />
+													</Button>
+												</div>
+											</CardFooter>
+										)}
+									</Card>
+								</CarouselItem>
+							);
+						})}
 						{isUserProfile && (
 							<CarouselItem className="basis-1/2 lg:basis-1/4">
 								<Card
@@ -168,7 +180,7 @@ const Articles = ({ data = [], isUserProfile }) => {
 						{!isLoading && articlePreview && (
 							<div className="flex gap-4">
 								<div className="w-[80px] h-[80px]">
-									<img src={articlePreview.picture} className="rounded-md object-cover aspect-square w-full" />
+									<Image src={articlePreview.picture} className="rounded-md object-cover aspect-square w-full" />
 								</div>
 								<div>
 									<Typography className="font-bold leading-none">{articlePreview.title}</Typography>

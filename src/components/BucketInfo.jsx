@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/chadcn/Select.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useBuckets } from '@/hooks/useBuckets.js';
 import ShareModal from '@/components/ShareModal.jsx';
+import { Image } from './Image';
+import { useBucket } from '@/hooks/useBucket';
+import { useProfile } from '@/hooks/useProfile';
 
 const dateOpts = {
 	month: 'short',
@@ -18,9 +21,11 @@ const dateOpts = {
 	minute: 'numeric'
 };
 
-const BucketInfo = ({ bucket, canEdit, isUserProfile, onClose }) => {
+const BucketInfo = ({ bucketId, userId, canEdit, isUserProfile, onClose }) => {
 	const navigate = useNavigate();
 	const { updateBucket } = useBuckets();
+	const { data: bucket } = useBucket(bucketId);
+	const { data: profile } = useProfile({ id: userId });
 
 	const [isPrivate, setIsPrivate] = useState(bucket.private.toString());
 	const [confirmDelete, setConfirmDelete] = useState(null);
@@ -87,7 +92,7 @@ const BucketInfo = ({ bucket, canEdit, isUserProfile, onClose }) => {
 				<Typography className="text-lg font-bold !mt-5">Your Bucket Details</Typography>
 				<div className="mt-5">
 					<Typography className="font-bold">Title</Typography>
-					<Typography className="!mt-0">{bucket.title || bucket.name}</Typography>
+					<Typography className="!mt-0">{bucket.title ?? bucket.name}</Typography>
 				</div>
 				<div className="mt-9">
 					<Typography className="font-bold">Created</Typography>
@@ -120,10 +125,10 @@ const BucketInfo = ({ bucket, canEdit, isUserProfile, onClose }) => {
 					<Typography className="font-bold">Owner</Typography>
 					<div className="flex items-center gap-2">
 						<div className="w-[40px] h-[40px]">
-							<img src={bucket.creator?.photoURL} className="rounded-full object-cover aspect-square w-48" />
+							<Image src={profile.photoURL} className="rounded-full object-cover aspect-square w-48" />
 						</div>
 						<Typography className="!mt-0">
-							{bucket.creator.name} {isUserProfile && '(you)'}
+							{profile.name ?? 'Unknown'} {isUserProfile && '(you)'}
 						</Typography>
 					</div>
 				</div>
@@ -133,35 +138,37 @@ const BucketInfo = ({ bucket, canEdit, isUserProfile, onClose }) => {
 						{!!bucket.contributors.length && (
 							<>
 								<div className="flex flex-wrap gap-1 my-1">
-									{bucket.contributors.slice(0, 5).map((item) => (
-										<div
-											key={item.id}
-											className={`flex items-center gap-1 cursor-pointer text-sm bg-accent rounded-full border h-[24px] pl-2 ${
-												canEdit ? '' : 'pr-2'
-											}`}
-											onClick={() => openContributor(item.user)}
-										>
-											<Typography className="!leading-none">{item.user.name}</Typography>
-											{canEdit && (
-												<Button
-													variant="ghost"
-													className="w-[24px] h-[24px] p-1"
-													onClick={(e) => {
-														e.preventDefault();
-														e.stopPropagation();
-														setConfirmDelete(item);
-													}}
-												>
-													<Icon icon="mingcute:close-fill" className="text-sm" />
-												</Button>
-											)}
-										</div>
-									))}
+									{bucket.contributors.slice(0, 5).map((item) => {
+										return (
+											<div
+												key={item.id}
+												className={`flex items-center gap-1 cursor-pointer text-sm bg-accent rounded-full border h-[24px] pl-2 ${
+													canEdit ? '' : 'pr-2'
+												}`}
+												onClick={() => openContributor(item.user)}
+											>
+												<Typography className="!leading-none">{item?.user?.name}</Typography>
+												{canEdit && (
+													<Button
+														variant="ghost"
+														className="w-[24px] h-[24px] p-1"
+														onClick={(e) => {
+															e.preventDefault();
+															e.stopPropagation();
+															setConfirmDelete(item);
+														}}
+													>
+														<Icon icon="mingcute:close-fill" className="text-sm" />
+													</Button>
+												)}
+											</div>
+										);
+									})}
 								</div>
 								<div className="flex flex-wrap gap-1">
 									{bucket.contributors.slice(0, 5).map((item) => (
 										<div key={item.id} className="w-[30px] h-[30px]" onClick={() => openContributor(item.user)}>
-											<img src={item.user?.photoURL} className="rounded-full object-cover aspect-square w-48" />
+											<Image src={item.user?.photoURL} className="rounded-full object-cover aspect-square w-48" />
 										</div>
 									))}
 								</div>

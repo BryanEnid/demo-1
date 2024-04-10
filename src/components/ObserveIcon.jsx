@@ -1,5 +1,6 @@
 import React from 'react';
 import ObserveLogo from '../assets/observe_logo_512_og.png';
+import { Image } from './Image';
 
 export function ObserveIcon({ size, rounded }) {
 	const round_styles = {
@@ -11,7 +12,7 @@ export function ObserveIcon({ size, rounded }) {
 
 	return (
 		<div style={rounded && round_styles}>
-			<img src={ObserveLogo} width={size} height={size} />
+			<Image src={ObserveLogo} width={size} height={size} />
 		</div>
 	);
 }

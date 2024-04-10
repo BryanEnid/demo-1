@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { cn } from '@/lib/utils';
 import { Typography } from './Typography';
 
-const buttonVariants = cva(
+export const buttonVariants = cva(
 	'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
 	{
 		variants: {
@@ -19,12 +19,12 @@ const buttonVariants = cva(
 			},
 			size: {
 				default: `
-				xl:py-2 xl:px-4
+          xl:py-2 xl:px-4
 
-				md:py-4 md:px-3  
+          md:py-4 md:px-3  
 
-				py-4 px-3 h-10
-				`,
+          py-4 px-3 h-10
+        `,
 				sm: 'h-9 rounded-md px-3',
 				lg: 'h-11 rounded-md px-8',
 				icon: 'h-10 w-10'
@@ -37,10 +37,23 @@ const buttonVariants = cva(
 	}
 );
 
-/**
- * @typedef {'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'} ButtonVariant
- */
-const VARIANT_OPTIONS = {
+export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
+
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'size'> {
+	className?: string;
+	variant?: ButtonVariant;
+	size?: ButtonSize;
+	asChild?: boolean;
+	iconBegin?: React.ReactNode;
+	iconEnd?: React.ReactNode;
+	align?: 'start' | 'center' | 'end';
+	children?: React.ReactNode;
+	errored?: boolean;
+	disabled?: boolean;
+}
+
+const VARIANT_OPTIONS: Record<string, ButtonVariant> = {
 	DEFAULT: 'default',
 	DESTRUCTIVE: 'destructive',
 	OUTLINE: 'outline',
@@ -49,48 +62,13 @@ const VARIANT_OPTIONS = {
 	LINK: 'link'
 };
 
-/**
- * @typedef {'default' | 'sm' | 'lg' | 'icon'} ButtonSize
- */
-const SIZE_OPTIONS = {
+const SIZE_OPTIONS: Record<string, ButtonSize> = {
 	DEFAULT: 'default',
 	SM: 'sm',
 	LG: 'lg',
 	ICON: 'icon'
 };
 
-/**
- * Props for the Button component
- *
- * @typedef {Object} ButtonProps
- * @property {string} [className] - Additional class names for the button
- * @property {ButtonVariant} [variant='default'] - Visual variant of the button
- * @property {ButtonSize} [size='default'] - Size of the button
- * @property {boolean} [asChild=false] - Whether to render as Slot child
- * @property {() => void} [onClick] - Click handler function
- * @property {ReactNode} [children] - Button label or content
- *
- * @typedef {'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'} ButtonVariant
- * @property {'default'} [variant='default'] - Default filled button style
- * @property {'destructive'} [variant='destructive'] - Destructive action button style
- * @property {'outline'} [variant='outline'] - Outlined button style
- * @property {'secondary'} [variant='secondary'] - Secondary button style
- * @property {'ghost'} [variant='ghost'] - Ghost button style
- * @property {'link'} [variant='link'] - Link-styled button
- *
- * @typedef {'default' | 'sm' | 'lg' | 'icon'} ButtonSize
- * @property {'default'} [size='default'] - Medium size button
- * @property {'sm'} [size='sm'] - Small size button
- * @property {'lg'} [size='lg'] - Large size button
- * @property {'icon'} [size='icon'] - Icon size button
- */
-
-/**
- * Primary UI button component
- *
- * @param {ButtonProps} props
- * @returns {JSX.Element}
- */
 function Button({
 	className,
 	iconBegin,
@@ -100,17 +78,25 @@ function Button({
 	asChild = false,
 	align = 'center',
 	children,
+	errored = false,
+	disabled,
 	...props
-}) {
+}: ButtonProps) {
 	// Validate variant and size
 	if (!Object.values(VARIANT_OPTIONS).includes(variant)) console.warn(`Invalid variant: ${variant}`);
 	if (!Object.values(SIZE_OPTIONS).includes(size)) console.warn(`Invalid size: ${size}`);
 
 	const Comp = asChild ? Slot : 'button';
-
 	return (
 		<Comp
-			className={cn(buttonVariants({ variant, size }), `flex flex-col`, align && `items-${align}`, className)}
+			className={cn(
+				buttonVariants({ variant, size }),
+				`flex flex-col`,
+				align && `items-${align}`,
+				className,
+				errored && 'border-2 border-red-500'
+			)}
+			disabled={disabled}
 			{...props}
 		>
 			<div className="flex gap-3 justify-between items-center">
@@ -124,11 +110,10 @@ function Button({
 
 Button.displayName = 'Button';
 
-// Use PropTypes to specify the possible values for variant and size
 Button.propTypes = {
 	className: PropTypes.string,
-	variant: PropTypes.oneOf(Object.values(VARIANT_OPTIONS)),
-	size: PropTypes.oneOf(Object.values(SIZE_OPTIONS)),
+	variant: PropTypes.oneOf(Object.values(VARIANT_OPTIONS)) as PropTypes.Validator<ButtonVariant>,
+	size: PropTypes.oneOf(Object.values(SIZE_OPTIONS)) as PropTypes.Validator<ButtonSize>,
 	asChild: PropTypes.bool,
 	onClick: PropTypes.func,
 	children: PropTypes.node,
@@ -136,4 +121,4 @@ Button.propTypes = {
 	iconEnd: PropTypes.node
 };
 
-export { Button, buttonVariants };
+export { Button };

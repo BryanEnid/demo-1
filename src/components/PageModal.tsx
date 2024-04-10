@@ -1,7 +1,28 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, ReactNode, useRef, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { cn } from '@/lib/utils';
 
-export function PageModal({ children, show, onClose, width, maxWidth = '100vw', initialFocus, zIndex }) {
+interface PageModalProps {
+	children: ReactNode;
+	show: boolean;
+	onClose?: () => void;
+	width?: string;
+	maxWidth?: string;
+	initialFocus?: React.MutableRefObject<HTMLElement | null>;
+	zIndex?: number;
+	className?: string;
+}
+
+export function PageModal({
+	children,
+	show,
+	onClose = () => {},
+	width,
+	maxWidth = '100vw',
+	initialFocus,
+	zIndex,
+	className
+}: PageModalProps) {
 	return (
 		<Transition.Root show={show} as={Fragment}>
 			<Dialog className="relative" style={{ zIndex: zIndex ?? 10 }} initialFocus={initialFocus} onClose={onClose}>
@@ -37,7 +58,7 @@ export function PageModal({ children, show, onClose, width, maxWidth = '100vw', 
 								>
 									<div className="sm:flex sm:items-start">
 										<div
-											className="text-center sm:text-left"
+											className={cn('text-center sm:text-left', className)}
 											style={{
 												// width: '100%',
 												width,

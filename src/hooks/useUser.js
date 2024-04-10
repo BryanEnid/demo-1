@@ -35,14 +35,16 @@ export const useUser = (auth, id) => {
 		mutationFn: async (data) => handleCreateUser(data)
 	});
 
-	const createUser = async (data) => {
-		setLoading(true);
+	const { mutate: createUser } = useMutation({
+		mutationFn: async (data) => {
+			setLoading(true);
 
-		const res = await mutateAsync(data);
+			const res = await mutateAsync(data);
 
-		setUser((val) => ({ ...val, ...res }));
-		setLoading(false);
-	};
+			setUser((val) => ({ ...val, ...res }));
+			setLoading(false);
+		}
+	});
 
 	return {
 		user,

@@ -2,7 +2,7 @@ import React from 'react';
 import { RichUtils } from 'draft-js';
 
 import { Icon } from '@iconify/react/dist/iconify.js';
-import { Button } from '@/chadcn/Button.jsx';
+import { Button } from '@/chadcn/Button';
 
 export const Toolbar = ({ editorState, setEditorState }) => {
 	const toolbarRef = React.useRef();
@@ -11,7 +11,6 @@ export const Toolbar = ({ editorState, setEditorState }) => {
 		let observer;
 		if (toolbarRef.current) {
 			const toggleStyles = ([e]) => {
-				console.log(e.intersectionRatio < 1);
 				e.target.children[0].classList.toggle('is-pinned', e.intersectionRatio < 1);
 			};
 			observer = new IntersectionObserver(toggleStyles, {

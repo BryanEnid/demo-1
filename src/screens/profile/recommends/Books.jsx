@@ -3,15 +3,16 @@ import { ReactSortable } from 'react-sortablejs';
 import { Icon } from '@iconify/react';
 
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input.jsx';
 import { Textarea } from '@/chadcn/Textarea.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { Image } from '@/components/Image';
 
 const initialBookState = {
 	title: '',
@@ -177,7 +178,7 @@ const Books = ({ data = [], isUserProfile }) => {
 									<CardHeader className="px-4 py-4">
 										<div className="w-full">
 											<div className="aspect-square flex justify-center items-center">
-												<img src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full " />
+												<Image src={book.photos[0]?.imgUrl} className="rounded-md max-w-full max-h-full" />
 											</div>
 										</div>
 									</CardHeader>
@@ -231,7 +232,7 @@ const Books = ({ data = [], isUserProfile }) => {
 				</Carousel>
 			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
-				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
+				<div className="flex flex-col justify-center p-8 gap-5 w-full">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">{bookCreate?.id ? `Book / ${bookCreate.title}` : 'Add Book'}</Typography>
 						<Button variant="ghost" className="rounded-full w-[40px] h-[40px]" onClick={closeCreateModal}>
@@ -292,11 +293,11 @@ const Books = ({ data = [], isUserProfile }) => {
 												}}
 											>
 												<div className="flex justify-center items-center aspect-square rounded-lg object-cover border-dashed border border-black/10">
-													<img src={photo.url || photo.imgUrl} className="rounded-md max-w-full max-h-full" />
+													<Image src={photo.url || photo.imgUrl} className="rounded-md max-w-full max-h-full" />
 												</div>
 												<Button
 													variant="destructive"
-													className="absolute -top-[2px] -right-[2px] rounded-full w-[15px] h-[15px] p-1 opacity-50 hover:opacity-70"
+													className="absolute -top-[2px] -right-[2px] rounded-full z-20 w-[15px] h-[15px] p-1 opacity-50 hover:opacity-70"
 													onClick={() => removePhoto(photo)}
 												>
 													<Icon icon="mingcute:close-fill" fontSize={10} />
@@ -305,7 +306,7 @@ const Books = ({ data = [], isUserProfile }) => {
 										))}
 									</ReactSortable>
 									<div className="flex justify-center items-center w-full pt-4">
-										<Typography variant="muted">Choose files or drag it here</Typography>
+										<Typography variant="muted">Choose Image files or drag Image here</Typography>
 									</div>
 								</div>
 							</>
@@ -314,7 +315,7 @@ const Books = ({ data = [], isUserProfile }) => {
 								<div>
 									<div className="w-full">
 										<div className="aspect-square flex justify-center items-center">
-											<img
+											<Image
 												src={bookCreate.photos[activePicture]?.imgUrl}
 												className="rounded-md max-w-full max-h-full "
 											/>
@@ -327,7 +328,7 @@ const Books = ({ data = [], isUserProfile }) => {
 												className="w-[50px] aspect-square flex justify-center items-center"
 												onClick={() => setActivePicture(i)}
 											>
-												<img src={bookCreate.photos[i]?.imgUrl} className="rounded-md max-w-full max-h-full " />
+												<Image src={bookCreate.photos[i]?.imgUrl} className="rounded-md max-w-full max-h-full " />
 											</div>
 										))}
 									</div>

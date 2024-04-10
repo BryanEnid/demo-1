@@ -10,6 +10,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/chad
 import { useAuthenticationProviders } from '@/hooks/useAuthenticationProviders';
 import { useMobile } from '@/hooks/useMobile';
 import useOrganizations from '@/hooks/useOrganizations.js';
+import { Image } from '@/components/Image';
 
 export function SideBar() {
 	const navigate = useNavigate();
@@ -50,6 +51,7 @@ export function SideBar() {
 				>
 					<Icon width={35} icon="ion:compass-outline" />
 				</button>
+
 				<button
 					onClick={() => navigate('/organizations')}
 					className={cn(
@@ -59,6 +61,7 @@ export function SideBar() {
 				>
 					<Icon width={35} icon="octicon:organization-24" />
 				</button>
+
 				<button className="transition ease-in-out hover:text-primary hover:scale-105 ">
 					<Icon width={30} icon="ion:briefcase-outline" />
 				</button>
@@ -69,16 +72,18 @@ export function SideBar() {
 
 				<Separator className="my-1" />
 
+				{/* List of organizations created by user */}
 				{list.map(({ id, picture }) => (
 					<button
 						key={id}
 						onClick={() => navigate(`/organizations/${id}`)}
 						className="flex justify-center items-center w-[36px] h-[36px] transition ease-in-out hover:text-primary hover:scale-105"
 					>
-						<img src={picture} className="rounded-full object-cover aspect-square" />
+						<Image src={picture} className="rounded-full object-cover aspect-square" />
 					</button>
 				))}
 
+				{/* Toggle button to open 'Create Organization' modal */}
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -95,6 +100,8 @@ export function SideBar() {
 					</Tooltip>
 				</TooltipProvider>
 			</div>
+
+			{/* Create Org Modal */}
 			{createOrgModal && (
 				<CreateOrganizationModal
 					open={createOrgModal}

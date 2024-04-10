@@ -22,6 +22,7 @@ import { Typography } from '@/chadcn/Typography';
 import { useAuth } from '@/providers/Authentication';
 import { useMobile } from '@/hooks/useMobile';
 import { MobileNavBar } from './MobileNavBar';
+import { Feedback } from '../Feedback';
 
 export function NavBar({ createBucket: handleCreateBucket }) {
 	// Hooks
@@ -31,6 +32,8 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 
 	// Refs
 	const inputRef = React.useRef();
+
+	const [showFeedback, setShowFeedback] = React.useState(false);
 
 	const handleLogOut = () => {
 		logout().then(() => navigate('/sign-in'));
@@ -110,7 +113,15 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 				)}
 
 				{/* Profile */}
-				{!user && <Button onClick={() => navigate('/')}>Log In</Button>}
+				{!user && (
+					<>
+						<Button variant="ghost" className="text-primary" onClick={() => setShowFeedback(true)}>
+							Leave your feedback
+						</Button>
+						<Button onClick={() => navigate('/')}>Log In</Button>
+					</>
+				)}
+
 				{user && (
 					<DropdownMenu>
 						<DropdownMenuTrigger>
@@ -131,14 +142,14 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 									Profile
 									<DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
 								</DropdownMenuItem>
-								{/*<DropdownMenuItem>*/}
-								{/*	Billing*/}
-								{/*	<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>*/}
-								{/*</DropdownMenuItem>*/}
-								{/*<DropdownMenuItem>*/}
-								{/*	Settings*/}
-								{/*	<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>*/}
-								{/*</DropdownMenuItem>*/}
+								<DropdownMenuItem onClick={() => navigate(`/${user.uid}/bills`)}>
+									Billing
+									<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+								</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => navigate(`/${user.uid}/settings`)}>
+									Settings
+									<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+								</DropdownMenuItem>
 								{/*<DropdownMenuItem>*/}
 								{/*	Keyboard shortcuts*/}
 								{/*	<DropdownMenuShortcut>⌘K</DropdownMenuShortcut>*/}
@@ -164,7 +175,7 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 								</DropdownMenuItem>
 							</DropdownMenuGroup>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>Feedback</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => setShowFeedback(true)}>Feedback</DropdownMenuItem>
 							<DropdownMenuItem disabled>API</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={handleLogOut}>
@@ -175,6 +186,8 @@ export function NavBar({ createBucket: handleCreateBucket }) {
 					</DropdownMenu>
 				)}
 			</nav>
+
+			<Feedback show={showFeedback} onClose={() => setShowFeedback(false)} />
 		</>
 	);
 }

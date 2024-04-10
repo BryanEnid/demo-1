@@ -2,14 +2,15 @@ import React, { useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
 
 import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from '@/chadcn/Card';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { Image } from '@/components/Image';
 
 const initialPeopleState = {
 	name: '',
@@ -126,7 +127,7 @@ const People = ({ data = [], isUserProfile }) => {
 									<CardHeader className="px-4 py-4">
 										<div className="w-full">
 											<div className="aspect-square flex justify-center items-center">
-												<img src={people.picture} className="rounded-md max-w-full max-h-full " />
+												<Image src={people.picture} className="rounded-md max-w-full max-h-full " />
 											</div>
 										</div>
 									</CardHeader>
@@ -167,7 +168,7 @@ const People = ({ data = [], isUserProfile }) => {
 				</Carousel>
 			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
-				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
+				<div className="flex flex-col justify-center p-8 gap-5 w-full">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">Add Person</Typography>
 						<Button variant="ghost" className="rounded-full w-[40px] h-[40px]" onClick={closeCreateModal}>
@@ -192,7 +193,7 @@ const People = ({ data = [], isUserProfile }) => {
 								<div className="flex flex-col justify-center items-center w-full pt-4">
 									{peopleCreate.picture?.url && (
 										<div className="flex justify-center items-center rounded-lg w-[60px] h-[60px]">
-											<img src={peopleCreate.picture.url} className="rounded-md max-w-full max-h-full" />
+											<Image src={peopleCreate.picture.url} className="rounded-md max-w-full max-h-full" />
 										</div>
 									)}
 									<Typography variant="muted">Choose Person picture</Typography>

@@ -3,13 +3,14 @@ import { Icon } from '@iconify/react';
 import { Listbox, Popover } from '@headlessui/react';
 import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
-import { Button } from '@/chadcn/Button.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { Button } from '@/chadcn/Button';
+import { Typography } from '@/chadcn/Typography';
 import { Input } from '@/chadcn/Input.jsx';
 import useOrganizations from '@/hooks/useOrganizations.js';
 import { organizationTypes } from '@/screens/organizations/constants.js';
+import { Image } from './Image';
 
 const Step1 = ({ values, handleChange }) => {
 	const [isDragOver, setIsDragOver] = React.useState(false);
@@ -67,7 +68,7 @@ const Step1 = ({ values, handleChange }) => {
 					].join(' ')}
 				>
 					{values.picture?.url ? (
-						<img src={values.picture.url} className="object-cover " />
+						<Image src={values.picture.url} className="object-cover " />
 					) : (
 						<Icon icon="lucide:upload" className="text-5xl opacity-50" />
 					)}
@@ -231,6 +232,7 @@ const CreateOrganizationModal = ({ open, isLoading, onClose: handleClose, onCrea
 					<Typography variant="muted" className="text-center text-sm">
 						For groups looking to develop a co-curated profile
 					</Typography>
+
 					<Button
 						variant="ghost"
 						className="rounded-full w-[40px] h-[40px] absolute top-[-2px] right-0"
@@ -242,6 +244,7 @@ const CreateOrganizationModal = ({ open, isLoading, onClose: handleClose, onCrea
 				<div>
 					<ModalStepComponent values={orgData} handleChange={handleChange} />
 				</div>
+
 				<div className="flex justify-end gap-2 w-full">
 					{modalStep === 0 ? (
 						<Button variant="secondary" className="rounded-md" onClick={closeModal}>

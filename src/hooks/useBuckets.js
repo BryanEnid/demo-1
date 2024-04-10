@@ -12,7 +12,9 @@ import {
 	uploadVideo as handleUploadVideo,
 	uploadVideoURLs as handleUploadVideoURLs,
 	updateBucketsCategory as handleUpdateBucketsCategory,
-	deleteBucketsCategory as handleDeleteBucketsCategory
+	deleteBucketsCategory as handleDeleteBucketsCategory,
+	createBucketPrice as handleCreateBucketPrice,
+	updateBucketPrice as handleUpdateBucketPrice
 } from './api/buckets';
 
 const COLLECTION_NAME = 'Buckets';
@@ -22,7 +24,7 @@ export const useBuckets = (owner, isOrganization) => {
 	const queryClient = useQueryClient();
 	const { user, ...auth } = useAuth();
 
-	const queryKey = [COLLECTION_NAME, owner?.id, isOrganization, auth.authToken];
+	const queryKey = [COLLECTION_NAME, owner?.id, auth.authToken];
 
 	const { data } = useQuery({
 		gcTime: Infinity,
@@ -73,6 +75,7 @@ export const useBuckets = (owner, isOrganization) => {
 			const body = new FormData();
 			body.append('video', data.video);
 			body.append('image', data.image);
+			body.append('videoType', data.videoType);
 			return handleUploadVideo(auth, id, body);
 		},
 		onMutate: ({ onLoading }) => {
@@ -122,6 +125,22 @@ export const useBuckets = (owner, isOrganization) => {
 		}
 	});
 
+	const createBucketPrice = useMutation({
+		mutationFn: async ({ data, bucketId }) => handleCreateBucketPrice(auth, bucketId, data),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
+	const updateBucketPrice = useMutation({
+		mutationFn: async ({ data, bucketId }) => handleUpdateBucketPrice(auth, bucketId, data),
+		onSuccess: () => {
+			// Invalidate and refetch
+			queryClient.invalidateQueries({ queryKey });
+		}
+	});
+
 	return {
 		data,
 		createBucket: createBucket.mutate,
@@ -131,6 +150,8 @@ export const useBuckets = (owner, isOrganization) => {
 		uploadVideo: uploadVideo.mutate,
 		saveVideoURLs: saveVideoURLs.mutate,
 		updateBucketsCategory: updateBucketsCategory.mutate,
-		deleteBucketsCategory: deleteBucketsCategory.mutate
+		deleteBucketsCategory: deleteBucketsCategory.mutate,
+		createBucketPrice: createBucketPrice.mutate,
+		updateBucketPrice: updateBucketPrice.mutate
 	};
 };

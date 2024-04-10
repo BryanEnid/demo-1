@@ -1,26 +1,23 @@
 import React, { useMemo, useState, useRef, useEffect, forwardRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
 import { useBuckets } from '@/hooks/useBuckets';
 import { useProfile } from '@/hooks/useProfile';
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Icon } from '@iconify/react/dist/iconify.js';
-import { Button } from '@/chadcn/Button.jsx';
-import { Input } from '@/chadcn/Input.jsx';
-import { Separator } from '@/chadcn/Separator.jsx';
-import { PageModal } from '@/components/PageModal.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
-import EditableLabel from '@/components/EditableLabel.jsx';
-import { groupBy } from '@/lib/utils.js';
+import { Typography } from '@/chadcn/Typography';
+import { Icon } from '@iconify/react/dist/iconify';
+import { Button } from '@/chadcn/Button';
+import { Input } from '@/chadcn/Input';
+import { Separator } from '@/chadcn/Separator';
+import { PageModal } from '@/components/PageModal';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import EditableLabel from '@/components/EditableLabel';
+import { groupBy } from '@/lib/utils';
 import { BucketItem } from './BucketItem';
 import { useMobile } from '@/hooks/useMobile';
-import { useLayout } from '@/providers/LayoutProvider.jsx';
+import { useLayout } from '@/providers/LayoutProvider';
 
 const UNCATEGORIZED_BUCKETS_LABEL = 'Default';
-
 const AddBucketBtn = ({ onClick }) => (
 	<div className="select-none">
 		<button onClick={onClick} className={`size-[64px] transition ease-in-out hover:scale-105 select-none`}>
@@ -34,23 +31,18 @@ const AddBucketBtn = ({ onClick }) => (
 		</button>
 	</div>
 );
-
 const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, ref) => {
 	const [editing, setEditing] = useState(false);
-
-	/** @type {React.MutableRefObject<number>} */
+	// /** @type {React.MutableRefObject<number>} */
 	const timeoutId = useRef();
-
 	const handleSetEditing = () => {
 		timeoutId.current = setTimeout(() => {
 			setEditing(true);
 		}, 300);
 	};
-
 	useEffect(() => {
 		return () => timeoutId.current && clearTimeout(timeoutId.current);
 	}, []);
-
 	return (
 		<div className="mb-9 flex gap-1 items-center">
 			{!editable ? (
@@ -92,12 +84,13 @@ const CategoryLabel = forwardRef(({ category, editable, onSubmit, onDelete }, re
 		</div>
 	);
 });
-CategoryLabel.displayName = 'CategoryLabel';
 
+CategoryLabel.displayName = 'CategoryLabel';
 export function Buckets() {
 	// Hooks
 	const { data: profile } = useProfile();
 	const [{ isUserProfile, isOrganization }] = useOutletContext();
+
 	const {
 		data: buckets,
 		updateBucket,
@@ -105,6 +98,7 @@ export function Buckets() {
 		deleteBucketsCategory,
 		deleteBucket
 	} = useBuckets(profile, isOrganization);
+
 	const { isMobile } = useMobile();
 	const { bucketInfoOpen, showBucketInfo, showCreateBucketModal } = useLayout();
 
@@ -118,7 +112,6 @@ export function Buckets() {
 
 	// Refs
 	const newCategoryRef = useRef();
-
 	const groupedBucket = useMemo(
 		() => groupBy(buckets || [], ({ category }) => category || UNCATEGORIZED_BUCKETS_LABEL),
 		[buckets]
@@ -148,7 +141,6 @@ export function Buckets() {
 		if (!newCategoryValue?.length) {
 			return;
 		}
-
 		setNewCategoryValue('');
 		setShowNewCategory(false);
 		setTmpCategories((val) => [newCategoryValue, ...val]);
@@ -201,6 +193,7 @@ export function Buckets() {
 
 	return (
 		<div>
+			{/* Add section button */}
 			{isUserProfile && (
 				<div className="justify-center flex mb-8 min-h-[40px] md:justify-start w-full">
 					<Button
@@ -217,7 +210,7 @@ export function Buckets() {
 					</Button>
 				</div>
 			)}
-
+			{/* User Lists and Buckets */}
 			<div className="flex flex-col">
 				{showNewCategory && (
 					<form onSubmit={saveCategory}>
@@ -249,7 +242,6 @@ export function Buckets() {
 						</div>
 					</form>
 				)}
-
 				{!!tmpCategories.length &&
 					tmpCategories.map((category) => (
 						<div key={category} className="mb-20">
@@ -259,8 +251,8 @@ export function Buckets() {
 								onDelete={() => setConfirmDelete(category)}
 								onSubmit={submitEditTmpCategory}
 							/>
-
 							<div className="grid gap-16 grid-cols-3">
+								{/* tempCategories add button */}
 								{isUserProfile && !isMobile && (
 									<motion.div
 										initial={{ opacity: 0, y: -20 }}
@@ -286,7 +278,6 @@ export function Buckets() {
 							)}
 						</div>
 					))}
-
 				{Object.keys(groupedBucket).map((category) => (
 					<div key={category} className="mb-20">
 						<CategoryLabel
@@ -295,7 +286,6 @@ export function Buckets() {
 							onDelete={() => setConfirmDelete(category)}
 							onSubmit={submitEditCategory}
 						/>
-						{/* <div className="grid gap-16 grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"> */}
 						<div className="relative grid gap-1 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 ">
 							{groupedBucket[category].map((bucket, index) => (
 								<motion.div
@@ -317,7 +307,6 @@ export function Buckets() {
 									/>
 								</motion.div>
 							))}
-
 							{isUserProfile && !isMobile && (
 								<motion.div
 									key="ADD NEW"
@@ -330,7 +319,6 @@ export function Buckets() {
 								</motion.div>
 							)}
 						</div>
-
 						{isUserProfile && isMobile && (
 							<div className="mt-10">
 								<Button
@@ -345,7 +333,6 @@ export function Buckets() {
 						)}
 					</div>
 				))}
-
 				{!Object.keys(groupedBucket).length && isUserProfile && !tmpCategories.length && (
 					<div className="mb-20">
 						<motion.div

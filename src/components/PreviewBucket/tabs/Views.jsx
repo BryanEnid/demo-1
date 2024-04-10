@@ -2,7 +2,8 @@ import React from 'react';
 
 import { useBucketViewers } from '@/hooks/useBucketViewers.js';
 import { Spinner } from '@/components/Spinner.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Image } from '@/components/Image';
 
 const Views = ({ bucketId }) => {
 	const { data, isLoading } = useBucketViewers(bucketId);
@@ -18,7 +19,7 @@ const Views = ({ bucketId }) => {
 				data.map((user) => (
 					<div key={user.id} className="flex items-center gap-2">
 						<div className="w-[46px] h-[46px]">
-							<img src={user.photoURL} className="rounded-full object-cover" />
+							<Image src={user.photoURL} className="rounded-full object-cover" />
 						</div>
 						<div>
 							<Typography className="font-bold leading-none">{user.name}</Typography>

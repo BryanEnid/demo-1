@@ -5,15 +5,63 @@ export function cn(...inputs) {
 	return twMerge(clsx(inputs));
 }
 
+export const isRelativePath = (str) => {
+	// Regular expression pattern to detect relative paths
+	var pattern = /^(?!https?:\/\/)(?!www\.).*$/;
+	return pattern.test(str);
+};
+
 // Function to check if the URL is from YouTube
 export const isYouTubeUrl = (url = '') => {
-	return url?.includes('youtube.com') || url?.includes('youtu.be');
+	return url?.includes('youtube.com') || url?.includes('youtu.be') || url?.includes('ytimg.com');
+};
+
+export const isValidUrl = (url) => {
+	try {
+		new URL(url);
+		return true;
+	} catch (error) {
+		return false;
+	}
+};
+
+export const isAWSUrl = (url = '') => {
+	return url?.includes('amazonaws.com');
+};
+
+export const throttle = (func, delay) => {
+	let lastExecuted = 0;
+	return (...args) => {
+		const now = Date.now();
+		if (now - lastExecuted >= delay) {
+			func(...args);
+			lastExecuted = now;
+		}
+	};
+};
+
+export const debounce = (func, delay) => {
+	let timeoutId;
+	return (...args) => {
+		clearTimeout(timeoutId);
+		timeoutId = setTimeout(() => {
+			func(...args);
+		}, delay);
+	};
 };
 
 export const extractYoutubeVideoId = (url) => {
 	const urlObject = new URL(url);
-	const searchParams = new URLSearchParams(urlObject.search);
-	return searchParams.get('v');
+	const pathname = urlObject.pathname;
+	if (pathname.startsWith('/watch')) {
+		const searchParams = new URLSearchParams(urlObject.search);
+		return searchParams.get('v');
+	} else if (pathname.startsWith('/')) {
+		// For youtu.be URLs
+		const segments = pathname.split('/');
+		return segments[1];
+	}
+	return null;
 };
 
 function dataURItoBlob(dataURI) {
@@ -185,4 +233,15 @@ export const parseDuration = (str) => {
 		minutes: matches[7] === undefined ? 0 : matches[7],
 		seconds: matches[8] === undefined ? 0 : matches[8]
 	};
+};
+
+export const decodeIdToken = (idToken) => {
+	if (!idToken) return;
+	// Split the token into its three parts: header, payload, signature
+	const parts = idToken.split('.');
+
+	// Decode the payload (middle part)
+	const payload = JSON.parse(atob(parts[1]));
+
+	return payload;
 };

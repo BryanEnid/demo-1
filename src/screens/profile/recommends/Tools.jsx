@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Icon } from '@iconify/react';
 
-import { groupBy } from '@/lib/utils.js';
+import { groupBy, isAWSUrl } from '@/lib/utils.js';
 import { BASE_URL } from '@/config/api.js';
 import { Card } from '@/chadcn/Card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
-import { Typography } from '@/chadcn/Typography.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Typography } from '@/chadcn/Typography';
+import { Button } from '@/chadcn/Button';
 import { Input } from '@/chadcn/Input.jsx';
 import { Carousel, CarouselContent, CarouselItem } from '@/chadcn/Carousel';
-import { PageModal } from '@/components/PageModal.jsx';
+import { PageModal } from '@/components/PageModal';
 import { Spinner } from '@/components/Spinner.jsx';
-import ConfirmDialog from '@/components/ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import EditableLabel from '@/components/EditableLabel.jsx';
 import useRecommends from '@/hooks/useRecommends.js';
 import useEmoji from '@/hooks/useEmoji.js';
+import { Image } from '@/components/Image';
 
 const initialToolState = {
 	title: '',
@@ -136,9 +137,11 @@ const Tools = ({ data = [], isUserProfile }) => {
 	const addCategory = (value) => {
 		setTmpCategories((val) => [value, ...val]);
 	};
+
 	const cancelAddingCategory = () => {
 		setTmpCategories((val) => val.filter((item) => !!item));
 	};
+
 	const submitNewCategory = (oldCategory, newCategory) => {
 		setTmpCategories((val) => val.map((item) => (item === oldCategory ? newCategory : item)));
 	};
@@ -168,8 +171,8 @@ const Tools = ({ data = [], isUserProfile }) => {
 							<DropdownMenuItem
 								className="py-3 px-3"
 								onClick={() => {
-									setShowNewCategory(true);
 									setNewCategoryValue('');
+									setShowCreateModal(true);
 								}}
 							>
 								<Icon icon="ic:round-plus" className="pr-1 text-xl" />
@@ -282,13 +285,10 @@ const Tools = ({ data = [], isUserProfile }) => {
 											<Card key={tool.id} className="h-[130px] w-full flex items-center gap-5 mb-4 px-10">
 												{!!tool.picture && (
 													<div className="w-[100px] h-[80px] flex items-center justify-center">
-														<img
+														<Image
+															proxyEnabled={!isAWSUrl(tool.picture)}
 															src={tool.picture}
-															className="max-w-full max-h-full "
-															onError={(e) => {
-																e.target.onerror = null;
-																e.target.src = `${BASE_URL}/static/external?url=${tool.picture}`;
-															}}
+															className="max-w-full max-h-full"
 														/>
 													</div>
 												)}
@@ -314,7 +314,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 				</Carousel>
 			)}
 			<PageModal show={showCreateModal} onClose={closeCreateModal} width="600px" maxWidth="100vw">
-				<div className="flex flex-col justify-center p-8 gap-5 w-screen">
+				<div className="flex flex-col justify-center p-8 gap-5 w-full">
 					<div className="flex justify-between items-center pb-2">
 						<Typography variant="h3">Add Tool</Typography>
 						<Button variant="ghost" className="rounded-full w-[40px] h-[40px]" onClick={closeCreateModal}>
@@ -341,7 +341,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 								<div className="flex flex-col justify-center items-center w-full pt-4">
 									{toolCreate.picture?.url && (
 										<div className="flex justify-center items-center rounded-lg w-[60px] h-[60px]">
-											<img src={toolCreate.picture.url} className="rounded-md max-w-full max-h-full" />
+											<Image src={toolCreate.picture.url} className="rounded-md max-w-full max-h-full" />
 										</div>
 									)}
 									<Typography variant="muted">Choose Tool picture</Typography>
@@ -357,7 +357,7 @@ const Tools = ({ data = [], isUserProfile }) => {
 												className="cursor-pointer border border-1 w-1/5 p-2 relative"
 												onClick={() => selectImage(iconUrl)}
 											>
-												<img src={`${BASE_URL}/static/external?url=${iconUrl}`} className="max-w-full max-h-full " />
+												<Image src={iconUrl} className="max-w-full max-h-full" />
 												{typeof toolCreate.picture === 'string' && toolCreate?.picture === iconUrl && (
 													<Icon icon="ci:check-big" className="text-2xl text-green-500 absolute top-0 right-0" />
 												)}

@@ -1,14 +1,13 @@
 import React from 'react';
-import { useNavigate, Outlet, useLocation, useMatches } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation, useMatches, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/Authentication.jsx';
 import { useLayout } from '@/providers/LayoutProvider.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useMobile } from '@/hooks/useMobile';
 import useOrganizations from '@/hooks/useOrganizations.js';
-
+import { Input } from '@/chadcn/Input';
 // Components
 import { Icon } from '@iconify/react';
 import { Typography } from '@/chadcn/Typography';
@@ -16,26 +15,23 @@ import { Button } from '@/chadcn/Button';
 import { Separator } from '@/chadcn/Separator.jsx';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/chadcn/DropDown';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/chadcn/Carousel';
+import { Image } from '@/components/Image';
+import useSettings from '@/hooks/useSettings';
 
 function NavOption(props) {
 	const { title, href, textClassName = '', buttonProps: { activeClassName, ...buttonProps } = {}, onClick } = props;
 	const width = 'w-full';
-
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const { isMobile } = useMobile();
-
 	const isActive = pathname.slice(1).includes(href || title.toLowerCase());
 	const className = `${buttonProps.className || ''} ${isActive && activeClassName ? activeClassName : ''}`;
-
 	const handleClick = () => {
 		if (typeof onClick === 'function') {
 			onClick(props);
 		}
-
 		navigate(href || title.toLowerCase());
 	};
-
 	const Wrapper = isMobile
 		? (props) => <CarouselItem className={cn('basis-1/2', width)} {...props} />
 		: (props) => <React.Fragment {...props} />;
@@ -60,11 +56,19 @@ export function Profile() {
 	// Hooks
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
-	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
-	const { updateOrganization } = useOrganizations();
-	const { user, isLoading: authLoading } = useAuth();
 	const { isMobile } = useMobile();
 	const { closeBucketInfo } = useLayout();
+	const { data: profile, isUserProfile, isLoading: profileLoading, isOrganization } = useProfile();
+	const { data: settings, uploadUserProfilePicture, updateSettings, isLoading } = useSettings();
+	const { updateOrganization } = useOrganizations();
+	const { user, isLoading: authLoading } = useAuth();
+
+	const [isDragOver, setIsDragOver] = React.useState(false);
+	const [userIMG, setUserIMG] = React.useState('');
+	const [headline, setHeadline] = React.useState('');
+	const [edit, setEdit] = React.useState(false);
+
+	const quoteRef = React.useRef();
 
 	const pathParts = pathname.slice(1).split('/');
 	const organizationMenu = [
@@ -85,15 +89,32 @@ export function Profile() {
 		{ label: 'Training', subLinks: [] },
 		{ label: 'Website', subLinks: [] }
 	];
-
 	// State
 	const [orgSubButtons, setOrgSubButtons] = React.useState(
 		organizationMenu.find(({ label, href }) => pathParts.includes(href || label.toLowerCase()))?.subLinks || []
 	);
-
-	const fileInpRef = React.useRef();
-
 	const [username] = pathParts;
+	const fileInpRef = React.useRef();
+	const sampleQuote =
+		'If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.';
+
+	React.useEffect(() => {
+		if (quoteRef.current) {
+			quoteRef.current.focus();
+		}
+	}, [edit]);
+
+	React.useEffect(() => {
+		if (!isLoading) {
+			const image =
+				settings?.image || profile?.photoURL
+					? settings?.image ?? profile?.photoURL
+					: '/src/assets/observe_logo_512_og.png';
+
+			setHeadline(settings?.headline);
+			setUserIMG(image);
+		}
+	}, [settings, isLoading]);
 
 	React.useEffect(() => {
 		closeBucketInfo();
@@ -102,9 +123,7 @@ export function Profile() {
 	React.useEffect(() => {
 		(() => {
 			if (username === 'profile' && user) return navigate(`/${user.uid}`);
-
-			// ! This doesn't longer work
-			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate('/notfound');
+			if (!(profile?.uid || profile?.id) && !profileLoading && !authLoading) return navigate(`/404?route=${pathname}`);
 		})();
 	}, [profile, profileLoading, authLoading]);
 
@@ -117,6 +136,64 @@ export function Profile() {
 		const bgPicture = new FormData();
 		bgPicture.append('picture', file);
 		updateOrganization({ ...profile, bgPicture });
+	};
+	const handleUpload = async (image) => {
+		if (!image) return;
+		const fd = new FormData();
+		fd.append('image', image.file);
+		try {
+			await uploadUserProfilePicture(fd);
+		} catch (error) {
+			console.log('onSubmitImage error: ', error);
+		}
+	};
+	const handleChange = (e) => {
+		setUserIMG(e.target.value);
+	};
+
+	const handleImageChange = (e) => {
+		const file = e.target.files[0];
+		const value = { file, url: URL.createObjectURL(file) };
+		// setValues((val) => ({ ...val, image: value }));
+		setUserIMG(value.url);
+		handleUpload(value);
+	};
+
+	const openFileExplorer = () => {
+		fileInpRef.current?.click?.();
+	};
+
+	const handleDragOver = (e) => {
+		e.preventDefault();
+		setIsDragOver(true);
+	};
+
+	const handleDragLeave = () => {
+		setIsDragOver(false);
+	};
+
+	const handleDrop = (e) => {
+		e.preventDefault();
+		setIsDragOver(false);
+		if (!e.dataTransfer.files.length > 0) return;
+		const { files } = e.dataTransfer;
+		const file = files[0];
+		if (!file || !file.type.startsWith('image/')) return alert('Please drop a valid image files.');
+		const value = { files, url: URL.createObjectURL(files) };
+		handleChange({ target: { name: 'image', value } });
+	};
+
+	const handleHeadline = (e) => {
+		e.preventDefault();
+		setEdit(false);
+		if (e.target.value === settings.headline) return;
+		setHeadline(e.target.value);
+
+		try {
+			updateSettings({ headline: e.target.value });
+		} catch (error) {
+			setHeadline(settings?.headline || sampleQuote);
+		}
 	};
 
 	return (
@@ -154,8 +231,9 @@ export function Profile() {
 									</DropdownMenu>
 								</>
 							)}
+
 							<div className="flex flex-col items-center">
-								<img src={profile?.picture} className="rounded-full object-cover aspect-square w-36 2xl:w-48 mb-8" />
+								<Image src={profile?.picture} className="rounded-full object-cover aspect-square w-36 2xl:w-48 mb-8" />
 								<Typography variant="h2" className="text-white/[.96]">
 									{profile?.name}
 								</Typography>
@@ -241,18 +319,66 @@ export function Profile() {
 			) : (
 				<div className="container">
 					<div>
-						{/* Header */}
+						{/* Profile Image, Name, Quote */}
 						<div className="flex flex-col items-center gap-3">
-							{/* <img src={profile?.photoURL} className="rounded-full object-cover aspect-square xl:w-48 md:w-32" /> */}
-							<img src={profile?.photoURL} className="rounded-full object-cover aspect-square w-36 2xl:w-48" />
+							<div className="group relative">
+								<input type="file" className="hidden" accept="image/*" ref={fileInpRef} onChange={handleImageChange} />
+								<div
+									onClick={openFileExplorer}
+									onDragOver={handleDragOver}
+									onDragLeave={handleDragLeave}
+									onDrop={handleDrop}
+									style={{ transition: '0.5s' }}
+								>
+									<Image
+										src={userIMG || settings?.image || profile?.image}
+										className="rounded-full object-cover aspect-square w-36 2xl:w-48 hover:cursor-pointer hover:opacity-75"
+										alt="Profile Image"
+									/>
+									<div className="absolute top-0 bottom-0 left-0 right-0 w-full h-full opacity-0 transition-opacity duration-300 font-medium group-hover:opacity-100">
+										<Icon
+											icon="lucide:camera"
+											className="text-black text-6xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center "
+										/>
+									</div>
+								</div>
+							</div>
+
 							<Typography variant="h3" className="mt-6">
-								{profile?.name}
+								{settings?.name || profile?.name}
 							</Typography>
-							<Typography variant="blockquote" className="border-0">
-								“If you want to find the secrets of the universe, think in terms of energy, frequency and vibration.”
-							</Typography>
+
+							{edit && isUserProfile && (
+								<Input
+									type="text"
+									className="border-b border-black p-2  text-center text-xl mb-2.5"
+									value={headline}
+									onBlur={(e) => handleHeadline(e)}
+									onChange={(e) => setHeadline(e.target.value)}
+									onEnter={(e) => handleHeadline(e)}
+									ref={quoteRef}
+								/>
+							)}
+
+							{!edit && (
+								<Typography
+									key={headline}
+									variant="blockquote"
+									className="group border-b border-transparent p-2 text-center text-xl cursor-pointer duration-50"
+									onClick={() => isUserProfile && setEdit(true)}
+								>
+									"{headline || sampleQuote}"
+									{isUserProfile && (
+										<Icon
+											icon="lucide:edit"
+											className="ml-2 text-black inline font-xs font-thin cursor-pointer hover:text-primary opacity-0 group-hover:opacity-75 duration-50 hover:text-black "
+										/>
+									)}
+								</Typography>
+							)}
 						</div>
 
+						{/* Navbar (Buckets, Experience, Recommends, Quests) */}
 						<div className="flex flex-row justify-center my-8">
 							<div className="w-full">
 								<Carousel

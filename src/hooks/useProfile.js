@@ -6,16 +6,18 @@ import { useQuery } from '@tanstack/react-query';
 import { getUser } from '@/hooks/api/users.js';
 import useOrganizations from '@/hooks/useOrganizations.js';
 
-export const useProfile = () => {
-	const { id } = useParams();
+export const useProfile = ({ id: passedId } = { id: null }) => {
+	const { id: pulledId } = useParams();
 	const { pathname } = useLocation();
 	const { user, ...auth } = useAuth();
+	const id = passedId ?? pulledId;
 
 	const isOrganization = pathname.includes('/organizations');
 
 	const { selected, isLoading: isOrgLoading } = useOrganizations(isOrganization ? { id } : undefined);
 
 	const enabled = id && id != 'profile' && !isOrganization;
+
 	const {
 		data: profile,
 		isLoading: userProfileLoading,

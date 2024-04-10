@@ -4,10 +4,11 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { extractYoutubeVideoId, isYouTubeUrl } from '@/lib/utils.js';
 import { useToast } from '@/hooks/useToast.js';
 import { getYouTubeVideoDetails } from '@/hooks/api/youtube.js';
-import { PageModal } from '@/components/PageModal.jsx';
-import { Typography } from '@/chadcn/Typography.jsx';
+import { PageModal } from '@/components/PageModal';
+import { Typography } from '@/chadcn/Typography';
 import { Input } from '@/chadcn/Input.jsx';
-import { Button } from '@/chadcn/Button.jsx';
+import { Button } from '@/chadcn/Button';
+import { Image } from './Image';
 
 const VideoAddURLModal = ({ show, onClose }) => {
 	// Hooks
@@ -32,7 +33,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 
 			const ToasterView = () => (
 				<div className="flex flex-col gap-3 w-full">
-					<img src={embedCode.thumbnail} className="w-full rounded-xl aspect-video object-cover" />
+					<Image src={embedCode.thumbnail} proxyEnabled className="w-full rounded-xl aspect-video object-cover" />
 
 					<Typography variant="small" className="text-md font-extrabold leading-5 line-clamp-1">
 						{embedCode?.title}
@@ -95,7 +96,7 @@ const VideoAddURLModal = ({ show, onClose }) => {
 						<div key={key} className="flex flex-col w-full gap-2">
 							<div key={key} className="flex flex-row items-center w-full gap-2">
 								<div className="inline-flex items-center relative w-full h-full">
-									<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} />
+									<Input key={key} onChange={({ target }) => handleVideoAdded(target.value, key)} autofocus />
 									{inputs[key].valid && (
 										<div className="absolute right-1 p-1 rounded-full bg-white z-10">
 											<Icon fontSize={20} icon="tabler:check" className="text-green-600 h-full" />
@@ -103,7 +104,12 @@ const VideoAddURLModal = ({ show, onClose }) => {
 									)}
 								</div>
 
-								<Icon fontSize={20} className="text-gray-500" icon="mi:delete" onClick={() => handleDeleteItem(key)} />
+								<Icon
+									fontSize={20}
+									className={`text-gray-500 ${Object.keys(inputs).length === 1 ? 'hidden' : ''}`}
+									icon="mi:delete"
+									onClick={() => handleDeleteItem(key)}
+								/>
 							</div>
 
 							{inputs[key].title && (
@@ -114,7 +120,13 @@ const VideoAddURLModal = ({ show, onClose }) => {
 						</div>
 					))}
 
-					<Button iconBegin={<Icon icon="ic:round-add" />} variant="default" onClick={handleAddNewItem}>
+					<Button
+						// className={`${inputs[Object.keys(inputs).length - 1]?.valid === true ? '' : 'bg-gray-300'} `}
+						disabled={!handleSaveDisabled}
+						iconBegin={<Icon icon="ic:round-add" />}
+						variant="default"
+						onClick={handleAddNewItem}
+					>
 						Add new url
 					</Button>
 				</div>
