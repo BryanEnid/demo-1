@@ -173,7 +173,7 @@ export const BucketItem = ({
 					</ContextMenu>
 				</button>
 
-				{name && <Typography className="text-center">{name}</Typography>}
+				{name && <Typography className="text-center truncate max-w-[250px]">{name}</Typography>}
 			</div>
 
 			<ConfirmDialog

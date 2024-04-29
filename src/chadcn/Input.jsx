@@ -19,6 +19,7 @@ const Input = React.forwardRef(({ className, onEnter = () => {}, type, error, ..
 		{...props}
 	/>
 ));
+
 Input.displayName = 'Input';
 
 export { Input };
